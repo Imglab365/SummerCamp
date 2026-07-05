@@ -5,15 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>貓抓老鼠遊戲 - 專案紀錄頁</title>
     <style>
+        /* ================================================================= */
+        /* 🎨 【魔法變色罐】與 index.html 保持完全相同，方便學生複製貼上！ */
+        /* ================================================================= */
+        :root {
+            --main-color: #1d59ff;      /* 主色調：header背景、分區段落標題 */
+            --accent-color: #ea580c;    /* 強調色：主標題、返回按鈕、標籤文字 */
+            --bg-light: #eeffed;        /* 背景淺色：背景漸層上層、標籤背景色 */
+            --bg-dark: #b1feaa;         /* 背景深色：背景漸層下層、圖片框線 */
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(to bottom, #fff7ed 0%, #ffedd5 100%);
+            background: linear-gradient(to bottom, var(--bg-light) 0%, var(--bg-dark) 100%);
             color: #2b2d42;
             font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
         }
         header {
-            background-color: #ff971d;
+            background-color: var(--main-color);
             padding: 30px 20px;
             text-align: center;
             color: white;
@@ -25,7 +35,7 @@
         }
         .back-btn {
             text-decoration: none;
-            color: #ea580c;
+            color: var(--accent-color);
             font-weight: bold;
             display: inline-block;
             margin-bottom: 20px;
@@ -37,8 +47,8 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             margin-bottom: 40px;
         }
-        h1 { color: #ea580c; margin-top: 0; }
-        h2 { color: #ff971d; border-bottom: 2px solid #ffedd5; padding-bottom: 10px; margin-top: 30px; }
+        h1 { color: var(--accent-color); margin-top: 0; }
+        h2 { color: var(--main-color); border-bottom: 2px solid var(--bg-light); padding-bottom: 10px; margin-top: 30px; }
         p { line-height: 1.8; color: #4b5563; }
         
         .main-img {
@@ -54,26 +64,27 @@
         }
         .flowchart-img {
             max-width: 100%;
-            border: 1px solid #fed7aa;
+            border: 1px solid var(--bg-dark);
             border-radius: 12px;
             margin-bottom: 20px;
         }
         .tag {
-            background: #ffedd5;
-            color: #ea580c;
+            background: var(--bg-light);
+            color: var(--accent-color);
+            border: 1px solid var(--bg-dark);
             padding: 4px 12px;
             border-radius: 6px;
             font-size: 0.9rem;
             margin-right: 8px;
             display: inline-block;
         }
-        footer { text-align: center; padding: 40px; color: #7c2d12; border-top: 1px solid #fed7aa; }
+        footer { text-align: center; padding: 40px; color: #7c2d12; border-top: 1px solid var(--bg-dark); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🎮 專案開發紀錄：貓抓老鼠</h1>
+        <h1>🎮 專案開發紀錄：植物大戰殭屍</h1>
         <p>從邏輯思想到遊戲實現的全過程</p>
     </header>
 
@@ -81,9 +92,9 @@
         <a href="index.html" class="back-btn">← 返回我的秘密基地</a>
 
         <div class="record-card">
-            <h2>🐱 遊戲主題</h2>
-            <p>這是一場驚險的貓抓老鼠大戰！老鼠大王擁有神奇的分身術，可以穿過障礙物逃走；而貓咪玩家必須展現靈敏的反應，在障礙物之間遊走，抓住四處逃竄的老鼠。</p>
-            <img src="圖1.png" alt="圖1" class="main-img">
+            <h2> 🌻遊戲主題</h2>
+            <p>這是我這次營隊花最多時間完成的遊戲！玩家要操控主角「寒冰射手」，靈活閃避殭屍和各種障礙物，努力生存下去。沿途收集神奇的葉子，就能獲得特殊能力，發射攻擊擊敗氣球殭屍。遊戲中有越來越困難的挑戰，考驗你的反應速度和操作技巧。快來挑戰自己的最高分，看看你能堅持多久，創下屬於你的最佳紀錄吧！🎮🌱🏆</p>
+            <img src="遊戲畫面.png" alt="遊戲畫面" class="main-img">
 
             <h2>⚙️ 遊戲機制</h2>
             <p>
@@ -92,23 +103,20 @@
                 <span class="tag">碰撞偵測</span>
                 <span class="tag">高分紀錄系統</span>
             </p>
-            <p>玩家操控貓咪移動，抓住隨機位置的老鼠來得分。遊戲加入最高得分機制，讓每一次挑戰都更有目標感！</p>
+            <p>玩家操控寒冰射手移動，跳高躲避殭屍以及墓碑，並且氣球殭屍來的時候，按下空白鍵發射寒冰豆消滅。遊戲加入最高得分機制，讓每一次挑戰都更有目標感！</p>
 
             <h2>🎨 遊戲素材</h2>
-            <p>結合了 Scratch 內建資源與 <strong>AI 生成的貓鼠俯視圖</strong>，加上我自己手繪設計的障礙物圖片，打造出獨一無二的關卡體驗。</p>
+            <p>我最喜歡的遊戲就是植物大戰殭屍，所以遊戲素材都是參考植物大戰殭屍的，還有利用AI工具生成的。</p>
 
             <h2>📜 邏輯流程圖 (Flowchart)</h2>
             <p>在動手寫程式前，我先規劃了遊戲的邏輯。從簡單的步驟到複雜的判斷邏輯：</p>
             
             <div class="flowchart-container">
                 <p><strong>【遊戲如何進行】</strong></p>
-                <img src="圖2.png" alt="遊戲流程圖" class="flowchart-img">
-                
-                <p><strong>【詳細機制拆解】</strong></p>
-                <img src="圖3.png" alt="詳細機制" class="flowchart-img">
+                <img src="遊戲流程圖.png" alt="遊戲流程圖" class="flowchart-img">
 
                 <p><strong>【素材】</strong></p>
-                <img src="圖4.png" alt="素材庫" class="flowchart-img">
+                <img src="遊戲素材圖.png" alt="遊戲素材圖" class="flowchart-img">
             </div>
         </div>
     </div>

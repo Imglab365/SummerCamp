@@ -5,15 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>貓抓老鼠遊戲 - 專案紀錄頁</title>
     <style>
+        /* ================================================================= */
+        /* 🎨 【魔法變色罐】與 index.html 保持完全相同，方便學生複製貼上！ */
+        /* ================================================================= */
+        :root {
+            --main-color: #ff971d;      /* 主色調：header背景、分區段落標題 */
+            --accent-color: #ea580c;    /* 強調色：主標題、返回按鈕、標籤文字 */
+            --bg-light: #fff7ed;        /* 背景淺色：背景漸層上層、標籤背景色 */
+            --bg-dark: #fed7aa;         /* 背景深色：背景漸層下層、圖片框線 */
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(to bottom, #fff7ed 0%, #ffedd5 100%);
+            background: linear-gradient(to bottom, var(--bg-light) 0%, var(--bg-dark) 100%);
             color: #2b2d42;
             font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
         }
         header {
-            background-color: #ff971d;
+            background-color: var(--main-color);
             padding: 30px 20px;
             text-align: center;
             color: white;
@@ -25,7 +35,7 @@
         }
         .back-btn {
             text-decoration: none;
-            color: #ea580c;
+            color: var(--accent-color);
             font-weight: bold;
             display: inline-block;
             margin-bottom: 20px;
@@ -37,8 +47,8 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             margin-bottom: 40px;
         }
-        h1 { color: #ea580c; margin-top: 0; }
-        h2 { color: #ff971d; border-bottom: 2px solid #ffedd5; padding-bottom: 10px; margin-top: 30px; }
+        h1 { color: var(--accent-color); margin-top: 0; }
+        h2 { color: var(--main-color); border-bottom: 2px solid var(--bg-light); padding-bottom: 10px; margin-top: 30px; }
         p { line-height: 1.8; color: #4b5563; }
         
         .main-img {
@@ -54,20 +64,21 @@
         }
         .flowchart-img {
             max-width: 100%;
-            border: 1px solid #fed7aa;
+            border: 1px solid var(--bg-dark);
             border-radius: 12px;
             margin-bottom: 20px;
         }
         .tag {
-            background: #ffedd5;
-            color: #ea580c;
+            background: var(--bg-light);
+            color: var(--accent-color);
+            border: 1px solid var(--bg-dark);
             padding: 4px 12px;
             border-radius: 6px;
             font-size: 0.9rem;
             margin-right: 8px;
             display: inline-block;
         }
-        footer { text-align: center; padding: 40px; color: #7c2d12; border-top: 1px solid #fed7aa; }
+        footer { text-align: center; padding: 40px; color: #7c2d12; border-top: 1px solid var(--bg-dark); }
     </style>
 </head>
 <body>
@@ -83,7 +94,7 @@
         <div class="record-card">
             <h2>🐱 遊戲主題</h2>
             <p>這是一場驚險的貓抓老鼠大戰！老鼠大王擁有神奇的分身術，可以穿過障礙物逃走；而貓咪玩家必須展現靈敏的反應，在障礙物之間遊走，抓住四處逃竄的老鼠。</p>
-            <img src="圖1.png" alt="圖1" class="main-img">
+            <img src="遊戲畫面.png" alt="遊戲畫面" class="main-img">
 
             <h2>⚙️ 遊戲機制</h2>
             <p>
@@ -102,13 +113,10 @@
             
             <div class="flowchart-container">
                 <p><strong>【遊戲如何進行】</strong></p>
-                <img src="圖2.png" alt="遊戲流程圖" class="flowchart-img">
-                
-                <p><strong>【詳細機制拆解】</strong></p>
-                <img src="圖3.png" alt="詳細機制" class="flowchart-img">
+                <img src="遊戲流程圖.png" alt="遊戲流程圖" class="flowchart-img">
 
                 <p><strong>【素材】</strong></p>
-                <img src="圖4.png" alt="素材庫" class="flowchart-img">
+                <img src="遊戲素材圖.png" alt="遊戲素材圖" class="flowchart-img">
             </div>
         </div>
     </div>

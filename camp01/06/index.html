@@ -273,14 +273,22 @@
         }
 
         /* 懸浮機器人 */
-        .floating-robot {
+        /* 把整個區塊固定在右下角 */
+        .robot-container {
             position: fixed;
             bottom: 40px;
             right: 40px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* 靠右對齊 */
+        }
+
+        /* 機器人本身的動畫與大小 */
+        .floating-robot {
             width: 100px;
             height: auto;
-            z-index: 999;
-            animation: hoverEffect 3s ease-in-out infinite; 
+            animation: hoverEffect 3s ease-in-out infinite;
             cursor: pointer;
             transition: transform 0.3s ease;
         }
@@ -289,16 +297,51 @@
             transform: scale(1.1) rotate(5deg);
         }
 
-        @keyframes hoverEffect {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
+        /* 新增的對話框設計 */
+        .robot-menu {
+            display: none; /* 關鍵：一開始先隱藏不顯示 */
+            background-color: white;
+            border: 3px solid var(--accent-color); /* 用原本設定的強調色 */
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 160px;
+        }
+
+        .robot-menu p {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            color: #2b2d42;
+            font-size: 0.95rem;
+        }
+
+        /* 選單按鈕的設計 */
+        .menu-link {
+            display: block;
+            background-color: var(--main-color);
+            color: #2b2d42;
+            text-decoration: none;
+            padding: 8px 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .menu-link:hover {
+            background-color: var(--accent-color);
+            color: white;
         }
 
         @media (max-width: 600px) {
-            .floating-robot {
+            .robot-container {
                 bottom: 20px;
                 right: 20px;
+            }
+            .floating-robot {
                 width: 70px;
             }
         }
@@ -428,6 +471,29 @@
     <footer>
         <p>© 2026 Imagination Lab 想像力實驗室. Made with 💻 and AI.</p>
     </footer>
-    <img src="吉祥物.png" alt="AI 機器人助手" class="floating-robot" onclick="alert('哈囉！我是 小嗡 的 AI 助手 Gemini,一起來寫程式吧！')">
+    <div class="robot-container">
+        <div class="robot-menu" id="robotMenu">
+            <p>哈囉！想去哪裡看看呢？</p>
+            <a href="https://www.youtube.com/" target="_blank" class="menu-link">📺 我的 YouTube</a>
+            <a href="https://scratch.mit.edu/" target="_blank" class="menu-link">🐱 我的 Scratch</a>
+        </div>
+        
+        <img src="吉祥物.png" alt="AI 機器人助手" class="floating-robot" id="robotBtn">
+    </div>
+    <script>
+        // 1. 先抓到畫面上的機器人跟對話框
+        const robotBtn = document.getElementById('robotBtn');
+        const robotMenu = document.getElementById('robotMenu');
+
+        // 2. 告訴機器人：當有人「點擊 (click)」你的時候要做什麼事
+        robotBtn.addEventListener('click', function() {
+            // 邏輯判斷：如果現在對話框是隱藏的，就把它打開 (block)；不然就關掉 (none)
+            if (robotMenu.style.display === 'none' || robotMenu.style.display === '') {
+                robotMenu.style.display = 'block';
+            } else {
+                robotMenu.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

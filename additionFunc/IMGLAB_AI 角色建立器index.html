@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 角色建立器 V6｜想像力實驗室</title>
+  <style>
+    :root{
+      --blue:#1554b7; --cream:#f7f1e6; --paper:#fffdf8; --ink:#1f2937;
+      --muted:#6b7280; --line:#e5e0d6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;
+      color:var(--ink);
+      background:radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 28%),linear-gradient(135deg,#fff8ed,#edf6ff);
+    }
+    .wrap{max-width:1080px;margin:0 auto;padding:24px 16px 42px}
+    header,.panel{
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:24px;
+      box-shadow:0 10px 28px rgba(31,41,55,.08);
+      margin-bottom:18px;
+    }
+    header{display:flex;justify-content:space-between;gap:16px;align-items:center}
+    h1{margin:0 0 8px;color:var(--blue);font-size:32px}
+    h2{font-size:26px;margin:0 0 8px;color:#111827}
+    .subtitle,.desc{color:var(--muted);line-height:1.7}
+    .subtitle{margin:0;font-size:15px}.desc{margin:0 0 18px}
+    .badge{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;padding:9px 14px;border-radius:999px;font-weight:700;white-space:nowrap}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+    .step{background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:18px;padding:12px 14px;color:var(--muted);font-weight:700;text-align:center}
+    .step.active{background:var(--blue);color:white;border-color:var(--blue)}
+    .panel{display:none}.panel.active{display:block}
+    .formGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:800px){.formGrid,.twoCol{grid-template-columns:1fr}header{display:block}.badge{display:inline-block;margin-top:12px}.steps{grid-template-columns:1fr}}
+    .field{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px}
+    label.title{display:block;font-size:16px;font-weight:800;margin-bottom:9px;color:#243040}
+    input[type="text"],textarea,select{width:100%;border:1px solid #d9d3c7;border-radius:14px;padding:12px 14px;font-size:17px;background:white}
+    textarea{min-height:82px;resize:vertical}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;border:1px solid #d9d3c7;background:white;font-size:15px;user-select:none}
+    .chip input{accent-color:var(--blue)}
+    .otherInput{display:none;margin-top:10px}
+    .hint{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    button{border:0;border-radius:16px;padding:13px 18px;font-size:17px;font-weight:800;cursor:pointer}
+    .primary{background:var(--blue);color:white}.secondary{background:#e8edf5;color:#172033}.ghost{background:#fff;border:1px solid var(--line);color:#172033}.success{background:#16a34a;color:white}
+    .twoCol{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px;align-items:start}
+    .summary{background:#fff8db;border:1px solid #f1d98c;border-radius:20px;padding:18px;line-height:1.8;font-size:16px}
+    .promptBox{background:#101827;color:#e5e7eb;border-radius:22px;padding:20px;min-height:360px;white-space:pre-wrap;line-height:1.65;font-size:15px;border:1px solid #1e293b}
+    .robot{background:#eff6ff;border:1px solid #bfdbfe;color:#153f8a;border-radius:20px;padding:16px;line-height:1.7;margin-bottom:16px;font-weight:700}
+    .copyMsg{color:#15803d;font-weight:800;margin-top:10px}
+    .mini{font-size:13px;color:var(--muted);line-height:1.7}
+    .finish{text-align:center;padding:28px 10px}.finish h2{font-size:34px;color:var(--blue)}.bigIcon{font-size:54px;margin-bottom:8px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>AI 角色建立器</h1>
+    <p class="subtitle">把腦中的想法整理清楚，再請 AI 幫你畫出角色。</p>
+  </div>
+  <div class="badge">想像力實驗室｜第二堂</div>
+</header>
+
+<div class="steps">
+  <div id="step1" class="step active">① 建立角色</div>
+  <div id="step2" class="step">② AI 整理想法</div>
+  <div id="step3" class="step">③ 複製到 ChatGPT</div>
+</div>
+
+<section id="panel1" class="panel active">
+<h2>① 建立你的角色</h2>
+<p class="desc">用選項和短句完成角色設定。你填的內容，等等會自動整理成 AI 看得懂的描述。</p>
+<div style="background:#fff7e6;border:1px solid #f3d27a;border-radius:18px;padding:16px 18px;margin:18px 0;line-height:1.8;">
+<strong>💡 創作小提醒</strong><br>
+為了創造屬於自己的角色，請盡量不要直接使用真實人物、電影角色、動漫角色或遊戲角色的名字。<br>
+試著加入自己的創意，設計一位<strong>屬於自己的原創角色</strong>，AI 也會更容易理解你的想法，創作出獨一無二的作品！
+</div>
+
+
+<div class="formGrid">
+  <div class="field">
+    <label class="title">角色名字</label>
+    <input id="name" type="text" placeholder="例如：阿哲、強納森、小米" />
+  </div>
+
+  <div class="field">
+    <label class="title">角色性別</label>
+    <div class="chips">
+      <label class="chip"><input type="radio" name="gender" value="男生">男生</label>
+      <label class="chip"><input type="radio" name="gender" value="女生">女生</label>
+      <label class="chip"><input type="radio" name="gender" value="中性風格">中性風格</label>
+      <label class="chip"><input type="radio" name="gender" value="不特別指定">不指定</label>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="title">年齡區間</label>
+    <select id="age">
+      <option value="">請選擇</option>
+      <option>15-20 歲</option>
+      <option>20-25 歲</option>
+      <option>25-30 歲</option>
+      <option>30-35 歲</option>
+      <option>35-40 歲</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="title">角色定位／職業</label>
+    <select id="role" onchange="updateDetailPlaceholder('role','請輸入其他角色定位／職業','新增角色細節（可不填）')">
+      <option value="">請選擇</option>
+      <option>學生</option><option>攝影師</option><option>探險家</option><option>廚師</option><option>工程師</option><option>太空人</option><option>魔法師</option><option>運動員</option><option>藝術家</option><option>偵探</option><option>發明家</option><option value="其他">其他</option>
+    </select>
+    <input id="roleDetail" type="text" placeholder="新增角色細節（可不填）" />
+  </div>
+
+  <div class="field">
+    <label class="title">長相（可複選）</label>
+    <div class="chips">
+      <label class="chip"><input type="checkbox" name="look" value="黑色短髮">黑色短髮</label>
+      <label class="chip"><input type="checkbox" name="look" value="黑色長髮">黑色長髮</label>
+      <label class="chip"><input type="checkbox" name="look" value="微分碎蓋">微分碎蓋</label>
+      <label class="chip"><input type="checkbox" name="look" value="油頭">油頭</label>
+      <label class="chip"><input type="checkbox" name="look" value="自然捲">自然捲</label>
+      <label class="chip"><input type="checkbox" name="look" value="妹妹頭">妹妹頭</label>
+      <label class="chip"><input type="checkbox" name="look" value="馬尾">馬尾</label>
+      <label class="chip"><input type="checkbox" name="look" value="瀏海明顯">瀏海明顯</label>
+      <label class="chip"><input type="checkbox" name="look" value="戴細框眼鏡">戴細框眼鏡</label>
+      <label class="chip"><input type="checkbox" name="look" value="戴圓框眼鏡">戴圓框眼鏡</label>
+      <label class="chip"><input type="checkbox" name="look" value="臉型斯文">臉型斯文</label>
+      <label class="chip"><input type="checkbox" name="look" value="笑容陽光">笑容陽光</label>
+      <label class="chip"><input type="checkbox" name="look" value="表情冷靜">表情冷靜</label>
+      <label class="chip"><input type="checkbox" name="look" value="眼神專注">眼神專注</label>
+      <label class="chip"><input type="checkbox" name="look" value="有酒窩">有酒窩</label>
+      <label class="chip"><input type="checkbox" name="look" value="皮膚偏白">皮膚偏白</label>
+      <label class="chip"><input type="checkbox" name="look" value="健康膚色">健康膚色</label>
+      <label class="chip"><input type="checkbox" name="look" value="運動感">運動感</label>
+      <label class="chip"><input type="checkbox" name="look" value="文青氣質">文青氣質</label>
+      <label class="chip"><input type="checkbox" name="look" value="有雀斑">有雀斑</label>
+      <label class="chip"><input type="checkbox" name="lookOtherCheck" value="其他" onchange="updateCheckboxDetailPlaceholder('look','請輸入其他長相特色','新增長相細節（可不填）')">其他</label>
+    </div>
+    <input id="lookDetail" type="text" placeholder="新增長相細節（可不填）" />
+    <div class="hint">可依角色性別與風格自由搭配，不一定只能選一個。</div>
+  </div>
+
+  <div class="field">
+    <label class="title">穿什麼？</label>
+    <select id="clothes" onchange="updateDetailPlaceholder('clothes','請輸入其他服裝風格','新增服裝細節（可不填）')">
+      <option value="">請選擇</option>
+      <option>休閒服</option><option>帽T</option><option>外套</option><option>制服</option><option>球衣</option><option>探險服</option><option>工作圍裙</option><option>未來科技風</option><option>復古風</option><option value="其他">其他</option>
+    </select>
+    <input id="clothesDetail" type="text" placeholder="新增服裝細節（可不填）" />
+  </div>
+
+  <div class="field">
+    <label class="title">身上有什麼道具？</label>
+    <div class="chips">
+      <label class="chip"><input type="checkbox" name="items" value="相機">相機</label>
+      <label class="chip"><input type="checkbox" name="items" value="眼鏡">眼鏡</label>
+      <label class="chip"><input type="checkbox" name="items" value="後背包">後背包</label>
+      <label class="chip"><input type="checkbox" name="items" value="帽子">帽子</label>
+      <label class="chip"><input type="checkbox" name="items" value="筆記本">筆記本</label>
+      <label class="chip"><input type="checkbox" name="items" value="耳機">耳機</label>
+      <label class="chip"><input type="checkbox" name="items" value="滑板">滑板</label>
+      <label class="chip"><input type="checkbox" name="items" value="料理工具">料理工具</label>
+      <label class="chip"><input type="checkbox" name="itemsOtherCheck" value="其他" onchange="updateCheckboxDetailPlaceholder('items','請輸入其他道具','新增道具細節（可不填）')">其他</label>
+    </div>
+    <input id="itemsDetail" type="text" placeholder="新增道具細節（可不填）" />
+  </div>
+
+  <div class="field">
+    <label class="title">他是什麼樣的人？</label>
+    <div class="chips">
+      <label class="chip"><input type="checkbox" name="personality" value="安靜">安靜</label>
+      <label class="chip"><input type="checkbox" name="personality" value="活潑">活潑</label>
+      <label class="chip"><input type="checkbox" name="personality" value="勇敢">勇敢</label>
+      <label class="chip"><input type="checkbox" name="personality" value="溫柔">溫柔</label>
+      <label class="chip"><input type="checkbox" name="personality" value="好奇">好奇</label>
+      <label class="chip"><input type="checkbox" name="personality" value="幽默">幽默</label>
+      <label class="chip"><input type="checkbox" name="personality" value="認真">認真</label>
+      <label class="chip"><input type="checkbox" name="personality" value="有點神秘">有點神秘</label>
+      <label class="chip"><input type="checkbox" name="personalityOtherCheck" value="其他" onchange="updateCheckboxDetailPlaceholder('personality','請輸入其他個性描述','新增個性細節（可不填）')">其他</label>
+    </div>
+    <input id="personalityDetail" type="text" placeholder="新增個性細節（可不填）" />
+  </div>
+
+  <div class="field">
+    <label class="title">他喜歡做什麼？</label>
+    <div class="chips">
+      <label class="chip"><input type="checkbox" name="hobby" value="攝影">攝影</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="旅行">旅行</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="打球">打球</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="畫畫">畫畫</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="音樂">音樂</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="閱讀">閱讀</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="發明東西">發明東西</label>
+      <label class="chip"><input type="checkbox" name="hobby" value="做料理">做料理</label>
+      <label class="chip"><input type="checkbox" name="hobbyOtherCheck" value="其他" onchange="updateCheckboxDetailPlaceholder('hobby','請輸入其他興趣／專長','新增興趣細節（可不填）')">其他</label>
+    </div>
+    <input id="hobbyDetail" type="text" placeholder="新增興趣細節（可不填）" />
+  </div>
+
+  <div class="field">
+    <label class="title">故事與信念</label>
+    <textarea id="story" placeholder="例如：明明很有潛力，卻在小餐館打工；他相信只要敢嘗試，就能做出沒有人想過的料理。"></textarea>
+    <div class="chips" style="margin-top:10px">
+      <label class="chip"><input type="checkbox" name="storyOtherCheck" value="其他" onchange="toggleStoryOther()">其他補充</label>
+    </div>
+    <input id="storyOther" class="otherInput" type="text" placeholder="請輸入其他故事或信念補充" />
+  </div>
+
+  <div class="field">
+    <label class="title">其他特色</label>
+    <textarea id="extra" placeholder="例如：懷才不遇，但其實很有創意；總是把食譜寫在小紙條上。"></textarea>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="primary" onclick="buildCharacter()">下一步：請 AI 整理想法</button>
+  <button class="ghost" onclick="clearAll()">清空重填</button>
+</div>
+</section>
+
+<section id="panel2" class="panel">
+  <h2>② AI 幫你整理好了</h2>
+  <p class="desc">這一段是 AI 看得懂的角色描述。你可以先看一下，有沒有跟你的想法接近。</p>
+  <div class="twoCol">
+    <div>
+      <div class="robot">🤖 我把你的角色想法整理成比較完整的描述了。</div>
+      <div id="summary" class="summary"></div>
+      <div class="actions">
+        <button class="secondary" onclick="goPanel(1)">回去修改</button>
+        <button class="primary" onclick="goPanel(3)">下一步：準備生成</button>
+      </div>
+    </div>
+    <div><div id="prompt" class="promptBox"></div></div>
+  </div>
+</section>
+
+<section id="panel3" class="panel">
+  <div class="finish">
+    <div class="bigIcon">✨</div>
+    <h2>你的角色準備好了！</h2>
+    <p class="desc">按下複製後，到 ChatGPT 貼上這段文字，就可以請 AI 幫你生成角色圖。</p>
+    <div class="actions" style="justify-content:center">
+      <button class="success" onclick="copyPrompt()">📋 複製到 ChatGPT</button>
+      <button class="secondary" onclick="goPanel(2)">回去查看</button>
+      <button class="ghost" onclick="clearAll()">建立新角色</button>
+    </div>
+    <p id="copyMsg" class="copyMsg"></p>
+    <p class="mini">小提醒：如果第一次圖片不滿意，不要一直重新生成。先說出想修改哪裡，再請 AI 幫忙調整。</p>
+  </div>
+</section>
+</div>
+
+<script>
+let finalPrompt="";
+
+function v(id){return document.getElementById(id).value.trim();}
+function radio(name){const e=document.querySelector(`input[name="${name}"]:checked`);return e?e.value:"";}
+function checks(name){return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(x=>x.value);}
+function list(arr,fallback){return arr.length?arr.join("、"):fallback;}
+function selectWithDetail(id){
+  const sel=v(id);
+  const detail=v(id+"Detail");
+  if(sel==="其他"){
+    return detail || "其他";
+  }
+  if(sel && detail){
+    return sel + "（" + detail + "）";
+  }
+  return sel;
+}
+function updateDetailPlaceholder(id, otherText, detailText){
+  const input=document.getElementById(id+"Detail");
+  if(!input) return;
+  input.placeholder = v(id)==="其他" ? otherText : detailText;
+}
+function updateCheckboxDetailPlaceholder(id, otherText, detailText){
+  const input=document.getElementById(id+"Detail");
+  if(!input) return;
+  const checked=document.querySelector(`input[name="${id}OtherCheck"]`)?.checked;
+  input.placeholder = checked ? otherText : detailText;
+}
+function detailValue(id){
+  const detail=v(id+"Detail");
+  return detail || "";
+}
+function checksWithDetail(name){
+  const base=checks(name);
+  const detail=detailValue(name);
+  const checked=document.querySelector(`input[name="${name}OtherCheck"]`)?.checked;
+  if(detail){
+    if(checked){
+      base.push(detail);
+    }else{
+      base.push("補充：" + detail);
+    }
+  }
+  return base;
+}
+function toggleStoryOther(){
+  const checked=document.querySelector('input[name="storyOtherCheck"]')?.checked;
+  const input=document.getElementById("storyOther");
+  if(input) input.style.display=checked?"block":"none";
+}
+function goPanel(n){
+  for(let i=1;i<=3;i++){
+    document.getElementById("panel"+i).classList.remove("active");
+    document.getElementById("step"+i).classList.remove("active");
+  }
+  document.getElementById("panel"+n).classList.add("active");
+  document.getElementById("step"+n).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function buildCharacter(){
+  const name=v("name")||"一位原創角色";
+  const gender=radio("gender")||"不特別指定性別";
+  const age=v("age")||"年齡未特別指定";
+  const role=selectWithDetail("role")||"角色定位未特別指定";
+  const look=list(checksWithDetail("look"),"長相清楚、有辨識度");
+  const clothes=selectWithDetail("clothes")||"適合角色個性的服裝";
+  const items=list(checksWithDetail("items"),"沒有特別指定道具");
+  const personality=list(checksWithDetail("personality"),"有自己的個性");
+  const hobby=list(checksWithDetail("hobby"),"有自己的興趣");
+  const storyBase=v("story")||"有自己的故事與信念";
+  const storyExtra=v("storyOther");
+  const story=storyExtra ? `${storyBase}；${storyExtra}` : storyBase;
+  const extra=v("extra")||"請讓角色看起來有故事感";
+
+  const summary =
+`角色名字：${name}
+角色定位：${age}的${gender}，角色身分是${role}
+長相：${look}
+服裝：${clothes}
+道具：${items}
+個性：${personality}
+喜歡做的事：${hobby}
+故事與信念：${story}
+補充：${extra}`;
+
+  finalPrompt =
+`請幫我生成一張半身角色圖。
+
+角色名字：${name}
+角色性別：${gender}
+年齡區間：${age}
+角色定位／職業：${role}
+
+長相：${look}
+服裝風格：${clothes}
+配件／道具：${items}
+
+角色個性：${personality}
+喜歡做的事／專長：${hobby}
+角色故事與信念：${story}
+補充特色：${extra}
+
+請讓角色看起來清楚、有特色、有故事感。
+畫面請以半身角色圖呈現，背景簡潔，不要過度複雜。
+整體風格適合國小學生的 AI 創意角色設計課程。
+請避免恐怖、暴力或過度成熟的風格。`;
+
+  document.getElementById("summary").textContent=summary;
+  document.getElementById("prompt").textContent=finalPrompt;
+  document.getElementById("copyMsg").textContent="";
+  goPanel(2);
+}
+async function copyPrompt(){
+  if(!finalPrompt){document.getElementById("copyMsg").textContent="請先完成角色設定。";return;}
+  try{
+    await navigator.clipboard.writeText(finalPrompt);
+    document.getElementById("copyMsg").textContent="已複製，可以貼到 ChatGPT。";
+  }catch(e){
+    document.getElementById("copyMsg").textContent="無法自動複製，請回上一頁長按文字手動複製。";
+  }
+}
+function clearAll(){
+  document.querySelectorAll("input[type=text], textarea").forEach(e=>e.value="");
+  document.querySelectorAll("input[type=checkbox], input[type=radio]").forEach(e=>e.checked=false);
+  document.querySelectorAll("select").forEach(e=>e.selectedIndex=0);
+  document.querySelectorAll(".otherInput").forEach(e=>e.style.display="none");
+  finalPrompt="";
+  document.getElementById("copyMsg").textContent="";
+  goPanel(1);
+}
+</script>
+</body>
+</html>

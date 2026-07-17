@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>忍者跑酷｜AI 遊戲素材提示詞產生器 V5.6</title>
+<style>
+:root{
+  --blue:#1554b7;--blue2:#3b82f6;--paper:#fffdf8;--ink:#1f2937;
+  --muted:#6b7280;--line:#e5e0d6;--yellow:#fff1b8;--red:#dc2626;
+  --green:#16a34a;--shadow:0 12px 28px rgba(31,41,55,.10);--radius:26px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC",
+  "Microsoft JhengHei",sans-serif;color:var(--ink);
+  background:
+    radial-gradient(circle at top left,rgba(59,130,246,.13),transparent 28%),
+    radial-gradient(circle at 92% 12%,rgba(255,224,138,.35),transparent 22%),
+    linear-gradient(135deg,#fff8ed,#edf6ff);
+  min-height:100vh;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 56px}
+header,.panel{
+  background:rgba(255,255,255,.94);border:1px solid var(--line);
+  border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:18px;
+}
+header{display:flex;justify-content:space-between;align-items:center;gap:18px}
+h1{margin:0 0 8px;color:var(--blue);font-size:34px;letter-spacing:-.02em}
+h2{margin:0 0 8px;font-size:27px;color:#111827}
+h3{margin:0 0 12px;font-size:20px}
+p{font-size:16px;line-height:1.75;margin:8px 0}
+.subtitle,.desc,.hint{color:var(--muted);line-height:1.7}
+.subtitle{margin:0;font-size:15px}.desc{margin:0 0 18px}.hint{font-size:13px;margin-top:8px}
+.badge{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;padding:9px 14px;border-radius:999px;font-weight:900;white-space:nowrap}
+.notice{background:#fff7e6;border:1px solid #f3d27a;border-radius:18px;padding:15px 17px;line-height:1.75;margin:14px 0 0}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.step{background:rgba(255,255,255,.78);border:1px solid var(--line);border-radius:18px;padding:12px 8px;color:var(--muted);font-weight:900;text-align:center;font-size:14px}
+.step a{color:inherit;text-decoration:none}
+.step:hover{background:#eff6ff;color:var(--blue)}
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px}
+.field.full{grid-column:1/-1}
+label.title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:16px;font-weight:900;margin-bottom:9px;color:#243040}
+.requiredTag{color:var(--red);font-size:13px;font-weight:950;white-space:nowrap}
+input[type="text"],textarea,select{
+  width:100%;border:1px solid #d9d3c7;border-radius:14px;padding:12px 14px;
+  font-size:17px;background:white;color:var(--ink);font-family:inherit;
+}
+textarea{min-height:82px;resize:vertical}
+.sectionIcon{font-size:28px;margin-right:8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+button{
+  border:0;border-radius:16px;padding:13px 18px;font-size:17px;font-weight:900;
+  cursor:pointer;font-family:inherit;transition:.18s transform,.18s box-shadow;
+}
+button:hover{transform:translateY(-1px)}
+.primary{background:var(--blue);color:white}
+.secondary{background:#e8edf5;color:#172033}
+.ghost{background:white;border:1px solid var(--line);color:#172033}
+.success{background:var(--green);color:white}
+.errorBox{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#991b1b;border-radius:18px;padding:14px 16px;margin:14px 0;line-height:1.7;font-weight:800}
+.outputGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.promptCard{background:#101827;color:#e5e7eb;border-radius:22px;padding:18px;border:1px solid #1e293b;position:relative;min-height:220px}
+.promptCard h3{color:#fff;padding-right:100px}
+.promptText{white-space:pre-wrap;line-height:1.65;font-size:14px}
+.copySmall{position:absolute;top:14px;right:14px;padding:8px 11px;font-size:13px;border-radius:12px;background:#334155;color:white}
+.summary{background:#fff8db;border:1px solid #f1d98c;border-radius:20px;padding:18px;line-height:1.8;white-space:pre-wrap}
+.robot{background:#eff6ff;border:1px solid #bfdbfe;color:#153f8a;border-radius:20px;padding:16px;line-height:1.7;margin-bottom:16px;font-weight:800}
+.copyMsg{color:#15803d;font-weight:900;margin-top:10px}
+.countPill{display:inline-block;background:#eef6ff;color:var(--blue);border:1px solid #bfdbfe;border-radius:999px;padding:4px 9px;font-size:13px;font-weight:900}
+.stickyBar{position:sticky;bottom:14px;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:20px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px}
+.stickyBar span{font-weight:800;color:#334155;font-size:14px}
+
+.radioRow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.radioCard{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1px solid #d9d3c7;border-radius:16px;padding:14px;cursor:pointer}
+.radioCard input{margin-top:4px;transform:scale(1.2)}
+.radioCard span{display:flex;flex-direction:column;gap:4px}
+.radioCard small{color:var(--muted);line-height:1.5}
+.progressBox{margin-top:18px;background:#f8fafc;border:1px solid #dbe3ee;border-radius:20px;padding:16px}
+.progressTitle{font-weight:900;margin-bottom:12px}
+.progressGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.statusItem{background:white;border:1px solid #dbe3ee;border-radius:14px;padding:11px;text-align:center;font-weight:900;color:#64748b}
+.statusItem.done{background:#ecfdf3;border-color:#86efac;color:#15803d}
+
+@media(max-width:900px){
+  header{display:block}.badge{display:inline-block;margin-top:12px}
+  .steps{grid-template-columns:1fr 1fr}.formGrid,.outputGrid,.radioRow,.progressGrid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}.wrap{padding:14px 10px 40px}
+  header,.panel{padding:18px;border-radius:22px}h1{font-size:28px}h2{font-size:23px}
+  .stickyBar{display:block}.stickyBar button{width:100%;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>忍者跑酷｜AI 遊戲素材提示詞產生器</h1>
+    <p class="subtitle">四張角色分開生成；第二、第四張改為極小跨步，所有區塊提示詞再精簡。</p>
+  </div>
+  <div class="badge">想像力實驗室｜極小跨步・精簡提示詞版 V5.6</div>
+</header>
+
+<div class="steps">
+  <div class="step"><a href="#basic">① 美術風格</a></div><div class="step"><a href="#player">② 主角</a></div>
+  <div class="step"><a href="#ui">③ 控制按鈕</a></div><div class="step"><a href="#items">④ 道具</a></div>
+  <div class="step"><a href="#obstacles">⑤ 障礙物</a></div><div class="step"><a href="#backgrounds">⑥ 背景</a></div>
+  <div class="step"><a href="#platform">⑦ 地板</a></div><div class="step"><a href="#effects">⑧ 特效</a></div>
+  <div class="step"><a href="#result">⑨ 已產生內容</a></div>
+</div>
+
+<section id="basic" class="panel"><h2>🎨 ① 整體美術風格</h2><p class="desc">後面每個區段產生提示詞時，都會自動帶入這裡的設定。</p>
+<div class="formGrid">
+<div class="field"><label class="title">遊戲名稱</label><input id="gameName" type="text" placeholder="例如：殭屍上學大冒險"></div>
+<div class="field"><label class="title">遊戲主題／參考方向</label><input id="theme" type="text" placeholder="例如：植物大戰殭屍裡的殭屍"></div>
+<div class="field"><label class="title">整體美術風格</label><select id="artStyle" onchange="toggleCustomStyle()">
+<option>可愛卡通遊戲風</option><option>明亮 2D 遊戲風</option><option>Q 版冒險風</option><option>手繪童趣風</option>
+<option>像素遊戲風</option><option>黏土玩具風</option><option>紙雕拼貼風</option><option>積木玩具風</option>
+<option>漫畫遊戲風</option><option>奇幻冒險風</option><option>未來科技風</option><option>復古街機風</option>
+<option>簡潔扁平插畫風</option><option>3D 動畫電影風</option><option>自行定義</option></select>
+<div id="customStyleWrap" style="display:none;margin-top:10px"><input id="customStyle" type="text" placeholder="請輸入你想要的美術風格"></div></div>
+<div class="field"><label class="title">自行補充風格</label><input id="styleExtra" type="text" placeholder="例如：顏色鮮明、輪廓清楚、不要恐怖"></div></div>
+<div class="actions"><button class="primary" onclick="generateStyle()">產生美術風格提示詞</button></div><div id="styleOutput"></div></section>
+
+
+
+<section id="player" class="panel">
+  <h2><span class="sectionIcon">🎞️</span>② 主角動畫</h2>
+  <p class="desc">選擇角色的動畫模式。跑步模式固定分成大跨步、小跨步、反向大跨步、反向小跨步；特殊角色仍可自行設定。</p>
+
+  <div class="formGrid">
+    <div class="field">
+      <label class="title">你想要什麼主角？ <span class="requiredTag">＊ 必填</span></label>
+      <input id="playerDesc" type="text" placeholder="例如：湖人隊籃球員、殭屍、小狗、四腳機器人">
+    </div>
+
+    <div class="field">
+      <label class="title">角色外觀補充</label>
+      <input id="playerExtra" type="text" placeholder="例如：戴帽子、拿獎盃、背書包">
+    </div>
+
+    <div class="field">
+      <label class="title">動畫模式</label>
+      <select id="animationMode" onchange="updateAnimationMode()">
+        <option value="run">跑步 Run</option>
+        <option value="walk">走路 Walk</option>
+        <option value="jump">跳躍 Jump</option>
+        <option value="fly">飛行 Fly</option>
+        <option value="float">漂浮 Float</option>
+        <option value="crawl">爬行 Crawl</option>
+        <option value="custom">自訂 Custom</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="title">這個角色是否使用人類型兩腳動作？</label>
+      <select id="bipedSelect" onchange="toggleMovementMode()">
+        <option value="yes">是</option>
+        <option value="no">否</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="bipedPanel">
+    <div class="field full" style="margin-top:16px;">
+      <label class="title">動畫關鍵影格 <span class="requiredTag">＊ 每次選一個</span></label>
+      <select id="playerAction" onchange="updateActionPreview()">
+        <option value="1">第 1 影格：Contact A</option>
+        <option value="2">第 2 影格：Passing</option>
+        <option value="3">第 3 影格：Contact B</option>
+        <option value="4">第 4 影格：Up / Recovery</option>
+      </select>
+      <div id="actionPreview" class="notice" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <div id="specialPanel" style="display:none;">
+    <div class="formGrid" style="margin-top:16px;">
+      <div class="field">
+        <label class="title">角色移動方式</label>
+        <select id="specialMoveType" onchange="toggleCustomMoveType()">
+          <option>四腳行走</option>
+          <option>多腳行走</option>
+          <option>身體爬行</option>
+          <option>跳躍移動</option>
+          <option>滾動移動</option>
+          <option>輪子移動</option>
+          <option>飛行</option>
+          <option>漂浮</option>
+          <option>植物伸縮移動</option>
+          <option>自行定義</option>
+        </select>
+        <div id="customMoveWrap" class="dynamic">
+          <input id="customMoveType" type="text" placeholder="請輸入角色的移動方式">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="title">身體構造補充 <span class="requiredTag">＊ 必填</span></label>
+        <input id="bodyStructure" type="text" placeholder="例如：四隻腳、八隻腳、底部有兩個輪子、沒有腳">
+      </div>
+
+      <div class="field">
+        <label class="title">自訂影格 1</label>
+        <input id="customAction1" type="text" placeholder="例如：前腳向前伸、後腳向後蹬">
+      </div>
+
+      <div class="field">
+        <label class="title">自訂影格 2</label>
+        <input id="customAction2" type="text" placeholder="例如：四腳向身體中央收縮">
+      </div>
+
+      <div class="field">
+        <label class="title">自訂影格 3</label>
+        <input id="customAction3" type="text" placeholder="例如：身體騰空，四腳自然伸展">
+      </div>
+
+      <div class="field">
+        <label class="title">自訂影格 4</label>
+        <input id="customAction4" type="text" placeholder="例如：前腳準備落地，後腳向前收回">
+      </div>
+
+      <div class="field full">
+        <label class="title">這次要生成哪一個影格？</label>
+        <select id="specialActionSelect">
+          <option value="1">第 1 影格</option>
+          <option value="2">第 2 影格</option>
+          <option value="3">第 3 影格</option>
+          <option value="4">第 4 影格</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="progressBox">
+    <div class="progressTitle">四個動畫影格完成狀態</div>
+    <div class="progressGrid">
+      <div id="status1" class="statusItem">① 第 1 影格</div>
+      <div id="status2" class="statusItem">② 第 2 影格</div>
+      <div id="status3" class="statusItem">③ 第 3 影格</div>
+      <div id="status4" class="statusItem">④ 第 4 影格</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" onclick="generatePlayer()">產生主角動畫提示詞</button>
+    <button class="ghost" onclick="resetPlayerProgress()">清除主角完成狀態</button>
+  </div>
+  <div id="playerOutput" class="promptBox"></div>
+</section>
+
+<section id="ui" class="panel"><h2>🕹️ ③ 遊戲控制按鈕</h2><p class="desc">開始與結束按鈕分開生成，每次只製作一個按鈕。</p>
+<div class="formGrid"><div class="field"><label class="title">按鈕文字 <span class="requiredTag">＊ 必填</span></label><input id="buttonText" type="text" placeholder="例如：遊戲開始"></div><div class="field"><label class="title">按鈕外觀補充</label><input id="buttonExtra" type="text" placeholder="例如：像木牌、像警告標誌"></div></div>
+<div class="actions"><button class="primary" onclick="generateButton()">產生按鈕提示詞</button></div><div id="buttonOutput"></div></section>
+
+<section id="items" class="panel"><h2>⭐ ④ 道具</h2><p class="desc">投擲物與收集道具分開生成。</p>
+<div class="formGrid"><div class="field"><label class="title">投擲物</label><input id="projectile" type="text" placeholder="例如：火焰豌豆"><div class="actions"><button class="primary" onclick="generateItem('projectile')">產生投擲物提示詞</button></div><div id="projectileOutput"></div></div>
+<div class="field"><label class="title">收集道具</label><input id="collectible" type="text" placeholder="例如：陽光能量"><div class="actions"><button class="primary" onclick="generateItem('collectible')">產生道具提示詞</button></div><div id="collectibleOutput"></div></div></div></section>
+
+<section id="obstacles" class="panel"><h2>🚧 ⑤ 障礙物</h2><p class="desc">選擇障礙物編號，再輸入這次要生成的內容。</p>
+<div class="formGrid"><div class="field"><label class="title">障礙物</label><select id="obstacleType"><option>障礙物 1</option><option>障礙物 2</option><option>障礙物 3</option><option>空中飛行障礙物</option></select></div>
+<div class="field"><label class="title">障礙物內容補充 <span class="requiredTag">＊ 必填</span></label><input id="obstacleDesc" type="text" placeholder="例如：戴著路障帽的殭屍"></div></div>
+<div class="actions"><button class="primary" onclick="generateObstacle()">產生障礙物提示詞</button></div><div id="obstacleOutput"></div></section>
+
+<section id="backgrounds" class="panel"><h2>🌆 ⑥ 遊戲背景</h2><p class="desc">一次生成一張背景，依序完成背景 1、2、3。</p>
+<div class="formGrid"><div class="field"><label class="title">背景編號</label><select id="bgNumber"><option>背景 1</option><option>背景 2</option><option>背景 3</option><option>其他</option></select></div>
+<div class="field"><label class="title">背景類型 <span class="requiredTag">＊ 必填</span></label><input id="bgType" type="text" placeholder="例如：殭屍學校外的街道"></div>
+<div class="field full"><label class="title">背景氣氛</label><input id="bgMood" type="text" placeholder="例如：白天、明亮、有冒險感"></div></div>
+<div class="actions"><button class="primary" onclick="generateBackground()">產生背景提示詞</button></div><div id="backgroundOutput"></div></section>
+
+<section id="platform" class="panel"><h2>🧱 ⑦ 地板／平台</h2><p class="desc">生成一條可左右重複拼接的長條地板。</p><div class="field"><label class="title">地板長什麼樣子？ <span class="requiredTag">＊ 必填</span></label><input id="platformDesc" type="text" placeholder="例如：有裂痕的校園水泥地"></div>
+<div class="actions"><button class="primary" onclick="generatePlatform()">產生地板提示詞</button></div><div id="platformOutput"></div></section>
+
+<section id="effects" class="panel"><h2>✨ ⑧ 遊戲特效</h2><p class="desc">兩種特效分開生成。</p><div class="formGrid">
+<div class="field"><label class="title">碰撞／攻擊特效</label><input id="hitEffect" type="text" placeholder="例如：黃色星星爆炸"><div class="actions"><button class="primary" onclick="generateEffect('hit')">產生碰撞特效提示詞</button></div><div id="hitOutput"></div></div>
+<div class="field"><label class="title">取得道具特效</label><input id="collectEffect" type="text" placeholder="例如：金色發光光圈"><div class="actions"><button class="primary" onclick="generateEffect('collect')">產生取得特效提示詞</button></div><div id="collectOutput"></div></div></div></section>
+
+<section id="result" class="panel"><h2>📚 ⑨ 已產生的提示詞</h2><p class="desc">這裡只記錄目前已經完成的內容，不需要把所有區段填完。</p><div id="history" class="summary">目前尚未產生任何提示詞。</div>
+<div class="actions"><button class="success" onclick="copyAll()">複製目前全部提示詞</button><button class="ghost" onclick="clearHistory()">清除已產生內容</button></div><p id="copyMsg" class="copyMsg"></p></section>
+
+<script>
+let historyItems=[];const val=id=>(document.getElementById(id)?.value||'').trim();const safe=t=>t||'未特別指定';
+function toggleCustomStyle(){document.getElementById('customStyleWrap').style.display=val('artStyle')==='自行定義'?'block':'none'}
+function getStyle(){let s=val('artStyle');if(s==='自行定義')s=val('customStyle')||'自行定義的原創遊戲風格';return s+(val('styleExtra')?`，並加入「${val('styleExtra')}」`:'')}
+function transparencySpec(){return `
+
+Transparent PNG.
+No background.
+No floor.
+No shadow.
+No platform.
+No scenery.
+No border.
+No frame.`}
+function common(clear=true){return `主題：${val('theme')||'學生自行設定'}。風格：${getStyle()}。輪廓清楚、配色易辨識，適合國小課程與 Scratch。${clear?transparencySpec():''}`}
+function need(id,n){if(val(id))return true;alert(`請先填寫「${n}」`);document.getElementById(id).focus();return false}
+function esc(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function render(id,title,text){document.getElementById(id).innerHTML=`<div class="promptCard" style="margin-top:16px"><button class="copySmall" onclick="copyOne('${id}')">複製這組</button><h3>${title}</h3><div class="promptText">${esc(text)}</div></div>`;historyItems.push({title,text});renderHistory()}
+async function clip(t,m){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove()}document.getElementById('copyMsg').textContent=m}
+function copyOne(id){clip(document.getElementById(id).querySelector('.promptText').innerText,'已複製這一組提示詞！')}
+function renderHistory(){document.getElementById('history').textContent=historyItems.length?historyItems.map((x,i)=>`${i+1}. ${x.title}`).join('\n'):'目前尚未產生任何提示詞。'}
+function copyAll(){if(!historyItems.length)return alert('目前還沒有產生任何提示詞。');clip(historyItems.map((x,i)=>`【${i+1}. ${x.title}】\n${x.text}`).join('\n\n====================\n\n'),'已複製目前全部提示詞！')}
+function clearHistory(){historyItems=[];renderHistory();document.getElementById('copyMsg').textContent=''}
+function generateStyle(){render('styleOutput','整體美術風格提示詞',`統一遊戲《${val('gameName')||'未命名遊戲'}》圖片風格。
+
+主題：${val('theme')||'學生自行設定'}
+風格：${getStyle()}
+保持一致配色、線條與比例；清楚易辨識。背景以外素材使用透明 PNG。`)}
+function getBipedMode(){
+  return val("bipedSelect") || "yes";
+}
+function animationModeLabel(){
+  const labels={
+    run:"跑步 Run",
+    walk:"走路 Walk",
+    jump:"跳躍 Jump",
+    fly:"飛行 Fly",
+    float:"漂浮 Float",
+    crawl:"爬行 Crawl",
+    custom:"自訂動畫"
+  };
+  return labels[val("animationMode")] || "自訂動畫";
+}
+function updateAnimationMode(){
+  const mode=val("animationMode");
+  const actionSelect=document.getElementById("playerAction");
+  const presets={
+    run:[
+      ["1","第 1 影格：Pose A｜大跨步"],
+      ["2","第 2 影格：Pose B｜小跨步"],
+      ["3","第 3 影格：Pose C｜反向大跨步"],
+      ["4","第 4 影格：Pose D｜反向小跨步"]
+    ],
+    walk:[
+      ["1","第 1 影格：左腳接觸地面"],
+      ["2","第 2 影格：身體通過中央"],
+      ["3","第 3 影格：右腳接觸地面"],
+      ["4","第 4 影格：準備下一步"]
+    ],
+    jump:[
+      ["1","第 1 影格：準備起跳"],
+      ["2","第 2 影格：向上離地"],
+      ["3","第 3 影格：空中最高點"],
+      ["4","第 4 影格：準備落地"]
+    ],
+    fly:[
+      ["1","第 1 影格：翅膀或飛行部件向上"],
+      ["2","第 2 影格：向下拍動"],
+      ["3","第 3 影格：展開滑翔"],
+      ["4","第 4 影格：回到上拍前"]
+    ],
+    float:[
+      ["1","第 1 影格：身體位於中央"],
+      ["2","第 2 影格：身體微微上升"],
+      ["3","第 3 影格：身體位於最高點"],
+      ["4","第 4 影格：身體微微下降"]
+    ],
+    crawl:[
+      ["1","第 1 影格：身體前段向前伸展"],
+      ["2","第 2 影格：身體中央收縮"],
+      ["3","第 3 影格：身體後段向前推進"],
+      ["4","第 4 影格：準備再次伸展"]
+    ],
+    custom:[
+      ["1","第 1 影格"],
+      ["2","第 2 影格"],
+      ["3","第 3 影格"],
+      ["4","第 4 影格"]
+    ]
+  };
+  actionSelect.innerHTML=presets[mode].map(([v,t])=>`<option value="${v}">${t}</option>`).join("");
+  updateActionPreview();
+}
+function toggleMovementMode(){
+  const isBiped=getBipedMode()==="yes";
+  document.getElementById("bipedPanel").style.display=isBiped?"block":"none";
+  document.getElementById("specialPanel").style.display=isBiped?"none":"block";
+}
+function toggleCustomMoveType(){
+  document.getElementById("customMoveWrap").classList.toggle("show",val("specialMoveType")==="自行定義");
+}
+function getStandardFrame(mode,n){
+  const frames={
+    run:{
+      "1":"Pose A｜大跨步：左腳大幅伸向前方，右腳大幅伸向後方；前後腳水平距離約為角色一個身高。右手向前、左手向後，身體微微前傾。",
+      "2":"Pose B｜極小跨步：左腳只稍微在前、右腳只稍微在後；兩隻腳都位於身體正下方，前後距離約一個鞋長，不能超過大跨步的 20%。雙膝自然彎曲，雙腳不可重疊。左手稍微向前、右手稍微向後。不要跳躍或縮腿。",
+      "3":"Pose C｜反向大跨步：右腳大幅伸向前方，左腳大幅伸向後方；前後腳水平距離約為角色一個身高。左手向前、右手向後，為 Pose A 的左右反向。",
+      "4":"Pose D｜反向極小跨步：右腳只稍微在前、左腳只稍微在後；兩隻腳都位於身體正下方，前後距離約一個鞋長，不能超過大跨步的 20%。雙膝自然彎曲，雙腳不可重疊。右手稍微向前、左手稍微向後。必須是 Pose B 的左右鏡像，不要跳躍或縮腿。"
+    },
+    walk:{
+      "1":"左腳向前並接觸地面，右腳在後方；右手向前、左手向後，步幅清楚但不要像奔跑。",
+      "2":"身體通過中央，右腳開始向前，左腳仍承重；雙腳距離縮小，雙手交換位置。",
+      "3":"右腳向前並接觸地面，左腳在後方；左手向前、右手向後，方向與第 1 影格相反。",
+      "4":"身體再次通過中央，左腳開始向前；雙腳距離縮小，準備銜接第 1 影格。"
+    },
+    jump:{
+      "1":"雙膝彎曲、身體下沉、雙手向後，呈現準備起跳。",
+      "2":"雙腳用力離地、身體向上伸展、雙手向前或向上。",
+      "3":"身體位於空中最高點，雙腳自然收起，姿勢清楚穩定。",
+      "4":"雙腳向下準備落地，膝蓋微彎，身體重心下降。"
+    },
+    fly:{
+      "1":"翅膀或飛行部件向上抬起，身體保持水平向右。",
+      "2":"翅膀或飛行部件向下拍動，身體略微上升。",
+      "3":"翅膀或飛行部件完全展開，呈現短暫滑翔。",
+      "4":"翅膀或飛行部件開始回到上抬位置，準備銜接第 1 影格。"
+    },
+    float:{
+      "1":"身體位於中央高度，姿勢平穩。",
+      "2":"身體微微上升，衣物或附屬部件略向下飄。",
+      "3":"身體位於最高點，漂浮感最明顯。",
+      "4":"身體微微下降，準備回到中央高度。"
+    },
+    crawl:{
+      "1":"身體前段向前伸展，後段拉長。",
+      "2":"身體中央明顯收縮，前後距離最短。",
+      "3":"身體後段向前推進，前段保持較前位置。",
+      "4":"身體再次拉開，準備銜接第 1 影格。"
+    },
+    custom:{
+      "1":"請依照自訂動畫模式設計第一個明顯動作。",
+      "2":"請依照自訂動畫模式設計第二個與第一個明顯不同的動作。",
+      "3":"請依照自訂動畫模式設計第三個與前兩個明顯不同的動作。",
+      "4":"請依照自訂動畫模式設計第四個可銜接回第一個的動作。"
+    }
+  };
+  return frames[mode][n];
+}
+function updateActionPreview(){
+  const n=val("playerAction");
+  const mode=val("animationMode");
+  document.getElementById("actionPreview").innerHTML=`<b>${animationModeLabel()}｜第 ${n} 影格：</b>${getStandardFrame(mode,n)}`;
+}
+function markPlayerDone(n){
+  const el=document.getElementById("status"+n);
+  el.classList.add("done");
+  el.textContent=`${["①","②","③","④"][n-1]} 第 ${n} 影格　✅ 已完成`;
+}
+function resetPlayerProgress(){
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById("status"+i);
+    el.classList.remove("done");
+    el.textContent=`${["①","②","③","④"][i-1]} 第 ${i} 影格`;
+  }
+}
+function getRunNegativePrompt(n){
+  const negatives={
+    "1":"No medium or small stride. Keep the feet very far apart.",
+    "2":"No medium or wide stride. Both feet must stay under the torso, only one shoe-length apart. No jumping or tucked legs.",
+    "3":"No medium or small stride. Keep the feet very far apart, right foot forward.",
+    "4":"No medium or wide stride. Mirror Pose B exactly; both feet under the torso, only one shoe-length apart. No jumping."
+  };
+  return negatives[n] || "";
+}
+function generatePlayer(){
+  if(!need("playerDesc","主角"))return;
+
+  const isBiped=getBipedMode()==="yes";
+  const mode=val("animationMode");
+  let actionNo, actionText, structureText="", negativeText="";
+
+  if(isBiped){
+    actionNo=val("playerAction");
+    actionText=getStandardFrame(mode,actionNo);
+    if(mode==="run") negativeText=getRunNegativePrompt(actionNo);
+  }else{
+    if(!need("bodyStructure","身體構造補充"))return;
+    actionNo=val("specialActionSelect");
+    const customAction=val("customAction"+actionNo);
+    if(!customAction){
+      alert(`請先填寫「自訂影格 ${actionNo}」`);
+      document.getElementById("customAction"+actionNo).focus();
+      return;
+    }
+    actionText=customAction;
+    const moveType=val("specialMoveType")==="自行定義"?(val("customMoveType")||"自行定義"):val("specialMoveType");
+    structureText=`非人類兩腳角色；移動：${moveType}；構造：${val("bodyStructure")}。依原構造設計。`;
+  }
+
+  const strideRule=mode==="run"
+    ?`跑步規則：A/C 為大跨步；B/D 為極小跨步，雙腳在身體下方、只差一個鞋長。`
+    :"";
+
+  const text=`生成單張 2D 橫向遊戲角色動畫。
+
+角色：${val("playerDesc")}
+補充：${safe(val("playerExtra"))}
+動畫：${animationModeLabel()}｜第 ${actionNo} 張
+
+姿勢：${actionText}
+${structureText}
+${negativeText?`避免：${negativeText}`:""}
+${strideRule}
+
+朝右，完整全身側面或輕微 3/4 側面；單一角色置中，不裁切。
+四張保持臉部、髮型、比例、服裝、顏色、配件、手持物、視角與大小一致，只改姿勢。
+${common(false)}
+${transparencySpec()}`;
+
+  render("playerOutput",`${animationModeLabel()}｜第 ${actionNo} 張`,text);
+  markPlayerDone(Number(actionNo));
+}
+function generateButton(){if(!need('buttonText','按鈕文字'))return;render('buttonOutput',`按鈕：${val('buttonText')}`,`生成單一遊戲按鈕。
+
+文字：${val('buttonText')}
+補充：${safe(val('buttonExtra'))}
+文字清楚、輪廓明確，不要人物或場景。
+${common(true)}`)}
+function generateItem(t){
+  const id=t==='projectile'?'projectile':'collectible';
+  const name=t==='projectile'?'投擲物':'收集道具';
+  if(!need(id,name))return;
+  const rule=t==='projectile'?'朝右飛行，只出現一個物件。':'清楚、有吸引力，只出現一個物件。';
+  render(id+'Output',`${name}：${val(id)}`,`生成橫向遊戲${name}。
+
+內容：${val(id)}
+${rule}
+${common(true)}`)
+}
+function generateObstacle(){
+  if(!need('obstacleDesc','障礙物內容補充'))return;
+  const flying=val('obstacleType')==='空中飛行障礙物';
+  render('obstacleOutput',`${val('obstacleType')}：${val('obstacleDesc')}`,`生成單一橫向遊戲障礙物。
+
+類型：${val('obstacleType')}
+內容：${val('obstacleDesc')}
+${flying?'清楚呈現飛行姿勢。':'底部穩定，適合跳躍閃避。'}
+不要主角、地板、文字或其他物件。
+${common(true)}`)
+}
+function generateBackground(){
+  if(!need('bgType','背景類型'))return;
+  render('backgroundOutput',`${val('bgNumber')}：${val('bgType')}`,`生成 16:9 橫向跑酷背景。
+
+編號：${val('bgNumber')}
+場景：${val('bgType')}
+氣氛：${safe(val('bgMood'))}
+主題：${val('theme')||'學生自行設定'}
+風格：${getStyle()}
+
+側視角，保留清楚跑酷路線與活動空間；包含前、中、遠景。不要角色、障礙物、道具、按鈕、文字或介面。左右邊緣自然銜接。背景不去背。`)
+}
+function generatePlatform(){
+  if(!need('platformDesc','地板'))return;
+  render('platformOutput',`地板：${val('platformDesc')}`,`生成橫向遊戲地板／平台。
+
+設定：${val('platformDesc')}
+正側面長條，可左右無縫重複，上方可站立。
+不要人物、道具、障礙物、文字或場景。
+${common(true)}`)
+}
+function generateEffect(t){
+  const id=t==='hit'?'hitEffect':'collectEffect';
+  const output=t==='hit'?'hitOutput':'collectOutput';
+  const name=t==='hit'?'碰撞特效':'取得道具特效';
+  if(!need(id,name))return;
+  render(output,`${name}：${val(id)}`,`生成單一${name}。
+
+內容：${val(id)}
+${t==='hit'?'清楚撞擊感，不要血液或傷口。':'清楚閃光、星光或能量感。'}
+容易疊加，不要人物、物件、地板、文字或場景。
+${common(true)}`)
+}
+toggleCustomStyle();updateAnimationMode();toggleMovementMode();toggleCustomMoveType();
+</script>
+</body>
+</html>

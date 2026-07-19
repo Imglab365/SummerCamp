@@ -3,32 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jack 的數位秘密基地</title>
+    <title>Bruno 史派克狂樂粉絲</title>
     <style>
-        /* 全域樣式：營隊活潑暖橙配色 */
+        /* ================================================================= */
+        /* 🎨 【魔法變色罐】學生只要修改這 4 個顏色即可！ */
+        /* ================================================================= */
+        :root {
+            --main-color: #99ff00;      /* 主色調：按鈕、標題邊框、大頭照外框 */
+            --accent-color: #3fc11b;    /* 強調色：滑鼠經過按鈕、文字大標題 */
+            --bg-light: #f1ffed;        /* 背景淺色：網頁頂部、卡片懸停背景 */
+            --bg-dark: #c6feaa;         /* 背景深色：網頁底部、卡片邊框 */
+        }
+
+        /* 全域樣式 */
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(to bottom, #fff7ed 0%, #ffedd5 50%, #fed7aa 100%);
+            background: linear-gradient(to bottom, var(--bg-light) 0%, #ffedd5 50%, var(--bg-dark) 100%);
             color: #2b2d42;
             font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
             min-height: 100vh;
         }
 
-        /* 頂部導覽列：利用偽元素做出照片背景與透明度控制 */
+        /* 頂部導覽列 */
         header {
-            background-color: #ff971d; /* 這是原本的橘底 */
+            background-color: var(--main-color);
             padding: 40px 20px;
             text-align: center;
-            border-bottom: 4px solid #ea580c;
-            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.15);
-            
-            /* 【核心關鍵】開啟相對定位，這樣背景照片才能乖乖貼在裡面 */
+            border-bottom: 4px solid var(--accent-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             position: relative; 
-            overflow: hidden; /* 防止照片超出範圍 */
+            overflow: hidden;
         }
 
-        /* 這裡就是用來控制背景照片的程式碼 */
         header::before {
             content: "";
             position: absolute;
@@ -36,28 +43,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            
-            /* 1. 這裡改成你在 github 上傳的照片檔名（例如：bg.png） */
             background-image: url('橫幅.png'); 
-            
-            /* 2. 讓照片置中、並且自動鋪滿整個橘色區塊 */
             background-position: center;
             background-size: cover;
             background-repeat: no-repeat;
-            
-            /* 3. 🔥 透明度控制：0.1 代表 10% 的亮度。你可以自由調整 0.05 ~ 0.2 之間，越小照片越淡 */
             opacity: 0.25; 
-            
-            /* 4. 這裡可以調整跟原本橘底的融合模式，讓照片帶有橘色科技感 */
             mix-blend-mode: overlay; 
-            
-            z-index: 1; /* 讓照片待在背景層 */
+            z-index: 1;
         }
 
-        /* 確保原本的文字與火箭，能浮在照片之上，不會被照片遮住 */
         header h1, header .subtitle {
             position: relative;
-            z-index: 2; /* 數字比背景大，就會留在最上層 */
+            z-index: 2;
         }
 
         header h1 {
@@ -67,7 +64,7 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
         }
         .subtitle {
-            color: #fff7ed;
+            color: var(--bg-light);
             margin-top: 10px;
             font-size: 1.15rem;
             font-weight: bold;
@@ -83,14 +80,14 @@
         /* 1. 個人簡介區塊（含大頭照） */
         .profile-section {
             background-color: #ffffff;
-            border: 2px solid #fed7aa;
+            border: 2px solid var(--bg-dark);
             border-radius: 24px;
             padding: 35px;
             margin-bottom: 50px;
             display: flex;
             align-items: center;
             gap: 35px;
-            box-shadow: 0 8px 24px rgba(234, 88, 12, 0.06);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
         }
         
         .avatar-wrapper {
@@ -98,9 +95,9 @@
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            border: 4px solid #ff971d;
+            border: 4px solid var(--main-color);
             overflow: hidden;
-            background-color: #fff7ed;
+            background-color: var(--bg-light);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         .avatar-wrapper img {
@@ -112,7 +109,7 @@
             flex-grow: 1;
         }
         .profile-info h2 {
-            color: #ea580c;
+            color: var(--accent-color);
             margin: 0 0 12px 0;
             font-size: 1.8rem;
         }
@@ -125,8 +122,8 @@
 
         /* 分區大標題 */
         .section-title {
-            color: #ea580c;
-            border-left: 6px solid #ff971d;
+            color: var(--accent-color);
+            border-left: 6px solid var(--main-color);
             padding-left: 15px;
             margin: 50px 0 25px 0;
             font-size: 1.8rem;
@@ -152,14 +149,14 @@
         }
         .info-card:hover {
             transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 15px 30px rgba(234, 88, 12, 0.15);
-            border-color: #ff971d;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--main-color);
         }
         .info-card-img {
             width: 100%;
             height: 200px;
             object-fit: cover;
-            background-color: #fff7ed;
+            background-color: var(--bg-light);
         }
         .info-card-content {
             padding: 24px;
@@ -167,7 +164,7 @@
         }
         .info-card-content h3 {
             margin: 0 0 12px 0;
-            color: #ff971d;
+            color: var(--main-color);
             font-size: 1.3rem;
         }
         .info-card-content p {
@@ -196,15 +193,15 @@
         }
         .project-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(234, 88, 12, 0.1);
-            border-color: #ff971d;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: var(--main-color);
         }
         .project-img {
             width: 280px;
             height: 190px;
             object-fit: cover;
             flex-shrink: 0;
-            background-color: #fff7ed;
+            background-color: var(--bg-light);
         }
         .project-info {
             padding: 30px;
@@ -212,7 +209,7 @@
         }
         .project-info h3 {
             margin: 0 0 10px 0;
-            color: #ea580c;
+            color: var(--accent-color);
             font-size: 1.4rem;
         }
         .project-info p {
@@ -224,21 +221,21 @@
         
         .btn {
             display: inline-block;
-            background-color: #ff971d;
+            background-color: var(--main-color);
             color: #ffffff;
             text-decoration: none;
             padding: 12px 24px;
             border-radius: 10px;
             font-weight: bold;
             transition: background-color 0.2s, transform 0.1s;
-            box-shadow: 0 4px 10px rgba(255, 151, 29, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
         .btn:hover {
-            background-color: #ea580c;
+            background-color: var(--accent-color);
             transform: scale(1.02);
         }
 
-        /* 【新】在 Footer 之上的預留空白區塊（約滾動一次的大小） */
+        /* 預留空白區塊 */
         .scroll-spacer {
             height: 80vh; 
             pointer-events: none; 
@@ -248,11 +245,11 @@
         footer {
             text-align: center;
             padding: 40px 0;
-            color: #7c2d12;
+            color: #4b5563;
             font-size: 0.95rem;
-            border-top: 2px solid #fed7aa;
+            border-top: 2px solid var(--bg-dark);
             font-weight: 500;
-            background-color: rgba(254, 215, 170, 0.3); /* 稍微帶點淡淡底色讓底部更有安全感 */
+            background-color: rgba(255, 255, 255, 0.4);
         }
 
         /* RWD 響應式 */
@@ -273,42 +270,30 @@
                 padding: 20px;
             }
         }
-        /* ================= 🤖 懸浮機器人 CSS 設定 ================= */
+
+        /* 懸浮機器人 */
         .floating-robot {
-            position: fixed;   /* 固定在螢幕上，不管網頁怎麼滾動都不會移走 */
-            bottom: 40px;      /* 距離螢幕底部 40 像素 */
-            right: 40px;       /* 距離螢幕右邊 40 像素 */
-            width: 100px;      /* 機器人的寬度，可以自由調整大小 */
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 100px;
             height: auto;
-            z-index: 999;      /* 數字極大，確保它永遠浮在最上層，不會被卡片遮住 */
-            
-            /* 套用上下飄浮的動畫：每次動 3 秒、無限循環、速度平滑（繞圈感） */
+            z-index: 999;
             animation: hoverEffect 3s ease-in-out infinite; 
-            
-            /* 滑鼠移上去時的小彩蛋：指著它會變成點擊的手勢，並帶有平滑放大效果 */
             cursor: pointer;
             transition: transform 0.3s ease;
         }
 
-        /* 當滑鼠移到機器人上面時，輕微放大並旋轉，增加互動感 */
         .floating-robot:hover {
             transform: scale(1.1) rotate(5deg);
         }
 
-        /* 這裡就是控制上下漂浮的核心：0% 在原位，50% 往上漂移 15 像素，100% 回到原位 */
         @keyframes hoverEffect {
-            0% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-15px); /* 往上漂浮 */
-            }
-            100% {
-                transform: translateY(0px);
-            }
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
 
-        /* 手機版優化：如果用手機看，機器人縮小一點，才不會擋到字 */
         @media (max-width: 600px) {
             .floating-robot {
                 bottom: 20px;
@@ -316,6 +301,7 @@
                 width: 70px;
             }
         }
+
         /* 推薦標籤樣式 */
         .favorite-badge {
             background-color: #ef4444;
@@ -329,9 +315,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* 學習歷程按鈕：使用不同的顏色區分 */
+        /* 學習歷程按鈕 */
         .btn-secondary {
-            background-color: #fbbf24; /* 亮黃色 */
+            background-color: #fbbf24;
             color: #7c2d12;
             margin-left: 10px;
         }
@@ -341,15 +327,15 @@
 
         /* 特別強調最喜歡的作品卡片 */
         .favorite-card {
-            border: 3px solid #ff971d !important;
-            background-color: #fffaf5 !important;
+            border: 3px solid var(--main-color) !important;
+            background-color: var(--bg-light) !important;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🚀 Jack 的數位秘密基地</h1>
+        <h1>🚀 Bruno 史派克狂樂粉絲</h1>
         <div class="subtitle">2026 暑期 AI x Scratch 遊戲工程營成果展示</div>
     </header>
 
@@ -360,8 +346,8 @@
                 <img src="大頭照.png" alt="Jack 的大頭照">
             </div>
             <div class="profile-info">
-                <h2>👋 哈囉！我是 Jack</h2>
-                <p>歡迎來到我的個人網站！我今年國小升五年級。我很喜歡跟電腦一起玩，這幾天我學會了用程式邏輯控制 Scratch 遊戲，還學會了怎麼跟 AI 助手 Gemini 下指令。這個網頁是我自己看著程式碼、用 AI 慢慢反覆測試修改出來的喔！</p>
+                <h2>👋 哈囉！我是 Bruno 史派克狂樂粉絲<h2>
+                <p>大家好，我叫 Bruno，是史派克狂熱粉絲！我喜歡玩《荒野亂鬥》和打桌球，也很喜歡希臘文與希臘神話。最愛體育課、電腦課，還超愛吃芒果！</p>
             </div>
         </section>
 
@@ -370,26 +356,26 @@
         <div class="about-me-grid">
             
             <div class="info-card">
-                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500" alt="最喜歡的事" class="info-card-img">
+                <img src="關於我1.png" alt="最喜歡的事" class="info-card-img">
                 <div class="info-card-content">
                     <h3>🎮 我最喜歡的事</h3>
-                    <p>我最喜歡在放學後打電腦遊戲和研究積木！自從上了 Scratch 課之後，我發現原來自己動手做遊戲，比單純玩別人的遊戲還要更有成就感！</p>
+                    <p>我是史派克的忠實粉絲，最愛玩極限淘汰賽！我常和鄰居戰友並肩作戰，默契十足，就算被強敵擊敗，也會互相幫對方復仇，一起贏得勝利！</p>
                 </div>
             </div>
 
             <div class="info-card">
-                <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?w=500" alt="最喜歡的運動" class="info-card-img">
+                <img src="關於我2.png" alt="最喜歡的運動" class="info-card-img">
                 <div class="info-card-content">
                     <h3>🏀 我最喜歡的運動</h3>
-                    <p>除了坐在電腦前，我也聯很喜歡去球場打籃球！運球和投籃都需要不斷練習，就像寫程式要不斷 Debug 一樣。希望我的投籃命中率能跟我的程式碼一樣準！</p>
+                    <p>我從一年級開始喜歡桌球，因為覺得又快又刺激，還考上桌球校隊！參加新生國小友誼賽讓我超有成就感，我也常用左右調動戰術，讓對手忙得追不上球。</p>
                 </div>
             </div>
 
             <div class="info-card">
-                <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=500" alt="AI拍檔" class="info-card-img">
+                <img src="關於我3.png" alt="AI拍檔" class="info-card-img">
                 <div class="info-card-content">
-                    <h3>🤖 我的超級 AI 拍檔</h3>
-                    <p>在營隊裡，Gemini 是我的最強助教！當網頁跑版或圖片出不來的時候，我會把程式碼貼給它，它就會溫柔地告訴我哪裡寫錯了。學會和 AI 溝通真的超酷的！</p>
+                    <h3>🤖 我的最愛的故事</h3>
+                    <p>我最喜歡希臘神話中的荷米斯，他是聰明又機智的神祇。我最喜歡他和兒子的冒險故事，尤其是兒子勇敢偷走欺負他的國王牛群，展現智慧與勇氣，讓我覺得超酷！</p>
                 </div>
             </div>
 
@@ -400,31 +386,31 @@
         <div class="projects-container">
             
             <div class="project-card">
-                <img src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=500" alt="遊戲畫面一" class="project-img">
+                <img src="遊戲封面1.png" alt="遊戲畫面一" class="project-img">
                 <div class="project-info">
-                    <h3>🚀 太空星戰大冒險</h3>
-                    <p>這是我這次營隊引以為傲的魔王關卡作品！裡面設計了分數變數、隨機隕石，還有超酷的音效。快點擊下方按鈕，進去我的 Scratch 專頁一起挑戰高分吧！</p>
-                    <a href="https://scratch.mit.edu" target="_blank" class="btn">點我開始玩遊戲一</a>
+                    <h3>🚀 大便人</h3>
+                    <p>我選了一隻愛吃大便的兜蟲當主角，因為實在太搞笑了！快來挑戰，看看牠能不能一路闖關成功！</p>
+                    <a href="https://scratch.mit.edu/projects/1363137351/fullscreen/" target="_blank" class="btn">點我開始玩遊戲一</a>
                 </div>
             </div>
 
             <div class="project-card">
-                <img src="https://images.unsplash.com/photo-1551103782-8ab07afd45c1?w=500" alt="遊戲畫面二" class="project-img">
+                <img src="遊戲封面2.png" alt="遊戲畫面二" class="project-img">
                 <div class="project-info">
-                    <h3>迷宮極速逃脫</h3>
-                    <p>這是我的第二個 Scratch 專案！我寫了碰撞偵測的邏輯，如果踩到牆壁就會退回起點，最後還做了一個計時器，看誰能最快逃出迷宮！</p>
-                    <a href="https://scratch.mit.edu" target="_blank" class="btn">點我開始玩遊戲二</a>
+                    <h3>小屁孩鬼</h3>
+                    <p>我選了一隻鬼當主角，雖然看起來有點可怕，但真正可怕的是遊戲難度！你有信心一路闖關成功嗎？快來挑戰，看看你能不能順利通關吧！</p>
+                    <a href="https://scratch.mit.edu/projects/1363137527/fullscreen/" target="_blank" class="btn">點我開始玩遊戲二</a>
                 </div>
             </div>
 
            <div class="project-card favorite-card">
-                <img src="貓鼠.png" alt="貓抓老鼠遊戲畫面" class="project-img">
+                <img src="遊戲封面3.png" alt="貓抓老鼠遊戲畫面" class="project-img">
                 <div class="project-info">
                     <span class="favorite-badge">⭐ 我最喜歡的遊戲</span>
-                    <h3>🐱 貓鼠大戰：終極捕捉計畫</h3>
-                    <p>這是我最自豪的作品！這是一個像跑酷一樣的追逐遊戲，老鼠大王擁有穿越障礙的神奇分身，但我控制的貓咪必須在路徑中精準遊走。可以記錄最高分數，快來挑戰吧！</p>
+                    <h3>希臘羅馬神話</h3>
+                    <p>我選擇希臘羅馬神話當主題，因為我非常喜歡神話故事，覺得每位神祇都很酷！在遊戲中，我將扮演速度與旅行之神荷米斯，一路奔跑、閃避各種怪物與障礙，挑戰更高分數，展開精彩的神話冒險！</p>
                     
-                    <a href="https://scratch.mit.edu" target="_blank" class="btn">點我開始玩</a>
+                    <a href="https://scratch.mit.edu/projects/1363137582/fullscreen/" target="_blank" class="btn">點我開始玩</a>
                     
                     <a href="project-detail.html" class="btn btn-secondary">查看學習歷程</a>
                 </div>
@@ -439,7 +425,7 @@
     <footer>
         <p>© 2026 Imagination Lab 想像力實驗室. Made with 💻 and AI.</p>
     </footer>
-    <img src="https://images.unsplash.com/photo-1546776310-eef45dd6d63c?w=200" alt="AI 機器人助手" class="floating-robot" onclick="alert('哈囉！我是 Jack 的 AI 助手 Gemini，一起來寫程式吧！')">
+    <img src="吉祥物.png" alt="AI 機器人助手" class="floating-robot" onclick="alert('哈囉！我是 Jack 的 AI 助手 Gemini，一起來寫程式吧！')">
 
 </body>
 </html>

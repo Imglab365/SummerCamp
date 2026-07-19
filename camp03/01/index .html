@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adam 的數位工作室
+
+    </title>
+    <style>
+        /* ================================================================= */
+        /* 🎨 【魔法變色罐】學生只要修改這 4 個顏色即可！ */
+        /* ================================================================= */
+        :root {
+            --main-color: #1dfff4;      /* 主色調：按鈕、標題邊框、大頭照外框 */
+            --accent-color: #0cea5d;    /* 強調色：滑鼠經過按鈕、文字大標題 */
+            --bg-light: #0e34ef;        /* 背景淺色：網頁頂部、卡片懸停背景 */
+            --bg-dark: #aaf4fe;         /* 背景深色：網頁底部、卡片邊框 */
+        }
+
+        /* 全域樣式：營隊活潑暖橙配色 */
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, var(--bg-light) 0%, #ffedd5 50%, var(--bg-dark) 100%);
+            color: #2b2d42;
+            font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* 頂部導覽列：利用偽元素做出照片背景與透明度控制 */
+        header {
+            background-color: var(--main-color);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--accent-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('橫幅.png'); 
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            opacity: 0.25; 
+            mix-blend-mode: overlay; 
+            z-index: 1; 
+        }
+
+        header h1, header .subtitle {
+            position: relative;
+            z-index: 2; 
+        }
+
+        header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 2.6rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        .subtitle {
+            color: var(--bg-light);
+            margin-top: 10px;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+
+        /* 主體區塊 */
+        .container {
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 1. 個人簡介區塊（含大頭照） */
+        .profile-section {
+            background-color: #ffffff;
+            border: 2px solid var(--bg-dark);
+            border-radius: 24px;
+            padding: 35px;
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 35px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+        
+        .avatar-wrapper {
+            flex-shrink: 0;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--main-color);
+            overflow: hidden;
+            background-color: var(--bg-light);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .avatar-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-info {
+            flex-grow: 1;
+        }
+        .profile-info h2 {
+            color: var(--accent-color);
+            margin: 0 0 12px 0;
+            font-size: 1.8rem;
+        }
+        .profile-info p {
+            color: #4b5563;
+            line-height: 1.7;
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        /* 分區大標題 */
+        .section-title {
+            color: var(--accent-color);
+            border-left: 6px solid var(--main-color);
+            padding-left: 15px;
+            margin: 50px 0 25px 0;
+            font-size: 1.8rem;
+        }
+
+        /* 2. 生活與興趣網格 */
+        .about-me-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .info-card {
+            background-color: #ffffff;
+            border: 2px solid #ffedd5;
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--main-color);
+        }
+        .info-card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: var(--bg-light);
+        }
+        .info-card-content {
+            padding: 24px;
+            flex-grow: 1;
+        }
+        .info-card-content h3 {
+            margin: 0 0 12px 0;
+            color: var(--main-color);
+            font-size: 1.3rem;
+        }
+        .info-card-content p {
+            color: #4b5563;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* 3. 精選作品卡片區域 */
+        .projects-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .project-card {
+            background-color: #ffffff;
+            border: 2px solid #ffedd5;
+            border-radius: 18px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: var(--main-color);
+        }
+        .project-img {
+            width: 280px;
+            height: 190px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background-color: var(--bg-light);
+        }
+        .project-info {
+            padding: 30px;
+            flex-grow: 1;
+        }
+        .project-info h3 {
+            margin: 0 0 10px 0;
+            color: var(--accent-color);
+            font-size: 1.4rem;
+        }
+        .project-info p {
+            color: #4b5563;
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--main-color);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        .btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.02);
+        }
+
+        /* 預留空白區塊 */
+        .scroll-spacer {
+            height: 80vh; 
+            pointer-events: none; 
+        }
+
+        /* 頁尾 */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #4b5563;
+            font-size: 0.95rem;
+            border-top: 2px solid var(--bg-dark);
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.4); 
+        }
+
+        /* RWD 響應式 */
+        @media (max-width: 768px) {
+            .profile-section {
+                flex-direction: column;
+                text-align: center;
+                padding: 25px;
+            }
+            .project-card {
+                flex-direction: column;
+            }
+            .project-img {
+                width: 100%;
+                height: 200px;
+            }
+            .project-info {
+                padding: 20px;
+            }
+        }
+
+        /* 懸浮機器人 */
+        .floating-robot {
+            position: fixed;   
+            bottom: 40px;      
+            right: 40px;       
+            width: 100px;      
+            height: auto;
+            z-index: 999;      
+            animation: hoverEffect 3s ease-in-out infinite; 
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .floating-robot:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        @keyframes hoverEffect {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @media (max-width: 600px) {
+            .floating-robot {
+                bottom: 20px;
+                right: 20px;
+                width: 70px;
+            }
+        }
+
+        /* 推薦標籤樣式 */
+        .favorite-badge {
+            background-color: #ef4444;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 學習歷程按鈕：使用不同的顏色區分 */
+        .btn-secondary {
+            background-color: #fbbf24; 
+            color: #7c2d12;
+            margin-left: 10px;
+        }
+        .btn-secondary:hover {
+            background-color: #f59e0b;
+        }
+
+        /* 特別強調最喜歡的作品卡片 */
+        .favorite-card {
+            border: 3px solid var(--main-color) !important;
+            background-color: var(--bg-light) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🚀 Adam 的數位工作室</h1>
+        <div class="subtitle">2026 暑期 AI x Scratch 遊戲工程營成果展示</div>
+    </header>
+
+    <div class="container">
+        
+        <section class="profile-section">
+            <div class="avatar-wrapper">
+                <img src="大頭照.png" alt="Adam 的大頭照">
+            </div>
+            <div class="profile-info">
+                <h2>👋 哈囉！我是 Adam</h2>
+                <p>大家好，我叫 Adam。我平常最喜歡打電動，其中最愛玩的遊戲就是《荒野亂鬥》，常常和朋友一起組隊挑戰各種模式。我對程式設計也很有興趣，希望透過這次 AI 營隊學到更多程式知識，培養自己的創作能力，完成有趣又厲害的作品！
+</p>
+            </div>
+        </section>
+
+        <h2 class="section-title">✨ 關於我的小祕密</h2>
+        
+        <div class="about-me-grid">
+            
+            <div class="info-card">
+                <img src="關於我1.png" alt="最喜歡的事" class="info-card-img">
+                <div class="info-card-content">
+                    <h3>我最喜歡的電動</h3>
+                    <p>我最喜歡的電動遊戲是荒野亂鬥，平常會跟弟弟一起輪流玩，討論裡面的遊戲角色，我發現我的策略性也也被訓練了。</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="關於我2.png" alt="最喜歡的運動" class="info-card-img">
+                <div class="info-card-content">
+                    <h3>我最喜歡的運動</h3>
+                    <p>我喜歡的運動是游泳，因為游泳不用曬太陽，也比較不會累，我是在學校社團學會的，而且我們還有游泳課，爸爸還會帶我們去師大附中游泳</p>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <img src="關於我3.png" alt="AI拍檔" class="info-card-img">
+                <div class="info-card-content">
+                    <h3>我的興趣</h3>
+                    <p>我的興趣是跟同學一起畫漫畫，我喜歡畫我的漫畫畫角色，平常都會在學校一起畫，我們還會創造角色圖鑑</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 class="section-title">👾 我做的遊戲作品！！！</h2>
+        
+        <div class="projects-container">
+            
+            <div class="project-card">
+                <img src="遊戲封面1.png" alt="遊戲畫面一" class="project-img">
+                <div class="project-info">
+                    <h3>科精殺幽靈</h3>
+                    <p>一個會讓玩家反彈的牆，我最喜歡的一關是（綜合藥水）</p>
+                    <a href="https://scratch.mit.edu/projects/1363135169/" target="_blank" class="btn">點我開始玩遊戲一</a>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <img src="遊戲封面2.png" alt="遊戲畫面二" class="project-img">
+                <div class="project-info">
+                    <h3>科精避電</h3>
+                    <p>這是我的第二個scratch遊戲，輸了會被電擊，要小心玩</p>
+                    <a href="https://scratch.mit.edu/projects/1363135273/" target="_blank" class="btn">點我開始玩遊戲二</a>
+                </div>
+            </div>
+
+           <div class="project-card favorite-card">
+                <img src="遊戲封面3.png" alt="貓抓老鼠遊戲畫面" class="project-img">
+                <div class="project-info">
+                    <span class="favorite-badge">⭐ 我最喜歡的遊戲</span>
+                    <h3>機器人跑酷</h3>
+                    <p>一個機器人要閃躲很欠揍的罐頭和水晶，還要射出子彈攻擊最討厭的細菌人</p>
+                    
+                    <a href="https://scratch.mit.edu/projects/1363135382/" target="_blank" class="btn">點我開始玩</a>
+                    
+                    <a href="project-detail.html" class="btn btn-secondary">查看學習歷程</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="scroll-spacer"></div>
+
+    </div>
+
+    <footer>
+        <p>© 2026 Imagination Lab 想像力實驗室. Made with 💻 and AI.</p>
+    </footer>
+    <img src="吉祥物.png" alt="AI 機器人助手" class="floating-robot" onclick="alert('你好我是Adam的助手')">
+
+</body>
+</html>

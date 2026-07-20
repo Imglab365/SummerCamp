@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小遊戲樂園</title>
+    <style>
+        /* 基礎設定 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* 標題樣式 */
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: #d1d8e0;
+        }
+
+        /* 按鈕容器 (使用 Grid 排版) */
+        .game-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        /* 按鈕樣式 */
+        .game-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            background-color: #ff4757;
+            border-radius: 15px;
+            box-shadow: 0 8px 0 #ff1e33, 0 15px 20px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+            position: relative;
+            text-align: center;
+        }
+
+        /* 不同按鈕的顏色 */
+        .game-btn:nth-child(1) { background-color: #ff4757; box-shadow: 0 8px 0 #e02435, 0 15px 20px rgba(0,0,0,0.3); }
+        .game-btn:nth-child(2) { background-color: #2ed573; box-shadow: 0 8px 0 #1ba353, 0 15px 20px rgba(0,0,0,0.3); }
+        .game-btn:nth-child(3) { background-color: #ffa502; box-shadow: 0 8px 0 #cc8400, 0 15px 20px rgba(0,0,0,0.3); }
+        .game-btn:nth-child(4) { background-color: #1e90ff; box-shadow: 0 8px 0 #0c75d6, 0 15px 20px rgba(0,0,0,0.3); }
+        .game-btn:nth-child(5) { background-color: #9b59b6; box-shadow: 0 8px 0 #7a4291, 0 15px 20px rgba(0,0,0,0.3); }
+
+        /* 按鈕懸停效果 */
+        .game-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* 按鈕點擊(按下)效果 */
+        .game-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 transparent, 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        /* 圖示 (使用簡單的 Emoji 代替) */
+        .icon {
+            margin-right: 15px;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎮 小遊戲樂園 🎮</h1>
+    <p>請選擇你想要挑戰的遊戲！</p>
+
+    <div class="game-menu">
+        <a href="game1.html" class="game-btn">
+            <span class="icon">🐍</span> 貪吃蛇
+        </a>
+        <a href="game2.html" class="game-btn">
+            <span class="icon">🧱</span> 打磚塊
+        </a>
+        <a href="game3.html" class="game-btn">
+            <span class="icon">🃏</span> 記憶翻牌
+        </a>
+        <a href="game4.html" class="game-btn">
+            <span class="icon">🚀</span> 太空射擊
+        </a>
+        <a href="game5.html" class="game-btn">
+            <span class="icon">⭕</span> 圈圈叉叉
+        </a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>霓虹幻境俄羅斯方塊 - 想像力實驗室</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-color: #1e2235;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+            padding: 15px;
+        }
+
+        /* 頂部「想像力實驗室」專屬 Logo 按鈕 */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--panel-color);
+            padding: 10px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--text-color);
+            border: 2px solid #3b82f6;
+            margin-bottom: 20px;
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .logo-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: #2d3245;
+        }
+
+        /* 遊戲視窗主容器：升級尺寸 */
+        .game-container {
+            display: flex;
+            background: var(--panel-color);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6), 0 0 40px rgba(59, 130, 246, 0.15);
+            border: 4px solid var(--border-color);
+            gap: 25px;
+            position: relative;
+            max-width: 100%;
+        }
+
+        @media (max-width: 650px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding: 15px;
+            }
+        }
+
+        /* 棋盤主體外框 */
+        .board-wrapper {
+            position: relative;
+            background-color: #04060e;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 3px solid #1e293b;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* 側邊控制資訊面板 */
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 20px;
+            width: 180px;
+        }
+
+        @media (max-width: 650px) {
+            .side-panel {
+                flex-direction: row;
+                width: 340px;
+                justify-content: space-between;
+                gap: 10px;
+            }
+        }
+
+        .info-group {
+            background: rgba(4, 6, 14, 0.7);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+        }
+
+        @media (max-width: 650px) {
+            .info-group {
+                flex: 1;
+            }
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 1.7rem;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* 下一個方塊預覽畫布 */
+        .next-canvas-style {
+            background: #04060e;
+            border-radius: 12px;
+            margin-top: 8px;
+            border: 2px solid #1e293b;
+            display: inline-block;
+        }
+
+        /* 開始/結束大覆蓋層 */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 15, 25, 0.94);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            z-index: 10;
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .overlay-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+            text-align: center;
+        }
+
+        .overlay-subtitle {
+            font-size: 1rem;
+            color: #94a3b8;
+            text-align: center;
+            max-width: 85%;
+            line-height: 1.7;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(168, 85, 247, 0.6);
+        }
+
+        /* 底部控制指南 */
+        .footer-info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.7;
+            max-width: 600px;
+        }
+
+        .highlight {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頂部「想像力實驗室」專屬 Logo 按鈕 -->
+    <a href="#" class="logo-container" onclick="event.preventDefault();">
+        <span class="logo-icon">✨</span>
+        <span class="logo-text">想像力實驗室</span>
+    </a>
+
+    <!-- 遊戲主體視窗 -->
+    <div class="game-container" id="game-zone">
+        
+        <!-- 大棋盤主畫布 -->
+        <div class="board-wrapper">
+            <canvas id="tetrisCanvas"></canvas>
+        </div>
+
+        <!-- 側邊資訊欄 -->
+        <div class="side-panel">
+            <div class="info-group">
+                <div class="info-label">Score</div>
+                <div class="info-value" id="score-val" style="color: #a855f7;">00000</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Level</div>
+                <div class="info-value" id="level-val" style="color: #3b82f6;">1</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Next</div>
+                <canvas id="nextCanvas" class="next-canvas-style" width="120" height="120"></canvas>
+            </div>
+        </div>
+
+        <!-- 浮層遮罩蓋板 -->
+        <div class="overlay" id="overlay">
+            <h2 class="overlay-title" id="overlay-title">霓虹幻境俄羅斯方塊</h2>
+            <p class="overlay-subtitle" id="overlay-desc">
+                高度放大優化版！新增全畫面滑鼠與觸控快捷操作：<br>
+                點擊格子換列、點擊方塊旋轉、點擊最底部一鍵順降消行！
+            </p>
+            <button class="play-btn" id="start-btn" onclick="startGame(event)">開始挑戰</button>
+        </div>
+
+    </div>
+
+    <!-- 底部控制提示 -->
+    <div class="footer-info">
+        <span class="highlight">鍵盤操作</span>：按 ← / → 移動，↑ 旋轉，↓ 加速，空白鍵瞬降。<br>
+        <span class="highlight">滑鼠/觸控操作</span>：<br>
+        1. <span class="highlight">點擊任何格子</span> ➡️ 積木自動平移至該列。<br>
+        2. <span class="highlight">點擊正在掉落的積木本身</span> ➡️ 旋轉積木。<br>
+        3. <span class="highlight">點擊棋盤最底部（最後兩排）</span> ➡️ 積木直接瞬降到底。
+    </div>
+
+    <script>
+        const canvas = document.getElementById('tetrisCanvas');
+        const ctx = canvas.getContext('2d');
+        const nextCanvas = document.getElementById('nextCanvas');
+        const nextCtx = nextCanvas.getContext('2d');
+        const overlay = document.getElementById('overlay');
+        const overlayTitle = document.getElementById('overlay-title');
+        const scoreVal = document.getElementById('score-val');
+        const levelVal = document.getElementById('level-val');
+        const startBtn = document.getElementById('start-btn');
+
+        // 棋盤尺寸規格與大網格尺寸調校 (BLOCK_SIZE 從 26px 升級至 34px)
+        const COLS = 10;
+        const ROWS = 20;
+        const BLOCK_SIZE = 34; 
+
+        canvas.width = COLS * BLOCK_SIZE;
+        canvas.height = ROWS * BLOCK_SIZE;
+
+        // 數據模型
+        let board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+        let isPlaying = false;
+        let score = 0;
+        let level = 1;
+        let dropCounter = 0;
+        let dropInterval = 1000; 
+        let lastTime = 0;
+        let particles = [];
+
+        // 霓虹配色
+        const COLORS = [
+            null,
+            '#00f0f0', // I
+            '#0000f0', // J
+            '#f0a000', // L
+            '#f0f000', // O
+            '#00f000', // S
+            '#a000f0', // T
+            '#f00000'  // Z
+        ];
+
+        const SHAPES = [
+            [],
+            [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], 
+            [[1,0,0],[1,1,1],[0,0,0]], 
+            [[0,0,1],[1,1,1],[0,0,0]], 
+            [[1,1],[1,1]], 
+            [[0,1,1],[1,1,0],[0,0,0]], 
+            [[0,1,0],[1,1,1],[0,0,0]], 
+            [[1,1,0],[0,1,1],[0,0,0]]  
+        ];
+
+        let playerPiece = null;
+        let nextPiece = null;
+
+        // Retro 音效
+        function playSound(type) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                if (type === 'move') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(240, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.04);
+                } else if (type === 'clear') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // G5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'gameover') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+                }
+            } catch (e) {}
+        }
+
+        // 脫落粒子系統
+        function createRowParticles(rowNum, colorIndex) {
+            const color = COLORS[colorIndex] || '#3b82f6';
+            for (let c = 0; c < COLS; c++) {
+                const numSubParticles = 4; // 加密粒子束
+                for (let p = 0; p < numSubParticles; p++) {
+                    particles.push({
+                        x: c * BLOCK_SIZE + Math.random() * BLOCK_SIZE,
+                        y: rowNum * BLOCK_SIZE + Math.random() * BLOCK_SIZE,
+                        vx: (Math.random() - 0.5) * 2.5, 
+                        vy: Math.random() * 4 + 2,    // 向下墜落初速度
+                        size: Math.random() * 5 + 3,  
+                        gravity: 0.22,                 
+                        color: color,
+                        alpha: 1,
+                        life: 35 + Math.floor(Math.random() * 20) 
+                    });
+                }
+            }
+        }
+
+        function updateAndDrawParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.vy += p.gravity; 
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                p.alpha = p.life / 55; 
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.restore();
+
+                if (p.life <= 0 || p.y > canvas.height) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function createPiece() {
+            const typeId = Math.floor(Math.random() * 7) + 1;
+            return {
+                matrix: SHAPES[typeId],
+                colorId: typeId,
+                x: Math.floor(COLS / 2) - Math.floor(SHAPES[typeId][0].length / 2),
+                y: 0
+            };
+        }
+
+        function drawBlock(context, x, y, colorId, targetCtx = ctx, size = BLOCK_SIZE) {
+            const color = COLORS[colorId];
+            if (!color) return;
+            targetCtx.save();
+            targetCtx.fillStyle = color;
+            targetCtx.shadowColor = color;
+            targetCtx.shadowBlur = 10;
+            targetCtx.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+            
+            targetCtx.shadowBlur = 0;
+            targetCtx.strokeStyle = 'rgba(255,255,255,0.25)';
+            targetCtx.lineWidth = 1;
+            targetCtx.strokeRect(x * size + 2, y * size + 2, size - 4, size - 4);
+            targetCtx.restore();
+        }
+
+        function draw() {
+            ctx.fillStyle = '#04060e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 背景對齊細網格線
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+            ctx.lineWidth = 1;
+            for(let r=0; r<ROWS; r++) {
+                for(let c=0; c<COLS; c++) {
+                    ctx.strokeRect(c*BLOCK_SIZE, r*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                }
+            }
+
+            // 繪製堆疊積木
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c] > 0) {
+                        drawBlock(ctx, c, r, board[r][c]);
+                    }
+                }
+            }
+
+            // 繪製控制下墜積木
+            if (playerPiece) {
+                playerPiece.matrix.forEach((row, r) => {
+                    row.forEach((value, c) => {
+                        if (value > 0) {
+                            drawBlock(ctx, playerPiece.x + c, playerPiece.y + r, playerPiece.colorId);
+                        }
+                    });
+                });
+            }
+
+            // 特效層
+            updateAndDrawParticles();
+        }
+
+        function drawNext() {
+            nextCtx.fillStyle = '#04060e';
+            nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+            if (nextPiece) {
+                const m = nextPiece.matrix;
+                const size = 24; 
+                const offsetX = (nextCanvas.width - m[0].length * size) / 2;
+                const offsetY = (nextCanvas.height - m.length * size) / 2;
+
+                m.forEach((row, r) => {
+                    row.forEach((value, c) => {
+                        if (value > 0) {
+                            nextCtx.save();
+                            nextCtx.fillStyle = COLORS[nextPiece.colorId];
+                            nextCtx.shadowColor = COLORS[nextPiece.colorId];
+                            nextCtx.shadowBlur = 8;
+                            nextCtx.fillRect(offsetX + c * size + 1, offsetY + r * size + 1, size - 2, size - 2);
+                            nextCtx.restore();
+                        }
+                    });
+                });
+            }
+        }
+
+        function collide(currentBoard, piece) {
+            const m = piece.matrix;
+            for (let r = 0; r < m.length; r++) {
+                for (let c = 0; c < m[r].length; c++) {
+                    if (m[r][c] !== 0) {
+                        const nextX = piece.x + c;
+                        const nextY = piece.y + r;
+                        if (nextX < 0 || nextX >= COLS || nextY >= ROWS) {
+                            return true;
+                        }
+                        if (nextY >= 0 && currentBoard[nextY][nextX] !== 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function merge(currentBoard, piece) {
+            piece.matrix.forEach((row, r) => {
+                row.forEach((value, c) => {
+                    if (value !== 0) {
+                        const targetY = piece.y + r;
+                        const targetX = piece.x + c;
+                        if (targetY >= 0 && targetY < ROWS && targetX >= 0 && targetX < COLS) {
+                            currentBoard[targetY][targetX] = piece.colorId;
+                        }
+                    }
+                });
+            });
+        }
+
+        // ===================================================
+        //  ✨ 修正 Bug：利用 JS 陣列 every 精準消行並集體下墜
+        // ===================================================
+        function arenaSweep() {
+            let rowClearedCount = 0;
+
+            for (let r = ROWS - 1; r >= 0; r--) {
+                // 精確檢查：如果這一列的 10 個格子全部大於 0（都有積木）
+                if (board[r].every(value => value > 0)) {
+                    // 觸發整排物理脫落碎裂掉落粒子效果
+                    createRowParticles(r, board[r][0]);
+
+                    // 將該整行自矩陣陣列中切除
+                    board.splice(r, 1);
+                    // 在頂部（最上方第 0 行）補回一條全空行，達成上方積木完美集體往下沉一格的效果
+                    board.unshift(Array(COLS).fill(0));
+                    
+                    rowClearedCount++;
+                    r++; // 基準指針不動，下一圈迴圈繼續檢查掉落到此 index 的新行
+                }
+            }
+
+            if (rowClearedCount > 0) {
+                score += rowClearedCount * rowClearedCount * 100;
+                scoreVal.textContent = String(score).padStart(5, '0');
+                playSound('clear');
+
+                // 難度進階提速
+                const newLevel = Math.floor(score / 400) + 1;
+                if (newLevel !== level) {
+                    level = newLevel;
+                    levelVal.textContent = level;
+                    dropInterval = Math.max(120, 1000 - (level - 1) * 130);
+                }
+            }
+        }
+
+        // ===================================================
+        //  ✨ 修正 Bug：徹底優化下墜邏輯，防止相撞後死鎖跑不出積木
+        // ===================================================
+        function playerDrop() {
+            playerPiece.y++;
+            if (collide(board, playerPiece)) {
+                playerPiece.y--;
+                merge(board, playerPiece);
+                arenaSweep(); 
+                
+                // 更換方塊
+                playerPiece = nextPiece;
+                nextPiece = createPiece();
+                drawNext();
+
+                // 刷新出生點如果立刻相撞 ➡️ 宣告遊戲結束 GameOver
+                if (collide(board, playerPiece)) {
+                    gameOver();
+                    return;
+                }
+            }
+            dropCounter = 0;
+        }
+
+        function hardDrop() {
+            if (!isPlaying) return;
+            while(!collide(board, playerPiece)) {
+                playerPiece.y++;
+            }
+            playerPiece.y--;
+            merge(board, playerPiece);
+            arenaSweep();
+            
+            playerPiece = nextPiece;
+            nextPiece = createPiece();
+            drawNext();
+            
+            if (collide(board, playerPiece)) {
+                gameOver();
+            }
+            dropCounter = 0;
+        }
+
+        function playerMove(dir) {
+            playerPiece.x += dir;
+            if (collide(board, playerPiece)) {
+                playerPiece.x -= dir;
+            } else {
+                playSound('move');
+            }
+        }
+
+        function rotate(matrix) {
+            for (let y = 0; y < matrix.length; ++y) {
+                for (let x = 0; x < y; ++x) {
+                    [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+                }
+            }
+            matrix.forEach(row => row.reverse());
+        }
+
+        function playerRotate() {
+            const pos = playerPiece.x;
+            let offset = 1;
+            rotate(playerPiece.matrix);
+            while (collide(board, playerPiece)) {
+                playerPiece.x += offset;
+                offset = -(offset + (offset > 0 ? 1 : -1));
+                if (offset > playerPiece.matrix[0].length) {
+                    rotate(playerPiece.matrix); 
+                    playerPiece.x = pos;
+                    return;
+                }
+            }
+            playSound('move');
+        }
+
+        // ===================================================
+        //  🖱️ 新增：滑鼠與手機平板全螢幕觸控精密控制系統
+        // ===================================================
+        canvas.addEventListener('mousedown', handlePointerInput);
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // 抑制移動端雙擊放大預設行為
+            handlePointerInput(e.touches[0]);
+        });
+
+        function handlePointerInput(e) {
+            if (!isPlaying || !playerPiece) return;
+
+            const rect = canvas.getBoundingClientRect();
+            // 計算獲得點擊在 Canvas 內精確的像素坐標
+            const clickX = (e.clientX - rect.left) / rect.width * canvas.width;
+            const clickY = (e.clientY - rect.top) / rect.height * canvas.height;
+
+            // 換算成網格坐標 (第幾列、第幾行)
+            const clickedCol = Math.floor(clickX / BLOCK_SIZE);
+            const clickedRow = Math.floor(clickY / BLOCK_SIZE);
+
+            // 規則 3：如果點擊棋盤最底下（最後兩排），觸發一鍵瞬降
+            if (clickedRow >= ROWS - 2) {
+                hardDrop();
+                return;
+            }
+
+            // 規則 2：如果點擊的區域剛好在「正在掉落的積木本身」範圍盒內，觸發旋轉轉向
+            const m = playerPiece.matrix;
+            const pieceWidth = m[0].length;
+            const pieceHeight = m.length;
+            if (clickedCol >= playerPiece.x && clickedCol < playerPiece.x + pieceWidth &&
+                clickedRow >= playerPiece.y && clickedRow < playerPiece.y + pieceHeight) {
+                playerRotate();
+                return;
+            }
+
+            // 規則 1：點擊哪個方格，積木就平移跑到哪一列
+            // 計算積木中心點，讓點擊位置盡量對準積木中心
+            const pieceCenterOffset = Math.floor(pieceWidth / 2);
+            const targetX = Math.max(0, Math.min(COLS - pieceWidth, clickedCol - pieceCenterOffset));
+            
+            let diff = targetX - playerPiece.x;
+            if (diff !== 0) {
+                let step = diff > 0 ? 1 : -1;
+                while (playerPiece.x !== targetX) {
+                    playerPiece.x += step;
+                    // 橫向推進若撞到固化積木，自動退回一步並停止
+                    if (collide(board, playerPiece)) {
+                        playerPiece.x -= step;
+                        break;
+                    }
+                }
+                playSound('move');
+            }
+        }
+
+        // 鍵盤控制
+        window.addEventListener('keydown', function(e) {
+            if (!isPlaying) return;
+            if (e.key === 'ArrowLeft') playerMove(-1);
+            if (e.key === 'ArrowRight') playerMove(1);
+            if (e.key === 'ArrowDown') playerDrop();
+            if (e.key === 'ArrowUp') playerRotate();
+            if (e.key === ' ') { 
+                e.preventDefault();
+                hardDrop();
+            }
+        });
+
+        // 啟動對局
+        function startGame(e) {
+            if (e) e.stopPropagation();
+
+            isPlaying = true;
+            score = 0;
+            level = 1;
+            dropInterval = 1000;
+            dropCounter = 0;
+            lastTime = performance.now(); // 修正：採用精密時間戳初始化，根除時鐘跳躍Bug
+            particles = [];
+
+            board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+            scoreVal.textContent = "00000";
+            levelVal.textContent = "1";
+
+            playerPiece = createPiece();
+            nextPiece = createPiece();
+            
+            overlay.style.display = 'none';
+            drawNext();
+
+            requestAnimationFrame(gameUpdate);
+        }
+
+        function gameUpdate(time = 0) {
+            if (!isPlaying) return;
+
+            const deltaTime = time - lastTime;
+            lastTime = time;
+
+            dropCounter += deltaTime;
+            if (dropCounter > dropInterval) {
+                playerDrop();
+            }
+
+            draw();
+            requestAnimationFrame(gameUpdate);
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            playSound('gameover');
+
+            document.getElementById('overlay-title').textContent = "遊戲結束";
+            document.getElementById('overlay-desc').innerHTML = `
+                方塊已經堆滿頂部頂天立地了！<br><br>
+                本次霓虹挑戰最終獲得：<span class="highlight" style="font-size:1.4rem; color:#a855f7;">${score}</span> 分！<br>
+                最高難度級別：<span style="color:#3b82f6; font-weight:bold;">Lv. ${level}</span>
+            `;
+            startBtn.textContent = "再次挑戰";
+            overlay.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

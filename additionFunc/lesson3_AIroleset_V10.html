@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>第三堂｜AI 角色故事設定器 V10</title>
+  <style>
+    :root{--blue:#1554b7;--blue2:#3b82f6;--paper:#fffdf8;--ink:#1f2937;--muted:#6b7280;--line:#e5e0d6;--yellow:#fff1b8;--red:#dc2626;--green:#16a34a;--shadow:0 12px 28px rgba(31,41,55,.10);--radius:26px}
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:radial-gradient(circle at top left,rgba(59,130,246,.13),transparent 28%),radial-gradient(circle at 92% 12%,rgba(255,224,138,.35),transparent 22%),linear-gradient(135deg,#fff8ed,#edf6ff);min-height:100vh}.wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}header,.panel{background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:18px}header{display:flex;justify-content:space-between;align-items:center;gap:18px}h1{margin:0 0 8px;color:var(--blue);font-size:34px;letter-spacing:-.02em}h2{margin:0 0 8px;font-size:28px;color:#111827}h3{margin:0 0 12px;font-size:21px;color:#172033}p{font-size:16px;line-height:1.75;margin:8px 0}.subtitle,.desc,.hint{color:var(--muted);line-height:1.75}.subtitle{margin:0;font-size:15px}.desc{margin:0 0 18px}.hint{font-size:13px;margin-top:8px}.badge{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;padding:9px 14px;border-radius:999px;font-weight:800;white-space:nowrap}.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}.step{background:rgba(255,255,255,.72);border:1px solid var(--line);border-radius:18px;padding:12px 10px;color:var(--muted);font-weight:800;text-align:center;font-size:15px}.step.active{background:var(--blue);color:white;border-color:var(--blue)}.panel{display:none}.panel.active{display:block}.notice{background:#fff7e6;border:1px solid #f3d27a;border-radius:18px;padding:15px 17px;line-height:1.75;margin:14px 0 18px}.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px}.field.full{grid-column:1/-1}label.title{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:16px;font-weight:900;margin-bottom:9px;color:#243040}.requiredTag{color:var(--red);font-size:13px;font-weight:950;white-space:nowrap}input[type="text"],textarea,select{width:100%;border:1px solid #d9d3c7;border-radius:14px;padding:12px 14px;font-size:17px;background:white;color:var(--ink);font-family:inherit}textarea{min-height:84px;resize:vertical}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;border:1px solid #d9d3c7;background:white;font-size:15px;user-select:none}.chip input{accent-color:var(--blue)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}button{border:0;border-radius:16px;padding:13px 18px;font-size:17px;font-weight:900;cursor:pointer;font-family:inherit;transition:.18s transform,.18s box-shadow,.18s background}button:hover{transform:translateY(-1px)}.primary{background:var(--blue);color:white}.secondary{background:#e8edf5;color:#172033}.ghost{background:white;border:1px solid var(--line);color:#172033}.success{background:var(--green);color:white}.errorBox{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#991b1b;border-radius:18px;padding:14px 16px;margin:14px 0;line-height:1.7;font-weight:800}.twoCol{display:grid;grid-template-columns:.92fr 1.08fr;gap:18px;align-items:start}.summary{background:#fff8db;border:1px solid #f1d98c;border-radius:20px;padding:18px;line-height:1.8;font-size:16px;white-space:pre-wrap}.promptBox{background:#101827;color:#e5e7eb;border-radius:22px;padding:20px;min-height:420px;white-space:pre-wrap;line-height:1.65;font-size:15px;border:1px solid #1e293b;overflow:auto}.robot{background:#eff6ff;border:1px solid #bfdbfe;color:#153f8a;border-radius:20px;padding:16px;line-height:1.7;margin-bottom:16px;font-weight:800}.copyMsg{color:#15803d;font-weight:900;margin-top:10px}
+    .uploadWarn{display:none;margin-top:12px;background:#fee2e2;color:#991b1b;border:2px solid #fecaca;border-radius:16px;padding:12px 16px;font-size:18px;font-weight:950;text-align:center}
+    .fileNameBox{margin-top:12px;background:#f8fafc;border:1px solid #dbe4ef;border-radius:16px;padding:12px 14px;font-weight:900;color:#1e3a5f;word-break:break-all}
+    .inlineBtn{padding:9px 12px;font-size:14px;border-radius:12px;margin-top:8px;background:#e8edf5;color:#172033}
+.mini{font-size:13px;color:var(--muted);line-height:1.7}.toolRows{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.toolCard{background:white;border:1px solid var(--line);border-radius:20px;padding:15px}.counter{display:inline-block;background:#eef6ff;color:var(--blue);border:1px solid #bfdbfe;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:900;margin-left:6px}.outputPreview{display:grid;grid-template-columns:1fr 180px;gap:14px;background:#fffdf8;border:1px solid var(--line);border-radius:22px;padding:14px;margin-top:10px}.fakeImage{min-height:210px;border-radius:18px;background:linear-gradient(135deg,rgba(21,84,183,.12),rgba(255,224,138,.32)),radial-gradient(circle at 30% 30%,rgba(59,130,246,.20),transparent 30%);display:flex;align-items:center;justify-content:center;text-align:center;color:#31516f;font-weight:900;line-height:1.7;padding:16px}.storyColumn{border-radius:18px;background:#fff;border:2px dashed #b9cce8;padding:14px;font-size:14px;line-height:1.65}.storyColumn b{color:var(--blue)}@media(max-width:900px){header{display:block}.badge{display:inline-block;margin-top:12px}.steps{grid-template-columns:1fr}.formGrid,.twoCol,.toolRows,.outputPreview{grid-template-columns:1fr}.field.full{grid-column:auto}.wrap{padding:14px 10px 34px}header,.panel{padding:18px;border-radius:22px}h1{font-size:28px}h2{font-size:24px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+<header><div><h1>AI 角色故事設定器</h1><p class="subtitle">第三堂｜讓角色有故事、有工具、有秘密基地</p></div><div class="badge">想像力實驗室｜角色故事設定圖</div></header>
+<div class="steps"><div id="step1" class="step active">① 上週角色</div><div id="step2" class="step">② 故事主軸</div><div id="step3" class="step">③ 三個工具</div><div id="step4" class="step">④ 秘密基地</div><div id="step5" class="step">⑤ 複製指令</div></div>
+<section id="panel1" class="panel active"><h2>① 你有上一週的角色半身圖嗎？</h2><p class="desc">如果你有第二堂課完成的角色圖，這次會延續同一個角色。若沒有，也可以用系統提供的基本臉模開始。</p><div id="error1" class="errorBox"></div><div class="formGrid"><div class="field full"><label class="title">上週角色產出 <span class="requiredTag">＊ 必填</span></label><div class="chips"><label class="chip"><input type="radio" name="hasPrevious" value="yes" onchange="togglePrevious()"> 有，我有上一堂的角色半身圖</label><label class="chip"><input type="radio" name="hasPrevious" value="no" onchange="togglePrevious()"> 沒有，我上週沒有產出／上週沒有來</label></div><div class="hint">選「有」的同學，生成時請先叫出或上傳上一週的角色圖。</div></div><div class="field"><label class="title">角色名字 <span class="requiredTag">＊ 必填</span></label><input id="characterName" type="text" placeholder="例如：阿哲、小米、強納森" /></div><div id="faceModelBox" class="field" style="display:none"><label class="title">新同學基本臉模 <span class="requiredTag">＊ 必填</span></label><div class="chips"><label class="chip"><input type="radio" name="faceModel" value="男生臉模"> 男生臉模</label><label class="chip"><input type="radio" name="faceModel" value="女生臉模"> 女生臉模</label><label class="chip"><input type="radio" name="faceModel" value="中性風格臉模"> 中性風格</label></div><div class="hint">系統會自動加入「清楚、親切、有特色、適合國小課程」的外觀設定。</div></div></div><div class="notice"><b>這堂課的重點：</b>不是幫角色加很多東西，而是讓每個東西都能說故事。</div><div class="actions"><button class="primary" onclick="nextFromPanel1()">下一步：角色故事主軸</button><button class="ghost" onclick="clearAll()">清空重填</button></div></section>
+<section id="panel2" class="panel"><h2>② 角色故事主軸</h2><p class="desc">不用寫很長，只要先知道：這個角色想做什麼？為什麼想做？</p><div id="error2" class="errorBox"></div><div class="formGrid"><div class="field"><label class="title">角色現在最想做什麼？ <span class="requiredTag">＊ 必填</span></label><select id="mainGoal" onchange="toggleOther('mainGoal','mainGoalOther')"><option value="">請選擇</option><option>完成一次冒險</option><option>做出厲害的作品</option><option>幫助朋友</option><option>解決一個問題</option><option>找到重要的東西</option><option>變得更有自信</option><option>練習某項技能</option><option>保護某個地方</option><option>發明新東西</option><option>記錄生活中的美好</option><option>完成一場重要比賽</option><option>解開一個神秘事件</option><option>用音樂感動大家</option><option>創作出自己的作品</option><option>完成一個祕密任務</option><option>找到屬於自己的方向</option><option>讓大家看見自己的能力</option><option>把失敗變成新的力量</option><option>學會照顧重要的人</option><option>打造一個屬於自己的空間</option><option>收集世界各地的故事</option><option>修好一個重要的東西</option><option>挑戰自己不敢做的事</option><option>把想像變成真正的作品</option><option value="其他">其他</option></select><input id="mainGoalOther" type="text" placeholder="請輸入其他目標" style="display:none;margin-top:10px;" /></div><div class="field"><label class="title">這個角色的個性比較像？ <span class="requiredTag">＊ 必填</span></label><select id="personality"><option value="">請選擇</option><option>勇敢，願意嘗試</option><option>安靜，喜歡觀察</option><option>活潑，常常帶來笑聲</option><option>溫柔，會照顧別人</option><option>認真，會把事情做好</option><option>好奇，想知道更多事情</option><option>有點神秘，不太說出心裡話</option><option>幽默，喜歡用有趣的方法解決問題</option><option>冷靜，遇到事情會先思考</option><option>熱血，想到就會立刻行動</option><option>害羞，但其實很努力</option><option>細心，會注意別人沒看到的地方</option><option>有責任感，會保護重要的人</option><option>有創意，常常有奇怪但有趣的想法</option><option>不服輸，失敗也想再試一次</option><option>樂觀，相信事情會變好</option><option>獨立，喜歡自己完成任務</option><option>可靠，是朋友會信任的人</option></select></div><div class="field full"><label class="title">為什麼他想做這件事？ <span class="requiredTag">＊ 必填</span></label><textarea id="goalReason" placeholder="請寫一句就好，例如：因為他想證明自己也可以完成重要的任務。"></textarea></div><div class="field full"><label class="title">角色主軸補充（選填）</label><textarea id="storyExtra" placeholder="例如：他平常不太說話，但其實一直偷偷準備自己的夢想。"></textarea></div></div><div class="actions"><button class="secondary" onclick="goPanel(1)">上一步</button><button class="primary" onclick="nextFromPanel2()">下一步：三個重要工具</button></div></section>
+<section id="panel3" class="panel"><h2>③ 三個重要工具</h2><p class="desc">每個角色身上的工具，都要能說出一點故事。請至少準備三個工具，並幫每個工具選用途。</p><div id="error3" class="errorBox"></div><div class="toolRows"><div class="toolCard"><h3>工具 1 <span class="requiredTag">＊ 必填</span></h3><select id="tool1" onchange="toggleOther('tool1','tool1Other')"></select><input id="tool1Other" type="text" placeholder="請輸入其他工具" style="display:none;margin-top:10px;" /><select id="toolUse1" onchange="toggleOther('toolUse1','toolUse1Other')" style="margin-top:10px;"></select><input id="toolUse1Other" type="text" placeholder="請輸入其他用途" style="display:none;margin-top:10px;" /></div><div class="toolCard"><h3>工具 2 <span class="requiredTag">＊ 必填</span></h3><select id="tool2" onchange="toggleOther('tool2','tool2Other')"></select><input id="tool2Other" type="text" placeholder="請輸入其他工具" style="display:none;margin-top:10px;" /><select id="toolUse2" onchange="toggleOther('toolUse2','toolUse2Other')" style="margin-top:10px;"></select><input id="toolUse2Other" type="text" placeholder="請輸入其他用途" style="display:none;margin-top:10px;" /></div><div class="toolCard"><h3>工具 3 <span class="requiredTag">＊ 必填</span></h3><select id="tool3" onchange="toggleOther('tool3','tool3Other')"></select><input id="tool3Other" type="text" placeholder="請輸入其他工具" style="display:none;margin-top:10px;" /><select id="toolUse3" onchange="toggleOther('toolUse3','toolUse3Other')" style="margin-top:10px;"></select><input id="toolUse3Other" type="text" placeholder="請輸入其他用途" style="display:none;margin-top:10px;" /></div></div><div class="field full" style="margin-top:16px;"><label class="title">這三個工具對角色來說為什麼重要？ <span class="requiredTag">＊ 必填</span></label><textarea id="toolsReason" placeholder="請寫一句就好，例如：這些工具能幫他記錄線索、規劃路線，完成自己的冒險。"></textarea></div><div class="actions"><button class="secondary" onclick="goPanel(2)">上一步</button><button class="primary" onclick="nextFromPanel3()">下一步：秘密基地</button></div></section>
+<section id="panel4" class="panel"><h2>④ 秘密基地／工作室設定</h2><p class="desc">這不是普通房間，而是角色準備任務、創作、練習或休息的地方。</p><div id="error4" class="errorBox"></div><div class="formGrid"><div class="field"><label class="title">基地類型 <span class="requiredTag">＊ 必填</span></label><select id="baseType" onchange="toggleOther('baseType','baseTypeOther')"></select><input id="baseTypeOther" type="text" placeholder="請輸入其他基地類型" style="display:none;margin-top:10px;" /></div><div class="field"><label class="title">基地主要用途 <span class="requiredTag">＊ 必填</span></label><select id="baseUse" onchange="toggleOther('baseUse','baseUseOther')"></select><input id="baseUseOther" type="text" placeholder="請輸入其他基地用途" style="display:none;margin-top:10px;" /></div><div class="field"><label class="title">基地風格模板 <span class="requiredTag">＊ 必填</span></label><select id="baseStyle" onchange="toggleOther('baseStyle','baseStyleOther')"></select><input id="baseStyleOther" type="text" placeholder="請輸入其他風格" style="display:none;margin-top:10px;" /><div class="hint">可以先選一個接近的風格，再用自己的理由讓它更像角色的基地。</div></div><div class="field">
+      <label class="title">右側資料欄風格 <span class="requiredTag">＊ 必填</span></label>
+      <select id="storyColumnStyle" onchange="toggleOther('storyColumnStyle','storyColumnStyleOther');toggleStoryColumnAutoButton();"></select>
+      <input id="storyColumnStyleOther" type="text" placeholder="請輸入右側資料欄風格" style="display:none;margin-top:10px;" />
+      <button id="storyColumnAutoBtn" class="smallBtn" type="button" onclick="autoStoryColumnStyle()" style="display:none;margin-top:10px;">✨ 自動生成</button>
+      <div class="hint">如果選「其他」，可以自己輸入；也可以按「自動生成」，系統會依照前面選擇的角色、工具、基地，幫你產生最合適的資料欄風格。</div>
+    </div><div class="field"><label class="title">基地裡一定要有的物品 <span class="requiredTag">＊ 至少選 5 個</span></label><div id="baseItems" class="chips"></div><div class="chips" style="margin-top:10px;"><label class="chip"><input type="checkbox" class="otherBaseToggle" value="其他一" data-target="baseItemsOther1" onchange="toggleOtherBaseItem(this);updateBaseItemCount()"> 其他一</label><label class="chip"><input type="checkbox" class="otherBaseToggle" value="其他二" data-target="baseItemsOther2" onchange="toggleOtherBaseItem(this);updateBaseItemCount()"> 其他二</label><label class="chip"><input type="checkbox" class="otherBaseToggle" value="其他三" data-target="baseItemsOther3" onchange="toggleOtherBaseItem(this);updateBaseItemCount()"> 其他三</label></div><div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;"><input id="baseItemsOther1" type="text" placeholder="請輸入其他一的物品" oninput="updateBaseItemCount()" style="display:none;" /><input id="baseItemsOther2" type="text" placeholder="請輸入其他二的物品" oninput="updateBaseItemCount()" style="display:none;" /><input id="baseItemsOther3" type="text" placeholder="請輸入其他三的物品" oninput="updateBaseItemCount()" style="display:none;" /></div><div class="hint">已選 <span id="baseItemCount" class="counter">0</span> 個</div></div><div class="field full"><label class="title">為什麼這個基地適合你的角色？ <span class="requiredTag">＊ 必填</span></label><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;"><button type="button" class="secondary" onclick="autoBaseReason()">✨ 自動生成</button><span class="hint" style="margin:0;">可以先自動生成，再自己修改成更像你的角色。</span></div><textarea id="baseReason" placeholder="請寫一句就好，例如：因為這裡可以讓他安靜研究地圖，準備下一次冒險。"></textarea></div><div class="field"><label class="title">班級代碼 <span class="requiredTag">＊ 必填</span></label><select id="classCode"><option value="">請選擇</option><option value="A">A｜低年級</option><option value="B">B｜中年級</option><option value="C">C｜高年級</option></select><div class="hint">這是給老師收作品用的編號，不是角色故事內容。</div></div><div class="field"><label class="title">號碼 <span class="requiredTag">＊ 必填</span></label><input id="studentNumber" type="text" placeholder="例如：01、08、12" /><div class="hint">請依照點名表輸入號碼。</div></div></div><div class="outputPreview"><div class="fakeImage">16:9 角色故事設定圖<br>角色約 80% 大小 + 工具 + 秘密基地</div><div class="storyColumn"><b>右側故事欄</b><br>可選資料欄風格<br>角色主軸<br>三個工具<br>作品編號</div></div><div class="actions"><button class="secondary" onclick="goPanel(3)">上一步</button><button class="primary" onclick="buildStoryPrompt()">整理並產生指令</button></div></section>
+<section id="panel5" class="panel"><h2>⑤ AI 幫你整理好了</h2><p class="desc">這一段可以複製到 ChatGPT，用來生成 16:9 角色故事設定圖。</p><div class="twoCol"><div><div class="robot">🤖 我把你的角色故事、三個工具和秘密基地整理成圖片指令了。</div><div id="summary" class="summary"></div><div class="actions"><button class="secondary" onclick="goPanel(4)">回去修改</button><button class="success" onclick="copyPrompt()">📋 複製到 ChatGPT</button><div id="uploadReminder" class="uploadWarn">⚠️ 記得要上傳角色圖</div><div id="fileNameBox" class="fileNameBox"></div><button class="inlineBtn" onclick="copyFileName()">複製檔名</button><button class="ghost" onclick="clearAll()">建立新設定</button></div><p id="copyMsg" class="copyMsg"></p><p class="mini">小提醒：如果第一次圖片不滿意，不要一直重新生成。先說出想修改哪裡，再請 AI 幫忙調整。</p></div><div><div id="prompt" class="promptBox"></div></div></div></section>
+</div>
+<script>
+let finalPrompt="";
+const toolOptions=["","相機","地圖","筆記本","耳機","望遠鏡","工具箱","料理工具","畫板","球","背包","手電筒","指南針","平板","書本","樂器","護目鏡","收藏盒","魔法書","機器助手","滑板","錄音筆","畫筆","球鞋","水壺","徽章","任務卡","小燈籠","秘密鑰匙","迷你無人機","幸運吊飾","其他"];
+const toolUseOptions=["","記錄重要畫面","規劃下一步","尋找線索","保護自己","幫助朋友","完成任務","練習技能","保存回憶","發明新東西","表達自己的想法","觀察遠方","解決問題","整理想法","展示自己的特色","其他"];
+const baseTypeOptions=["","房間基地","工作室","樹屋基地","地下室基地","露營車基地","攝影暗房","料理研究室","發明實驗室","音樂練習室","運動訓練室","魔法小屋","太空艙","海底基地","山洞基地","森林小屋","偵探事務所","屋頂秘密基地","圖書館角落","未來科技基地","火車車廂基地","雲端觀察站","秘密花園基地","廢棄倉庫改造基地","移動背包基地","湖邊小屋","城市巷弄工作室","其他"];
+const baseUseOptions=["","休息","計畫冒險","發明","創作","練習","料理","拍照剪輯","收藏","研究","觀察世界","整理線索","準備任務","和朋友討論計畫","保護重要物品","訓練自己的能力","設計新作品","修理壞掉的東西","記錄每天的發現","照顧夥伴或動物","秘密開會","放鬆充電","測試新工具","保存回憶","其他"];
+const baseStyleOptions=["","溫暖木質風","自然森林風","科技藍光風","復古收藏風","神秘偵探風","乾淨簡約風","冒險地圖風","魔法奇幻風","攝影工作室風","書房研究風","秘密任務風","植物溫室風","其他"];
+const storyColumnStyleOptions=["","清爽白卡風","手帳筆記風","冒險地圖風","科技資料卡風","偵探檔案風","溫暖木質標籤風","攝影作品集風","夢幻星空卡風","遊戲狀態欄風","魔法卷軸風","自然觀察筆記風","未來藍圖風","寶藏任務卡風","其他"];
+const baseItemOptions=["書桌","電腦","相機","地圖","書櫃","望遠鏡","工具箱","畫板","樂器","運動器材","料理台","沙發","植物","照片牆","收藏架","燈串","白板","任務牆","模型","窗邊座位","機器人","寶箱","床鋪","地毯","時鐘","背包架","展示櫃","秘密門","小黑板","錄音設備","置物箱","工作檯","寵物角落","星空投影燈","獎盃架"];
+function initOptions(){["tool1","tool2","tool3"].forEach(id=>fillSelect(id,toolOptions,"請選擇工具"));["toolUse1","toolUse2","toolUse3"].forEach(id=>fillSelect(id,toolUseOptions,"請選擇用途"));fillSelect("baseType",baseTypeOptions,"請選擇基地類型");fillSelect("baseUse",baseUseOptions,"請選擇基地用途");fillSelect("baseStyle",baseStyleOptions,"請選擇風格模板");fillSelect("storyColumnStyle",storyColumnStyleOptions,"請選擇資料欄風格");document.getElementById("baseItems").innerHTML=baseItemOptions.map(item=>`<label class="chip"><input type="checkbox" name="baseItem" value="${item}" onchange="updateBaseItemCount()"> ${item}</label>`).join("");updateBaseItemCount()}
+function fillSelect(id,opts,first){document.getElementById(id).innerHTML=opts.map((op,i)=>`<option value="${op}">${i===0?first:op}</option>`).join("")}
+function goPanel(n){for(let i=1;i<=5;i++){document.getElementById("panel"+i).classList.remove("active");document.getElementById("step"+i).classList.remove("active")}document.getElementById("panel"+n).classList.add("active");document.getElementById("step"+n).classList.add("active");window.scrollTo({top:0,behavior:"smooth"})}
+function v(id){const el=document.getElementById(id);return el?el.value:""}
+function clean(id){return v(id).trim()}
+function radio(name){const e=document.querySelector(`input[name="${name}"]:checked`);return e?e.value:""}
+function checks(name){return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(x=>x.value)}
+function isFilled(id){return v(id).length>0}
+function selectedValue(id,otherId){const val=v(id);if(val==="其他"){const other=v(otherId||"");return other.length?other:"其他"}return val}
+function textOrFallback(id,fallback){const raw=v(id);if(raw.trim().length===0&&raw.length>0)return"學生暫時保留，課後可再補充";return raw.trim()||fallback}
+function showError(id,list){const box=document.getElementById(id);if(!list.length){box.style.display="none";box.innerHTML="";return}box.style.display="block";box.innerHTML="請先完成以下必填欄位：<br>・"+list.join("<br>・")}
+function togglePrevious(){document.getElementById("faceModelBox").style.display=radio("hasPrevious")==="no"?"block":"none"}
+function toggleOther(s,i){const input=document.getElementById(i);if(input)input.style.display=v(s)==="其他"?"block":"none"}
+function toggleOtherBaseItem(cb){const input=document.getElementById(cb.dataset.target);if(!input)return;input.style.display=cb.checked?"block":"none";if(!cb.checked)input.value=""}
+function getBasePresetItems(){return checks("baseItem")}
+function getOtherBaseItems(){const result=[];document.querySelectorAll(".otherBaseToggle").forEach(cb=>{if(cb.checked){const text=clean(cb.dataset.target);if(text.length>0)result.push(text)}});return result}
+function getAllBaseItems(){return getBasePresetItems().concat(getOtherBaseItems())}
+function updateBaseItemCount(){const el=document.getElementById("baseItemCount");if(el)el.textContent=getAllBaseItems().length}
+function nextFromPanel1(){const errors=[];const has=radio("hasPrevious");if(!has)errors.push("上週角色產出");if(!isFilled("characterName"))errors.push("角色名字");if(has==="no"&&!radio("faceModel"))errors.push("新同學基本臉模");showError("error1",errors);if(!errors.length)goPanel(2)}
+function nextFromPanel2(){const errors=[];if(!selectedValue("mainGoal","mainGoalOther"))errors.push("角色現在最想做什麼");if(v("mainGoal")==="其他"&&!isFilled("mainGoalOther"))errors.push("其他目標");if(!v("personality"))errors.push("角色個性");if(!isFilled("goalReason"))errors.push("為什麼他想做這件事");showError("error2",errors);if(!errors.length)goPanel(3)}
+function nextFromPanel3(){const errors=[];[1,2,3].forEach(i=>{if(!selectedValue("tool"+i,"tool"+i+"Other"))errors.push(`工具 ${i}`);if(v("tool"+i)==="其他"&&!isFilled("tool"+i+"Other"))errors.push(`其他工具 ${i}`);if(!selectedValue("toolUse"+i,"toolUse"+i+"Other"))errors.push(`工具 ${i} 的用途`);if(v("toolUse"+i)==="其他"&&!isFilled("toolUse"+i+"Other"))errors.push(`其他用途 ${i}`)});if(!isFilled("toolsReason"))errors.push("三個工具的重要原因");showError("error3",errors);if(!errors.length)goPanel(4)}
+function validatePanel4(){const errors=[];if(!selectedValue("baseType","baseTypeOther"))errors.push("基地類型");if(v("baseType")==="其他"&&!isFilled("baseTypeOther"))errors.push("其他基地類型");if(!selectedValue("baseUse","baseUseOther"))errors.push("基地主要用途");if(v("baseUse")==="其他"&&!isFilled("baseUseOther"))errors.push("其他基地用途");if(!selectedValue("baseStyle","baseStyleOther"))errors.push("基地風格模板");if(v("baseStyle")==="其他"&&!isFilled("baseStyleOther"))errors.push("其他風格");document.querySelectorAll(".otherBaseToggle").forEach(cb=>{if(cb.checked&&clean(cb.dataset.target).length===0)errors.push(cb.value+"的物品名稱")});if(getAllBaseItems().length<5)errors.push("基地裡一定要有的物品至少 5 個");if(!isFilled("baseReason"))errors.push("為什麼這個基地適合你的角色");if(!v("classCode"))errors.push("班級代碼");if(!isFilled("studentNumber"))errors.push("號碼");showError("error4",errors);return errors.length===0}
+
+function toggleStoryColumnAutoButton(){
+  const select = document.getElementById("storyColumnStyle");
+  const btn = document.getElementById("storyColumnAutoBtn");
+  if(!select || !btn) return;
+  btn.style.display = select.value === "其他" ? "inline-flex" : "none";
+}
+
+function autoStoryColumnStyle(){
+  const personality = checks("personality").join("、");
+  const goal = clean("mainGoal");
+  const baseType = selectedValue("baseType","baseTypeOther") || "秘密基地";
+  const baseStyle = selectedValue("baseStyle","baseStyleOther") || "角色風格";
+  const baseUse = selectedValue("baseUse","baseUseOther") || "準備任務";
+  const tools = [v("tool1"), v("tool2"), v("tool3")].filter(Boolean).join("、");
+  let result = "";
+
+  if(baseType.includes("偵探") || baseStyle.includes("偵探") || goal.includes("線索")){
+    result = "偵探檔案卡風：像任務檔案一樣，有清楚分隔線、小圖示與線索卡片感";
+  }else if(baseStyle.includes("科技") || baseType.includes("太空") || baseType.includes("未來")){
+    result = "科技資料卡風：藍色光感、乾淨分區、像角色數據面板";
+  }else if(baseStyle.includes("攝影") || tools.includes("相機")){
+    result = "攝影作品集風：像相簿側欄，有照片框、底片感分隔線與簡潔說明";
+  }else if(baseStyle.includes("魔法") || baseType.includes("魔法")){
+    result = "魔法卷軸風：像故事卷軸或任務書，邊框有溫和奇幻感";
+  }else if(baseStyle.includes("自然") || baseStyle.includes("森林") || baseStyle.includes("植物")){
+    result = "自然觀察筆記風：像自然筆記本，有葉子圖示、觀察標籤與柔和底色";
+  }else if(baseStyle.includes("冒險") || baseUse.includes("冒險") || tools.includes("地圖")){
+    result = "冒險地圖風：像旅行手帳或探險地圖，有路線、標記與任務欄";
+  }else if(personality.includes("神秘")){
+    result = "秘密任務卡風：低調神秘，有任務標籤、暗色邊框與清楚資訊區塊";
+  }else{
+    result = "清爽白卡風：乾淨白色卡片、溫和邊框、清楚分區，適合閱讀角色資料";
+  }
+
+  const select = document.getElementById("storyColumnStyle");
+  const input = document.getElementById("storyColumnStyleOther");
+  if(select) select.value = "其他";
+  if(input){
+    input.style.display = "block";
+    input.value = result;
+  }
+  toggleStoryColumnAutoButton();
+}
+
+function autoBaseReason(){
+  const name = clean("charName") || "這位角色";
+  const personality = checks("personality").join("、") || "有自己的個性";
+  const goal = clean("mainGoal") || "完成自己的目標";
+  const goalWhy = clean("goalWhy") || "想要一步一步完成自己的想法";
+  const tools = [1,2,3].map(i=>{
+    const tool = v(`tool${i}`);
+    const use = v(`toolUse${i}`);
+    return tool && use ? `${tool}用來${use}` : "";
+  }).filter(Boolean);
+  const toolText = tools.length ? tools.join("，") : "重要工具幫助他完成任務";
+  const baseType = v("baseType") || "秘密基地";
+  const baseUse = v("baseUse") || "準備自己的計畫";
+  const baseStyle = v("baseStyle") || "有自己特色的風格";
+  const items = typeof getAllBaseItems === "function" ? getAllBaseItems() : checks("baseItem");
+  const itemText = items.slice(0,8).join("、") || "重要物品";
+  const extra = clean("extraSetting");
+  const extraText = extra && extra !== "沒有其他補充" ? `另外，${extra}，也讓這個基地更有他的故事感。` : "";
+  const sentence = `因為${baseType}是${name}整理想法與${baseUse}的重要地方，${baseStyle}能呼應他「${personality}」的個性。基地裡的${itemText}可以幫助他規劃行動、保存線索與準備作品；再加上${toolText}，讓他能一步一步完成「${goal}」。他這麼做的原因是${goalWhy}。${extraText}`;
+  document.getElementById("baseReason").value = sentence.replace(/。+/g,"。").replace(/，。/g,"。");
+}
+function buildStoryPrompt(){
+  if(!validatePanel4())return;
+  const has=radio("hasPrevious"),name=textOrFallback("characterName","一位原創角色"),face=radio("faceModel");
+  const roleStart=has==="yes"?"請先使用我上一週完成的角色半身圖作為角色參考，保持角色外觀、臉部特徵、髮型和整體氣質一致，並延伸成清楚的全身角色造型。":`我上週沒有角色半身圖，請直接建立一位新的原創角色。基本外觀使用「${face}」：清楚、親切、有特色，適合國小學生 AI 創意角色設計課程，不模仿真人或現有作品角色。`;
+  const mainGoal=selectedValue("mainGoal","mainGoalOther"),personality=v("personality"),goalReason=textOrFallback("goalReason","學生暫時保留，課後可再補充"),storyExtra=clean("storyExtra")||"沒有其他補充";
+  const tools=[1,2,3].map(i=>({name:selectedValue("tool"+i,"tool"+i+"Other"),use:selectedValue("toolUse"+i,"toolUse"+i+"Other")}));
+  const toolsReason=textOrFallback("toolsReason","學生暫時保留，課後可再補充"),baseType=selectedValue("baseType","baseTypeOther"),baseUse=selectedValue("baseUse","baseUseOther"),baseStyle=selectedValue("baseStyle","baseStyleOther");
+  const storyColumnStyleRaw = selectedValue("storyColumnStyle","storyColumnStyleOther");
+  const storyColumnStyleInstruction = `右側資料欄風格：${storyColumnStyleRaw}。請讓右側故事欄的邊框、底色、標題小圖示與分隔線都符合這個風格，但文字仍要清楚容易閱讀。`;
+  const items=getAllBaseItems();
+  const baseReason=textOrFallback("baseReason","學生暫時保留，課後可再補充");
+  const studentNumber=clean("studentNumber").padStart(2,"0");
+  const workCode=`${v("classCode")}${studentNumber}`;
+  const suggestedFileName=`${workCode}_角色故事設定圖.png`;
+  const storyCard=`角色主軸：${name}想要${mainGoal}\n原因：${goalReason}\n重要工具：\n1. ${tools[0].name}：${tools[0].use}\n2. ${tools[1].name}：${tools[1].use}\n3. ${tools[2].name}：${tools[2].use}\n秘密基地：${baseType}\n基地理由：${baseReason}\n作品編號：${workCode}`;
+  const summary=`角色名字：${name}\n上週角色圖：${has==="yes"?"有，需延續上一週半身圖":"沒有，使用"+face}\n角色個性：${personality}\n角色目標：${mainGoal}\n目標原因：${goalReason}\n\n三個工具：\n1. ${tools[0].name}｜${tools[0].use}\n2. ${tools[1].name}｜${tools[1].use}\n3. ${tools[2].name}｜${tools[2].use}\n工具重要原因：${toolsReason}\n\n秘密基地／工作室：\n基地類型：${baseType}\n基地用途：${baseUse}\n基地風格：${baseStyle}\n右側資料欄風格：${storyColumnStyleRaw}\n基地物品：${items.join("、")}\n基地設定理由：${baseReason}\n\n作品編號：${workCode}\n建議檔名：${suggestedFileName}`;
+  finalPrompt=`請幫我生成一張 16:9 角色故事設定圖，角色請以全身圖呈現，但人物比例請縮小到原本約 80%，讓畫面能呈現更多秘密基地／工作室場景。\n\n${roleStart}\n\n畫面左側或中央呈現角色全身圖、角色的完整服裝，以及他的秘密基地／工作室。角色不要佔滿畫面，人物約佔原本大小的 80%，保留更多空間呈現基地的環境、物品與故事線索。三個重要工具請不要漂浮在空中，也不要全部硬塞到角色手上；請統一放在畫面下方偏左或下方中央的「道具欄／工具展示列」中，像遊戲道具欄一樣分成三個小格子，每格清楚放一個工具圖示或物件，並可搭配很短的用途標籤。\n畫面右側保留約 1/5 到 1/6 的直式故事欄，故事欄要清楚、乾淨、容易閱讀。除了右側故事欄、作品編號，以及下方道具欄中非常短的工具用途標籤之外，畫面其他區域請盡量避免出現可讀文字；背景中的白板、便利貼、招牌、筆記本可以用圖案、線條、符號或簡單圖示代替文字，避免錯字或多餘文字。\n\n角色名字：${name}\n角色個性：${personality}\n角色主軸：${name}想要${mainGoal}\n角色目標原因：${goalReason}\n角色補充設定：${storyExtra}\n\n三個重要工具：\n1. ${tools[0].name}，用途是${tools[0].use}。\n2. ${tools[1].name}，用途是${tools[1].use}。\n3. ${tools[2].name}，用途是${tools[2].use}。\n工具設定理由：${toolsReason}\n\n秘密基地／工作室：\n基地類型：${baseType}\n基地用途：${baseUse}\n基地風格：${baseStyle}\n${storyColumnStyleInstruction}\n基地裡一定要有：${items.join("、")}\n基地設定理由：${baseReason}\n\n右側故事欄請依照「右側資料欄風格」呈現，並放入以下文字，字數不要過多，排版要清楚：\n${storyCard}\n\n請在右側故事欄最下方放一個比較明顯的金色鑲嵌式作品編號：作品編號：${workCode}。請做成像金色文字印在卡片上、壓印或鑲嵌在底部牌面上的效果，字體清楚、稍微放大，方便老師一眼辨識，但仍保持整體美觀。\n\n請讓角色的服裝、工具、房間擺設都能看出他的個性、目標和故事。\n不是單純堆很多東西，而是讓每個東西都能說故事。場景中的故事線索以物件、顏色、照片、圖示與擺設來表現，不要依賴大量背景文字。三個重要工具用下方道具欄呈現，避免懸浮、重疊或讓角色手部出錯。\n\n生成前請自我檢查畫面是否合理：\n1. 角色只能有正常的人體結構，避免多手、多腳、手指錯誤、肢體重疊或不自然姿勢。\n2. 角色的雙手要清楚合理，避免同一隻手重複出現，避免手指變形。\n3. 三個重要工具要清楚出現，但不要造成角色手部混亂；請優先放在畫面下方的三格道具欄／工具展示列中，每個工具都要有穩定的承載位置，不要懸浮在空中。\n4. 右側故事欄文字要乾淨可讀，不要擠壓主要角色。\n5. 如果畫面元素太多，請優先保留角色全身、三個工具、秘密基地、右側故事欄與作品編號；角色可以稍微縮小，讓基地場景更完整。\n\n生成前請自我檢查畫面是否合理，並反覆檢查一次再輸出：
+1. 角色只能有正常的人體結構，避免多手、多腳、手指錯誤、肢體重疊、手的方向錯誤或不自然姿勢。
+2. 角色的雙手要清楚合理，避免同一隻手重複出現，避免手指變形。
+3. 三個重要工具要清楚出現，但不要造成角色手部混亂；請優先放在畫面下方的三格道具欄／工具展示列中，每個工具都要有穩定的承載位置，不要懸浮在空中。
+4. 右側故事欄文字要乾淨可讀，不要擠壓主要角色。
+5. 請檢查右側故事欄的文字是否有漏字、錯字、重複文字或不自然斷行。
+6. 除了右側故事欄與底部作品編號，其他場景物件請避免出現可讀文字；若需要白板、便利貼、筆記本或牆面標示，請用圖案、線條、符號或簡單圖示取代，避免像「小夥伴」這類背景文字出錯。
+7. 作品編號要放在右側故事欄底部，做成金色鑲嵌或金色壓印效果，字要清楚、比一般小字更醒目。
+8. 如果畫面元素太多，請優先保留角色全身、三個工具、秘密基地、右側故事欄與作品編號；角色可以稍微縮小，讓基地場景更完整。\n\n整體風格適合國小學生 AI 創意角色設計課程。\n畫面要明亮、清楚、有特色、有故事感。\n請避免恐怖、暴力或過度成熟的風格。\n請避免直接模仿真實人物、電影角色、動漫角色或遊戲角色。`;
+  document.getElementById("summary").textContent=summary;
+  document.getElementById("prompt").textContent=finalPrompt;
+  document.getElementById("copyMsg").textContent="";
+  const reminder=document.getElementById("uploadReminder");if(reminder)reminder.style.display=has==="yes"?"block":"none";
+  toggleStoryColumnAutoButton();
+  const storyOther=document.getElementById("storyColumnStyleOther");
+  if(storyOther){storyOther.style.display="none";storyOther.value="";}
+  const fileBox=document.getElementById("fileNameBox");if(fileBox)fileBox.textContent="建議檔名："+suggestedFileName;
+  goPanel(5);
+}
+async function copyFileName(){const box=document.getElementById("fileNameBox");const text=box?box.textContent.replace("建議檔名：","").trim():"";if(!text){document.getElementById("copyMsg").textContent="尚未產生檔名。";return}try{await navigator.clipboard.writeText(text);document.getElementById("copyMsg").textContent="已複製檔名。"}catch(e){document.getElementById("copyMsg").textContent="無法自動複製檔名，請手動選取。"}}
+async function copyPrompt(){if(!finalPrompt){document.getElementById("copyMsg").textContent="請先完成設定。";return}try{await navigator.clipboard.writeText(finalPrompt);document.getElementById("copyMsg").textContent="已複製，可以貼到 ChatGPT。"}catch(e){document.getElementById("copyMsg").textContent="無法自動複製，請長按右側文字手動複製。"}}
+function clearAll(){document.querySelectorAll("input[type=text],textarea").forEach(e=>e.value="");document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(e=>e.checked=false);document.querySelectorAll("select").forEach(e=>e.selectedIndex=0);document.querySelectorAll(".errorBox").forEach(e=>{e.style.display="none";e.innerHTML=""});["mainGoalOther","tool1Other","tool2Other","tool3Other","toolUse1Other","toolUse2Other","toolUse3Other","baseTypeOther","baseUseOther","baseStyleOther","baseItemsOther1","baseItemsOther2","baseItemsOther3"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display="none"});document.getElementById("faceModelBox").style.display="none";const reminder=document.getElementById("uploadReminder");if(reminder)reminder.style.display="none";toggleStoryColumnAutoButton();
+  const storyOther=document.getElementById("storyColumnStyleOther");
+  if(storyOther){storyOther.style.display="none";storyOther.value="";}
+  const fileBox=document.getElementById("fileNameBox");if(fileBox)fileBox.textContent="";updateBaseItemCount();finalPrompt="";goPanel(1)}
+initOptions();
+</script>
+</body>
+</html>

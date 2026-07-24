@@ -14,7 +14,246 @@
             --bg-light: #f6ff00;        /* 背景淺色：網頁頂部、卡片懸停背景 */
             --bg-dark: #fed7aa;         /* 背景深色：網頁底部、卡片邊框 */
         }
-ｓ
+
+        /* ================================================= */
+/* 吉祥物 2：左側按讚點擊器 */
+/* ================================================= */
+
+.mascot-clicker {
+    position: fixed;
+
+    /* 控制吉祥物位於畫面左側的位置 */
+    left: 28px;
+    bottom: 35px;
+
+    z-index: 998;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 170px;
+}
+
+/* 吉祥物圖片按鈕 */
+.mascot-click-button {
+    width: 125px;
+    height: 125px;
+
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+
+    background-color: transparent;
+    cursor: pointer;
+
+    transition: transform 0.15s ease;
+}
+
+/* 滑鼠移到吉祥物上 */
+.mascot-click-button:hover {
+    transform: scale(1.08);
+}
+
+/* 點擊時縮小，增加按壓感 */
+.mascot-click-button:active {
+    transform: scale(0.9);
+}
+
+/* 吉祥物 2 圖片 */
+.mascot-two-image {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+
+    filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.22));
+
+    animation: mascotTwoFloat 2.5s ease-in-out infinite;
+}
+
+/* 按讚數字區 */
+.mascot-like-counter {
+    margin-top: 8px;
+    padding: 8px 14px;
+
+    color: #ffffff;
+    background-color: var(--accent-color);
+
+    border: 3px solid #ffffff;
+    border-radius: 999px;
+
+    font-size: 0.95rem;
+    font-weight: bold;
+    white-space: nowrap;
+
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* 吉祥物點擊次數歸零按鈕 */
+.mascot-reset-button {
+    margin-top: 7px;
+    padding: 6px 13px;
+
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+
+    color: #ffffff;
+    background-color: #64748b;
+
+    font-size: 0.78rem;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.mascot-reset-button:hover {
+    background-color: #ef4444;
+    transform: translateY(-2px);
+}
+
+.mascot-reset-button:active {
+    transform: scale(0.92);
+}
+
+.mascot-like-counter strong {
+    font-size: 1.1rem;
+}
+
+/* 吉祥物上方的對話泡泡 */
+.mascot-message {
+    position: relative;
+
+    width: 155px;
+    margin-bottom: 14px;
+    padding: 12px 14px;
+
+    color: #334155;
+    background-color: #ffffff;
+
+    border: 3px solid var(--main-color);
+    border-radius: 18px;
+
+    font-size: 0.9rem;
+    font-weight: bold;
+    line-height: 1.5;
+    text-align: center;
+
+    box-shadow: 0 7px 18px rgba(0, 0, 0, 0.16);
+
+    /* 一開始稍微淡化 */
+    opacity: 0.9;
+}
+
+/* 對話泡泡下方的小三角形 */
+.mascot-message::after {
+    content: "";
+
+    position: absolute;
+    left: 50%;
+    bottom: -13px;
+
+    width: 20px;
+    height: 20px;
+
+    background-color: #ffffff;
+    border-right: 3px solid var(--main-color);
+    border-bottom: 3px solid var(--main-color);
+
+    transform: translateX(-50%) rotate(45deg);
+}
+
+/* 點擊後的跳動效果 */
+.mascot-click-button.is-clicked {
+    animation: mascotLikePop 0.35s ease;
+}
+
+/* 對話泡泡說話效果 */
+.mascot-message.is-speaking {
+    animation: messagePop 0.4s ease;
+}
+
+/* 平常漂浮 */
+@keyframes mascotTwoFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* 點擊跳動 */
+@keyframes mascotLikePop {
+    0% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.2) rotate(-6deg);
+    }
+
+    75% {
+        transform: scale(0.95) rotate(4deg);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 對話泡泡彈出 */
+@keyframes messagePop {
+    0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.85);
+    }
+
+    70% {
+        transform: translateY(-3px) scale(1.04);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* 手機版縮小，避免擋住太多內容 */
+@media (max-width: 600px) {
+    .mascot-clicker {
+        left: 10px;
+        bottom: 15px;
+        width: 125px;
+    }
+
+    .mascot-click-button {
+        width: 85px;
+        height: 85px;
+    }
+
+    .mascot-message {
+        width: 115px;
+        padding: 9px;
+        font-size: 0.78rem;
+    }
+
+    .mascot-like-counter {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+    }
+}
+
         /* 全域樣式 */
         body {
             margin: 0;
@@ -273,6 +512,252 @@
         }
 
         /* 懸浮機器人 */
+        /* YouTube 吉祥物對話框 */
+.youtube-dialog {
+    width: min(460px, calc(100% - 36px));
+    padding: 0;
+    border: none;
+    border-radius: 28px;
+    overflow: visible;
+    background: transparent;
+}
+
+/* 對話框出現時的背景 */
+.youtube-dialog::backdrop {
+    background-color: rgba(30, 41, 59, 0.62);
+    backdrop-filter: blur(6px);
+}
+
+/* 對話框白色主體 */
+.dialog-content {
+    position: relative;
+    padding: 88px 32px 30px;
+    text-align: center;
+
+    background:
+        radial-gradient(
+            circle at top,
+            var(--bg-light) 0%,
+            #ffffff 48%
+        );
+
+    border: 5px solid var(--main-color);
+    border-radius: 28px;
+
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.25),
+        0 0 0 8px rgba(255, 255, 255, 0.7);
+
+    animation: dialogPop 0.35s ease;
+}
+
+/* 上方突出來的吉祥物 */
+.dialog-mascot {
+    position: absolute;
+    top: -62px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: 125px;
+    height: 125px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+    border: 5px solid var(--main-color);
+    border-radius: 50%;
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+}
+
+.dialog-mascot img {
+    width: 105px;
+    height: 105px;
+    object-fit: contain;
+    animation: mascotBounce 2.2s ease-in-out infinite;
+}
+
+/* 右上角關閉按鈕 */
+.dialog-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 50%;
+
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #64748b;
+
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.dialog-close:hover {
+    transform: rotate(90deg) scale(1.08);
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* 小標籤 */
+.dialog-tag {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 6px 14px;
+
+    color: #ffffff;
+    background-color: var(--accent-color);
+
+    border-radius: 999px;
+
+    font-size: 0.85rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* 標題 */
+.dialog-text h2 {
+    margin: 4px 0 12px;
+    color: var(--accent-color);
+    font-size: 1.75rem;
+}
+
+/* 說明文字 */
+.dialog-text p {
+    margin: 0 auto 26px;
+    max-width: 350px;
+
+    color: #4b5563;
+    font-size: 1.05rem;
+    line-height: 1.75;
+}
+
+/* 按鈕排列 */
+.dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* 共用按鈕 */
+.dialog-btn {
+    min-width: 145px;
+    padding: 13px 20px;
+
+    border: none;
+    border-radius: 14px;
+
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
+}
+
+.dialog-btn:hover {
+    transform: translateY(-3px);
+}
+
+/* 灰色取消按鈕 */
+.dialog-btn-cancel {
+    color: #475569;
+    background-color: #e2e8f0;
+}
+
+.dialog-btn-cancel:hover {
+    background-color: #cbd5e1;
+    box-shadow: 0 7px 15px rgba(71, 85, 105, 0.2);
+}
+
+/* YouTube 紅色按鈕 */
+.dialog-btn-youtube {
+    color: #ffffff;
+    background: linear-gradient(
+        135deg,
+        #ff0033,
+        #dc2626
+    );
+
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+}
+
+.dialog-btn-youtube:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 9px 20px rgba(220, 38, 38, 0.4);
+}
+
+/* 對話框彈出動畫 */
+@keyframes dialogPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.75) translateY(25px);
+    }
+
+    70% {
+        transform: scale(1.04) translateY(-4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 吉祥物漂浮動畫 */
+@keyframes mascotBounce {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-3deg);
+    }
+
+    50% {
+        transform: translateY(-8px) rotate(3deg);
+    }
+}
+
+/* 手機版 */
+@media (max-width: 520px) {
+    .dialog-content {
+        padding: 78px 20px 24px;
+    }
+
+    .dialog-mascot {
+        width: 110px;
+        height: 110px;
+        top: -55px;
+    }
+
+    .dialog-mascot img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .dialog-text h2 {
+        font-size: 1.45rem;
+    }
+
+    .dialog-buttons {
+        flex-direction: column;
+    }
+
+    .dialog-btn {
+        width: 100%;
+    }
+}
         .floating-robot {
             position: fixed;
             bottom: 40px;
@@ -391,9 +876,9 @@
             <div class="project-card">
                 <img src="遊戲封面1.png " alt="遊戲畫面一" class="project-img">
                 <div class="project-info">
-                    <h3>貓抓老鼠</h3>
+                    <h3>康迪抓柯爾特</h3>
                     <p>這是我這次營隊引以為傲的魔王關卡作品！裡面設計了分數變數、和障礙物，還有超酷的音效。快點擊下方按鈕，進去我的 Scratch 專頁一起挑戰高分吧！</p>
-                    <a href="遊戲網址" target="_blank" class="btn">點我開始玩遊戲一</a>
+                    <a href="https://scratch.mit.edu/projects/1364162342/fullscreen/" target="_blank" class="btn">點我開始玩遊戲一</a>
                 </div>
             </div>
 
@@ -402,7 +887,7 @@
                 <div class="project-info">
                     <h3>閃躲專家</h3>
                     <p>這是我的第二個 Scratch 專案！我寫了碰撞偵測的邏輯，如果碰到柱子就會死掉，最後還做了一個最高紀錄的程式，看誰能拿到最高分！</p>
-                    <a href="遊戲網址" target="_blank" class="btn">點我開始玩遊戲二</a>
+                    <a href="https://scratch.mit.edu/projects/1364162569/fullscreen/" target="_blank" class="btn">點我開始玩遊戲二</a>
                 </div>
             </div>
 
@@ -413,7 +898,7 @@
                     <h3>康迪留斯跑酷</h3>
                     <p>這是我最自豪的作品！這是一個跑酷遊戲，康迪留斯會跳過障礙物，用蘑菇打掉天上的烏鴉，快來挑戰吧！</p>
                     
-                    <a href="https://scratch.mit.edu/projects/1352079686/fullscreen/" target="_blank" class="btn">點我開始玩</a>
+                    <a href="https://scratch.mit.edu/projects/1364164350/fullscreen/" target="_blank" class="btn">點我開始玩</a>
                     
                     <a href="project-detail.html" class="btn btn-secondary">查看學習歷程</a>
                 </div>
@@ -428,7 +913,271 @@
     <footer>
         <p>© 2026 Imagination Lab 想像力實驗室. Made with 💻 and AI.</p>
     </footer>
-    <img src="吉祥物.png" alt="AI 機器人助手" class="floating-robot" onclick="alert('哈囉！我是 Jack 的 AI 助手 Gemini，一起來寫程式吧！')">
+    <img
+    src="吉祥物.png"
+    alt="AI 機器人助手"
+    class="floating-robot"
+    id="youtubeMascot"
+>
+<dialog id="youtubeDialog" class="youtube-dialog">
+    <div class="dialog-content">
 
+        <button id="closeDialog" class="dialog-close" aria-label="關閉">
+            ×
+        </button>
+
+        <div class="dialog-mascot">
+            <img src="吉祥物.png" alt="吉祥物">
+        </div>
+
+        <div class="dialog-text">
+            <span class="dialog-tag">吉祥物推薦</span>
+
+            <h2>要一起去看 YouTube 嗎？</h2>
+
+            <p>
+                快來看我打球的影片吧！⚾️
+                
+            </p>
+        </div>
+
+        <div class="dialog-buttons">
+            <button id="cancelYoutube" class="dialog-btn dialog-btn-cancel">
+                下次再說
+            </button>
+
+            <button id="goYoutube" class="dialog-btn dialog-btn-youtube">
+                ▶ 前往 YouTube
+            </button>
+        </div>
+
+    </div>
+</dialog>
+<script>
+    const mascot = document.getElementById("youtubeMascot");
+    const dialog = document.getElementById("youtubeDialog");
+    const closeDialog = document.getElementById("closeDialog");
+    const cancelYoutube = document.getElementById("cancelYoutube");
+    const goYoutube = document.getElementById("goYoutube");
+    closeDialog.addEventListener("click", function () {
+    dialog.close();
+});
+cancelYoutube.addEventListener("click", function () {
+    dialog.close();
+});
+
+    mascot.addEventListener("click", function () {
+        dialog.showModal();
+    });
+
+    closeDialog.addEventListener("click", function () {
+        dialog.close();
+    });
+
+    goYoutube.addEventListener("click", function () {
+        window.open("https://www.youtube.com/@liutristan19", "_blank");
+        dialog.close();
+    });
+</script>
+<!-- 吉祥物 2：按讚點擊器 -->
+<div class="mascot-clicker" id="mascotClicker">
+
+    <div class="mascot-message" id="mascotMessage">
+        現在是 <span id="currentTime">--:--</span><br>
+        謝謝你幫我按讚！
+    </div>
+
+    <button
+        type="button"
+        class="mascot-click-button"
+        id="mascotLikeButton"
+        aria-label="點擊吉祥物按讚"
+    >
+        <img
+            src="吉祥物2.png"
+            alt="按讚吉祥物"
+            class="mascot-two-image"
+        >
+    </button>
+
+    <div class="mascot-like-counter">
+        ❤️ 按讚次數：
+        <strong id="mascotLikeCount">0</strong>
+    </div>
+    <button
+    type="button"
+    class="mascot-reset-button"
+    id="mascotResetButton"
+>
+    ↺ 歸零
+</button>
+
+</div>
+<script>
+    const mascotLikeButton =
+        document.getElementById("mascotLikeButton");
+
+    const mascotLikeCount =
+        document.getElementById("mascotLikeCount");
+
+        const mascotResetButton =
+    document.getElementById("mascotResetButton");
+
+    const mascotMessage =
+        document.getElementById("mascotMessage");
+
+    const currentTime =
+        document.getElementById("currentTime");
+
+    /*
+     * 從瀏覽器讀取之前的按讚數。
+     * 第一次開啟網頁時，若沒有紀錄，就從 0 開始。
+     */
+    let likeCount =
+        Number(localStorage.getItem("mascotLikeCount")) || 0;
+
+    mascotLikeCount.textContent = likeCount;
+
+    /*
+     * 取得目前時間，格式為「上午 9:05」或「下午 3:20」。
+     */
+    function getCurrentTime() {
+        const now = new Date();
+
+        return now.toLocaleTimeString("zh-TW", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true
+        });
+    }
+
+    /*
+     * 更新對話泡泡中的時間。
+     */
+    function updateMascotTime() {
+        currentTime.textContent = getCurrentTime();
+    }
+
+    /*
+     * 網頁載入時先顯示一次正確時間。
+     */
+    updateMascotTime();
+
+    /*
+     * 每 30 秒更新一次時間，
+     * 避免網頁開啟很久後時間沒有改變。
+     */
+    setInterval(updateMascotTime, 30000);
+
+    /*
+     * 點擊吉祥物時：
+     * 1. 按讚數加 1
+     * 2. 保存按讚數
+     * 3. 更新時間
+     * 4. 播放動畫
+     */
+    mascotLikeButton.addEventListener("click", function () {
+        likeCount++;
+
+        mascotLikeCount.textContent = likeCount;
+
+        localStorage.setItem(
+            "mascotLikeCount",
+            likeCount
+        );
+
+        updateMascotTime();
+
+        mascotMessage.innerHTML =
+            "現在是 <span id='currentTime'>" +
+            getCurrentTime() +
+            "</span><br>" +
+            getLikeMessage(likeCount);
+
+        restartAnimation(
+            mascotLikeButton,
+            "is-clicked"
+        );
+
+        restartAnimation(
+            mascotMessage,
+            "is-speaking"
+        );
+    });
+
+    /*
+     * 根據按讚次數，改變吉祥物說的話。
+     */
+    function getLikeMessage(count) {
+       if (count >= 2000) {
+            return "67";
+        } 
+        if (count >= 1000) {
+            return "太猛了！已經突破 1000 個讚！";
+        }
+        if (count >= 100) {
+            return "太厲害了！已經突破 100 個讚！";
+        }
+
+        if (count >= 50) {
+            return "謝謝你！我充滿能量了！";
+        }
+
+        if (count >= 20) {
+            return "好多讚！繼續幫我加油！";
+        }
+
+        if (count >= 10) {
+            return "已經有 10 個讚了！";
+        }
+
+        return "謝謝你幫我按讚！";
+    }
+
+    /*
+     * 讓動畫可以在每次點擊時重新播放。
+     */
+    function restartAnimation(element, className) {
+        element.classList.remove(className);
+
+        void element.offsetWidth;
+
+        element.classList.add(className);
+    }
+    mascotResetButton.addEventListener("click", function () {
+    const confirmReset = confirm(
+        "確定要將吉祥物的按讚次數歸零嗎？"
+    );
+
+    if (!confirmReset) {
+        return;
+    }
+
+    // 將變數歸零
+    likeCount = 0;
+
+    // 更新畫面上的數字
+    mascotLikeCount.textContent = likeCount;
+
+    // 清除瀏覽器保存的按讚紀錄
+    localStorage.removeItem("mascotLikeCount");
+
+    // 更新目前時間
+    updateMascotTime();
+
+    // 修改吉祥物說的話
+    mascotMessage.innerHTML =
+        "現在是 <span id='currentTime'>" +
+        getCurrentTime() +
+        "</span><br>" +
+        "按讚次數已經歸零囉！";
+
+    // 播放對話泡泡動畫
+    restartAnimation(
+        mascotMessage,
+        "is-speaking"
+    );
+});
+</script>
 </body>
 </html>

@@ -33,7 +33,7 @@
             color: #d1d8e0;
         }
 
-        /* 按鈕容器 (使用 Grid 排版) */
+        /* 按鈕容器 (Grid 排版) */
         .game-menu {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -66,19 +66,21 @@
         .game-btn:nth-child(3) { background-color: #ffa502; box-shadow: 0 8px 0 #cc8400, 0 15px 20px rgba(0,0,0,0.3); }
         .game-btn:nth-child(4) { background-color: #1e90ff; box-shadow: 0 8px 0 #0c75d6, 0 15px 20px rgba(0,0,0,0.3); }
         .game-btn:nth-child(5) { background-color: #9b59b6; box-shadow: 0 8px 0 #7a4291, 0 15px 20px rgba(0,0,0,0.3); }
+        .game-btn:nth-child(6) { background-color: #00cec9; box-shadow: 0 8px 0 #00a8a3, 0 15px 20px rgba(0,0,0,0.3); }
+        .game-btn:nth-child(7) { background-color: #fd79a8; box-shadow: 0 8px 0 #e84393, 0 15px 20px rgba(0,0,0,0.3); }
 
         /* 按鈕懸停效果 */
         .game-btn:hover {
             filter: brightness(1.1);
         }
 
-        /* 按鈕點擊(按下)效果 */
+        /* 按鈕點擊效果 */
         .game-btn:active {
             transform: translateY(8px);
             box-shadow: 0 0px 0 transparent, 0 5px 10px rgba(0,0,0,0.3);
         }
 
-        /* 圖示 (使用簡單的 Emoji 代替) */
+        /* 圖示 依摸吉 */
         .icon {
             margin-right: 15px;
             font-size: 2rem;
@@ -103,7 +105,14 @@
         <a href="重力四連棋.html" class="game-btn">
             <span class="icon">♟</span> 重力四連棋
         </a>
-        <a href="game5.html" class="game-btn">
+        <a href="對對碰小遊戲.html" class="game-btn">
+            <span class="icon">🃏</span> 對對碰小遊戲
+        </a>
+        <a href="引水入杯小遊戲.html" class="game-btn">
+            <span class="icon">🥛</span> 引水入杯小遊戲
+        </a>
+        <!-- 敬請期待 -->
+        <a href="game7.html" class="game-btn">
             <span class="icon">😓</span> 🧐敬請期待
         </a>
     </div>

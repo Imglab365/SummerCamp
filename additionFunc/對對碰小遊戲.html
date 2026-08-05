@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>萬物對對碰 - 想像力實驗室</title>
+    <style>
+        :root {
+            --bg-color: #f0fdf4;
+            --panel-color: #ffffff;
+            --text-color: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-gold: #fbbf24;
+            --accent-red: #ef4444;
+            --border-color: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        /* 想像力實驗室 Logo */
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--panel-color);
+            padding: 10px 25px;
+            border-radius: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            border: 2px solid var(--accent-blue);
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #ff7675, #f1c40f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 主容器 */
+        .game-wrapper {
+            background: var(--panel-color);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+        }
+
+        /* 選擇畫面 */
+        .menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .menu-title { font-size: 2.5rem; color: var(--accent-green); margin-bottom: 5px; transition: color 0.3s; }
+
+        .btn-group { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px;}
+        
+        .mode-btn, .diff-btn, .theme-btn {
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .mode-btn.active, .diff-btn.active, .theme-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .start-btn {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3);
+            transition: transform 0.2s;
+        }
+        .start-btn:hover { transform: scale(1.05); }
+
+        .section-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 15px;
+            width: 100%;
+        }
+
+        /* 遊戲畫面 */
+        .game-screen { display: none; flex-direction: column; gap: 20px; }
+
+        /* 計分板 */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 2px solid var(--border-color);
+        }
+
+        .player-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .player-score.active-turn {
+            background: #fffbeb;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+            transform: scale(1.05);
+        }
+
+        .player-name { font-size: 1.2rem; font-weight: bold; color: #475569; }
+        .score-num { font-size: 2rem; font-weight: 900; color: var(--accent-blue); }
+        .active-turn .score-num { color: var(--accent-gold); }
+
+        .turn-indicator {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-green);
+            text-align: center;
+            padding: 5px 15px;
+            background: #dcfce7;
+            border-radius: 20px;
+            border: 2px solid #86efac;
+        }
+
+        /* 36張牌 6x6 網格 */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            perspective: 1000px;
+        }
+
+        @media (max-width: 500px) {
+            .board { gap: 5px; }
+            .scoreboard { padding: 10px; }
+            .player-score { padding: 5px 10px; }
+            .player-name { font-size: 1rem; }
+            .score-num { font-size: 1.5rem; }
+            .turn-indicator { font-size: 1rem; }
+            .mode-btn, .diff-btn, .theme-btn { padding: 8px 15px; font-size: 1rem; }
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+
+        .card.flipped, .card.matched {
+            transform: rotateY(180deg);
+        }
+
+        /* 配對成功後：變灰階閒置、不可點擊 */
+        .card.matched {
+            cursor: default;
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        .card-face, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 500px) {
+            .card-face, .card-back { font-size: 1.8rem; border-radius: 8px; }
+        }
+
+        /* 背面 (蓋著的樣子) */
+        .card-back {
+            background: linear-gradient(135deg, #3b82f6, #2dd4bf);
+            border: 3px solid #2563eb;
+            color: white;
+            transition: background 0.3s;
+        }
+        .card-back::after {
+            content: '❓';
+            font-size: 1.5rem;
+            opacity: 0.5;
+        }
+
+        /* 正面 */
+        .card-face {
+            background: #ffffff;
+            border: 3px solid var(--border-color);
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-face {
+            border-color: #94a3b8;
+            background: #f1f5f9;
+        }
+
+        /* 結束畫面 Modal 彈出視窗 (置中防重疊) */
+        .modal-backdrop {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            z-index: 40;
+            display: none;
+            backdrop-filter: blur(3px);
+        }
+
+        .end-screen {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            border: 4px solid var(--accent-gold);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 40px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 50;
+            display: none;
+            width: 85%;
+            max-width: 400px;
+        }
+
+        .winner-text {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent-gold);
+            text-shadow: 0 2px 10px rgba(251, 191, 36, 0.4);
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <a href="#" class="logo-container" onclick="event.preventDefault();">
+        <span class="logo-icon">✨</span>
+        <span>想像力實驗室</span>
+    </a>
+
+    <div class="game-wrapper">
+        
+        <!-- 選單畫面 -->
+        <div class="menu-screen" id="menu-screen">
+            <h1 class="menu-title" id="main-title">🍎 水果對對碰 🍇</h1>
+            
+            <div class="section-box">
+                <h3>選擇遊戲主題</h3>
+                <div class="btn-group">
+                    <button class="theme-btn active" onclick="setTheme('fruits')">🍎 水果</button>
+                    <button class="theme-btn" onclick="setTheme('fish')">🐟 海洋</button>
+                    <button class="theme-btn" onclick="setTheme('animals')">🐶 動物</button>
+                    <button class="theme-btn" onclick="setTheme('signs')">🛑 號誌</button>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h3>選擇遊戲模式</h3>
+                <div class="btn-group">
+                    <button class="mode-btn active" onclick="setMode('1p')">單人模式 (VS 電腦)</button>
+                    <button class="mode-btn" onclick="setMode('2p')">雙人模式 (VS 朋友)</button>
+                </div>
+            </div>
+
+            <div class="section-box" id="difficulty-section">
+                <h3>選擇電腦難度</h3>
+                <div class="btn-group">
+                    <button class="diff-btn active" onclick="setDiff('easy')">簡單</button>
+                    <button class="diff-btn" onclick="setDiff('medium')">中等</button>
+                    <button class="diff-btn" onclick="setDiff('hard')">困難</button>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">開始遊戲</button>
+        </div>
+
+        <!-- 遊戲主畫面 -->
+        <div class="game-screen" id="game-screen">
+            
+            <div class="scoreboard">
+                <div class="player-score" id="p1-panel">
+                    <div class="player-name">玩家 1</div>
+                    <div class="score-num" id="p1-score">0</div>
+                </div>
+
+                <div class="turn-indicator" id="turn-indicator">玩家 1 的回合</div>
+
+                <div class="player-score" id="p2-panel">
+                    <div class="player-name" id="p2-name">電腦</div>
+                    <div class="score-num" id="p2-score">0</div>
+                </div>
+            </div>
+
+            <div class="board" id="board">
+                <!-- 卡片由 JS 產生 -->
+            </div>
+
+        </div>
+
+        <!-- 結束畫面 Popup -->
+        <div class="modal-backdrop" id="end-backdrop"></div>
+        <div class="end-screen" id="end-screen">
+            <div class="winner-text" id="winner-text">玩家 1 獲勝！</div>
+            <div style="font-size:1.8rem; color:#475569; font-weight:bold;" id="final-score-text">10 : 8</div>
+            <button class="start-btn" style="font-size:1.2rem; padding: 10px 30px;" onclick="backToMenu()">回到選單</button>
+        </div>
+
+    </div>
+
+    <script>
+        // 音效系統
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                if (type === 'flip') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                } else if (type === 'match') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, ctx.currentTime); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                } else if (type === 'win') {
+                    osc.type = 'square'; osc.frequency.setValueAtTime(523.25, ctx.currentTime); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+                }
+                
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.6);
+            } catch (e) {}
+        }
+
+        // 主題資料庫
+        const THEMES = {
+            fruits: {
+                title: '🍎 水果對對碰 🍇',
+                color: '#22c55e',
+                bg: 'linear-gradient(135deg, #3b82f6, #2dd4bf)',
+                items: ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🥑']
+            },
+            fish: {
+                title: '🐟 海洋對對碰 🐠',
+                color: '#0ea5e9',
+                bg: 'linear-gradient(135deg, #0284c7, #38bdf8)',
+                items: ['🐟', '🐠', '🐡', '🦈', '🐬', '🐳', '🐋', '🐙', '🦑', '🦐', '🦞', '🦀', '🐚', '🪼', '🦭', '🐢', '🐊', '🐸']
+            },
+            animals: {
+                title: '🐶 動物對對碰 🐱',
+                color: '#d97706',
+                bg: 'linear-gradient(135deg, #d97706, #fbbf24)',
+                items: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐻‍❄️', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧']
+            },
+            signs: {
+                title: '🛑 號誌對對碰 🚥',
+                color: '#ef4444',
+                bg: 'linear-gradient(135deg, #475569, #94a3b8)',
+                items: ['🛑', '⛔', '🚫', '🚳', '🚭', '🚯', '🚱', '🚷', '📵', '🔞', '☢️', '☣️', '⚠️', '🚸', '🚥', '🚦', '🚧', '🚨']
+            }
+        };
+        
+        let currentTheme = 'fruits';
+        let mode = '1p'; // '1p' or '2p'
+        let difficulty = 'easy'; // 'easy', 'medium', 'hard'
+        let cards = [];
+        let scores = [0, 0];
+        let currentTurn = 0; // 0 for P1, 1 for P2/AI
+        let flippedIndices = [];
+        let matchedIndices = [];
+        let isLocked = false;
+        
+        // AI 記憶庫：記錄 { index: fruit }
+        let aiMemory = {};
+
+        // UI 綁定
+        function setTheme(newTheme) {
+            currentTheme = newTheme;
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const titleEl = document.getElementById('main-title');
+            titleEl.textContent = THEMES[currentTheme].title;
+            titleEl.style.color = THEMES[currentTheme].color;
+        }
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const diffSection = document.getElementById('difficulty-section');
+            if (mode === '2p') {
+                diffSection.style.display = 'none';
+            } else {
+                diffSection.style.display = 'flex';
+            }
+        }
+
+        function setDiff(newDiff) {
+            difficulty = newDiff;
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function backToMenu() {
+            document.getElementById('end-backdrop').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+        }
+
+        function startGame() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            document.getElementById('p2-name').textContent = mode === '1p' ? `電腦 (${difficulty === 'easy' ? '簡單' : difficulty === 'medium' ? '中等' : '困難'})` : '玩家 2';
+            
+            // 初始化變數
+            scores = [0, 0];
+            currentTurn = 0;
+            flippedIndices = [];
+            matchedIndices = [];
+            isLocked = false;
+            aiMemory = {};
+            
+            updateScoreUI();
+            updateTurnUI();
+
+            // 生成 36 張牌 (從選擇的主題庫抓取)
+            const activeItems = THEMES[currentTheme].items;
+            cards = [...activeItems, ...activeItems];
+            
+            // Fisher-Yates 洗牌
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            const cardBg = THEMES[currentTheme].bg;
+
+            cards.forEach((item, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.dataset.index = index;
+                
+                cardEl.innerHTML = `
+                    <div class="card-back" style="background: ${cardBg}"></div>
+                    <div class="card-face">${item}</div>
+                `;
+                
+                cardEl.addEventListener('click', () => handleCardClick(index));
+                board.appendChild(cardEl);
+            });
+        }
+
+        function handleCardClick(index) {
+            if (isLocked) return;
+            if (flippedIndices.includes(index)) return;
+            if (matchedIndices.includes(index)) return;
+
+            // 翻牌
+            playSound('flip');
+            const cardEls = document.querySelectorAll('.card');
+            cardEls[index].classList.add('flipped');
+            flippedIndices.push(index);
+
+            // 更新 AI 記憶 (模擬玩家或 AI 看到這張牌)
+            rememberCard(index, cards[index]);
+
+            if (flippedIndices.length === 2) {
+                checkMatch();
+            }
+        }
+
+        function rememberCard(index, item) {
+            // 根據難度決定 AI 的記憶率
+            let memoryRate = 0;
+            if (difficulty === 'easy') memoryRate = 0.3;
+            else if (difficulty === 'medium') memoryRate = 0.7;
+            else if (difficulty === 'hard') memoryRate = 1.0;
+
+            if (mode === '1p' && Math.random() < memoryRate) {
+                aiMemory[index] = item;
+            }
+        }
+
+        function checkMatch() {
+            isLocked = true;
+            const [idx1, idx2] = flippedIndices;
+            const cardEls = document.querySelectorAll('.card');
+
+            if (cards[idx1] === cards[idx2]) {
+                // 配對成功
+                setTimeout(() => {
+                    playSound('match');
+                    cardEls[idx1].classList.add('matched');
+                    cardEls[idx2].classList.add('matched');
+                    matchedIndices.push(idx1, idx2);
+                    
+                    // 從記憶中移除已配對的
+                    delete aiMemory[idx1];
+                    delete aiMemory[idx2];
+
+                    scores[currentTurn]++;
+                    updateScoreUI();
+                    
+                    flippedIndices = [];
+                    isLocked = false;
+
+                    checkWin();
+
+                    // 配對成功，同一個人繼續！(如果還沒結束)
+                    if (matchedIndices.length < 36 && mode === '1p' && currentTurn === 1) {
+                        setTimeout(aiTurn, 1000);
+                    }
+                }, 500);
+            } else {
+                // 配對失敗
+                setTimeout(() => {
+                    cardEls[idx1].classList.remove('flipped');
+                    cardEls[idx2].classList.remove('flipped');
+                    flippedIndices = [];
+                    
+                    // 換人
+                    currentTurn = currentTurn === 0 ? 1 : 0;
+                    updateTurnUI();
+                    isLocked = false;
+
+                    if (mode === '1p' && currentTurn === 1) {
+                        setTimeout(aiTurn, 1000);
+                    }
+                }, 1200);
+            }
+        }
+
+        function updateScoreUI() {
+            document.getElementById('p1-score').textContent = scores[0];
+            document.getElementById('p2-score').textContent = scores[1];
+        }
+
+        function updateTurnUI() {
+            const p1Panel = document.getElementById('p1-panel');
+            const p2Panel = document.getElementById('p2-panel');
+            const indicator = document.getElementById('turn-indicator');
+
+            if (currentTurn === 0) {
+                p1Panel.classList.add('active-turn');
+                p2Panel.classList.remove('active-turn');
+                indicator.textContent = '玩家 1 的回合';
+                indicator.style.color = '#3b82f6';
+                indicator.style.borderColor = '#93c5fd';
+                indicator.style.background = '#eff6ff';
+            } else {
+                p1Panel.classList.remove('active-turn');
+                p2Panel.classList.add('active-turn');
+                indicator.textContent = mode === '1p' ? '電腦思考中...' : '玩家 2 的回合';
+                indicator.style.color = '#ef4444';
+                indicator.style.borderColor = '#fca5a5';
+                indicator.style.background = '#fef2f2';
+            }
+        }
+
+        function checkWin() {
+            if (matchedIndices.length === 36) {
+                setTimeout(() => {
+                    playSound('win');
+                    // 彈出置中的 Modal 遮罩
+                    const backdrop = document.getElementById('end-backdrop');
+                    const endScreen = document.getElementById('end-screen');
+                    const winnerText = document.getElementById('winner-text');
+                    const finalScore = document.getElementById('final-score-text');
+
+                    backdrop.style.display = 'block';
+                    endScreen.style.display = 'flex';
+                    finalScore.textContent = `${scores[0]} : ${scores[1]}`;
+
+                    if (scores[0] > scores[1]) {
+                        winnerText.textContent = '玩家 1 獲勝！🏆';
+                        winnerText.style.color = '#fbbf24';
+                    } else if (scores[1] > scores[0]) {
+                        winnerText.textContent = mode === '1p' ? '電腦獲勝！🤖' : '玩家 2 獲勝！🏆';
+                        winnerText.style.color = '#ef4444';
+                    } else {
+                        winnerText.textContent = '平手！🤝';
+                        winnerText.style.color = '#3b82f6';
+                    }
+                }, 1000);
+            }
+        }
+
+        // ==========================================
+        // 電腦 AI 邏輯
+        // ==========================================
+        function getUnflippedIndices() {
+            let unflipped = [];
+            for (let i = 0; i < 36; i++) {
+                if (!matchedIndices.includes(i) && !flippedIndices.includes(i)) {
+                    unflipped.push(i);
+                }
+            }
+            return unflipped;
+        }
+
+        function findKnownPair() {
+            let seenItems = {};
+            for (let idx in aiMemory) {
+                let item = aiMemory[idx];
+                if (seenItems[item] !== undefined) {
+                    return [seenItems[item], parseInt(idx)]; // 找到一對了！
+                }
+                seenItems[item] = parseInt(idx);
+            }
+            return null;
+        }
+
+        function aiTurn() {
+            if (matchedIndices.length === 36 || currentTurn === 0) return; // 防呆
+
+            // 1. 檢查記憶中有沒有已經湊成一對的
+            let knownPair = findKnownPair();
+            
+            // 決定 AI 智商發揮的機率
+            let executeMemory = false;
+            if (difficulty === 'hard') executeMemory = true;
+            else if (difficulty === 'medium' && Math.random() > 0.3) executeMemory = true;
+            else if (difficulty === 'easy' && Math.random() > 0.7) executeMemory = true;
+
+            if (knownPair && executeMemory) {
+                // AI 知道一對，直接翻！
+                handleCardClick(knownPair[0]);
+                setTimeout(() => {
+                    if (currentTurn === 1) handleCardClick(knownPair[1]);
+                }, 800);
+            } else {
+                // 2. 如果不知道，或者機率沒觸發，就隨機翻第一張
+                let unflipped = getUnflippedIndices();
+                // 為了讓 AI 看起來更聰明，不要隨機翻已經在記憶裡且沒配對的牌(除非是 Easy)
+                let smartUnflipped = unflipped.filter(idx => aiMemory[idx] === undefined);
+                if (smartUnflipped.length === 0 || difficulty === 'easy') {
+                    smartUnflipped = unflipped; // 退回完全隨機
+                }
+                
+                let randomIdx1 = smartUnflipped[Math.floor(Math.random() * smartUnflipped.length)];
+                handleCardClick(randomIdx1);
+
+                // 3. 翻開第一張後，檢查這張圖案是否在記憶中有另一半
+                setTimeout(() => {
+                    if (currentTurn === 0) return; // 狀態已改變防呆
+
+                    let firstItem = cards[randomIdx1];
+                    let memoryMatchIdx = null;
+
+                    for (let idx in aiMemory) {
+                        if (aiMemory[idx] === firstItem && parseInt(idx) !== randomIdx1) {
+                            memoryMatchIdx = parseInt(idx);
+                            break;
+                        }
+                    }
+
+                    if (memoryMatchIdx !== null && executeMemory) {
+                        // 記憶裡有！翻開它
+                        handleCardClick(memoryMatchIdx);
+                    } else {
+                        // 真的不知道，隨機翻第二張
+                        let unflipped2 = getUnflippedIndices();
+                        // 避免翻到剛剛那張
+                        unflipped2 = unflipped2.filter(i => i !== randomIdx1);
+                        let randomIdx2 = unflipped2[Math.floor(Math.random() * unflipped2.length)];
+                        handleCardClick(randomIdx2);
+                    }
+                }, 800);
+            }
+        }
+
+    </script>
+</body>
+</html>

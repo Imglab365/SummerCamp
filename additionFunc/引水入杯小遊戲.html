@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>引水入杯 - 想像力實驗室</title>
+    <!-- 引入 Matter.js 物理引擎 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --panel-color: #ffffff;
+            --text-color: #0f172a;
+            --accent-blue: #0ea5e9;
+            --accent-green: #22c55e;
+            --accent-gold: #f59e0b;
+            --accent-brown: #78350f;
+            --border-color: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* 想像力實驗室 Logo */
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--panel-color);
+            padding: 10px 25px;
+            border-radius: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            border: 2px solid var(--accent-blue);
+            margin-bottom: 15px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #0ea5e9, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 主容器 */
+        .game-wrapper {
+            background: var(--panel-color);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            border: 4px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 選單畫面 */
+        .menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 600px;
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%);
+        }
+
+        .menu-title { font-size: 3rem; color: var(--accent-blue); margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .rules-box {
+            background: #ffffff;
+            border: 2px solid var(--accent-blue);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.1);
+        }
+        .rules-title { font-weight: bold; font-size: 1.2rem; color: var(--accent-blue); margin-bottom: 5px; }
+        .rules-desc { font-size: 1.05rem; color: #475569; line-height: 1.6; }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .level-btn {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 4px solid var(--accent-blue);
+            background: #ffffff;
+            color: var(--accent-blue);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+        }
+
+        .level-btn:hover:not(.locked) {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(14, 165, 233, 0.4);
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .level-btn.locked {
+            border-color: #cbd5e1;
+            color: #94a3b8;
+            background: #f1f5f9;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 遊戲畫面 */
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 600px;
+            position: relative;
+        }
+
+        .game-hud {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-left, .hud-right {
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .hud-btn {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .hud-btn:hover { background: #f1f5f9; border-color: #94a3b8; }
+
+        .hud-stat {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #8b5a2b; /* 底色，挖開泥土後顯露的顏色 */
+            cursor: crosshair;
+        }
+
+        /* 彈出視窗 */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            display: none;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 4px solid var(--accent-blue);
+            transform: scale(0.9);
+            animation: popIn 0.3s forwards;
+            min-width: 350px;
+        }
+
+        @keyframes popIn { to { transform: scale(1); } }
+
+        .modal-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 10px; }
+        .win-title { color: var(--accent-blue); }
+
+        .modal-desc { font-size: 1.2rem; color: #475569; margin-bottom: 25px; }
+
+        .modal-btns { display: flex; gap: 15px; justify-content: center; }
+
+        .m-btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            transition: transform 0.2s;
+        }
+        .m-btn:hover { transform: scale(1.05); }
+        .btn-secondary { background: #94a3b8; box-shadow: 0 4px 15px rgba(148, 163, 184, 0.4); }
+        .btn-blue { background: var(--accent-blue); box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
+
+    </style>
+</head>
+<body>
+
+    <a href="#" class="logo-container" onclick="event.preventDefault();">
+        <span class="logo-icon">💧</span>
+        <span>想像力實驗室</span>
+    </a>
+
+    <div class="game-wrapper">
+        <!-- 主選單 -->
+        <div class="menu-screen" id="menu-screen">
+            <h1 class="menu-title">💧 引水入杯</h1>
+            
+            <div class="rules-box">
+                <div class="rules-title">📜 遊戲規則</div>
+                <div class="rules-desc">
+                    利用滑鼠/手指在畫面上輕輕滑動，可以<strong>精確挖開泥土</strong>。<br>
+                    引導上方積水遵循重力流動，想辦法避開石頭障礙物。<br>
+                    <strong>只要杯子收集到足夠的水量</strong>，就能通關！
+                </div>
+            </div>
+            
+            <div class="level-grid" id="level-grid">
+                <!-- 關卡按鈕由 JS 生成 -->
+            </div>
+        </div>
+
+        <!-- 遊戲畫面 -->
+        <div class="game-screen" id="game-screen">
+            <div class="game-hud">
+                <div class="hud-left">
+                    <button class="hud-btn" onclick="returnToMenu()">❮ 返回選單</button>
+                    <button class="hud-btn" onclick="restartLevel()">↻ 重新開始</button>
+                </div>
+                <div class="hud-right">
+                    <div class="hud-stat" id="level-display">關卡 1</div>
+                    <div class="hud-stat" style="color:var(--accent-blue)">進度: <span id="water-display">0 / 40</span> 滴</div>
+                </div>
+            </div>
+
+            <!-- Canvas for Physics Rendering -->
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+            <!-- 彈出視窗 -->
+            <div class="modal-overlay" id="modal-overlay">
+                <div class="modal-box">
+                    <h2 class="modal-title win-title" id="modal-title">關卡完成！</h2>
+                    <p class="modal-desc" id="modal-desc">水杯已經裝滿了！</p>
+                    <div class="modal-btns" id="modal-btns">
+                        <button class="m-btn btn-secondary" onclick="returnToMenu()">回到主選單</button>
+                        <button class="m-btn btn-blue" id="next-level-btn" onclick="nextLevel()">下一關 ❯</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 音效系統
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                if (type === 'dig') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.03, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                } else if (type === 'drop') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(600 + Math.random()*200, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.02, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                } else if (type === 'win') {
+                    osc.type = 'square'; osc.frequency.setValueAtTime(523.25, ctx.currentTime); osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+                }
+                
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.6);
+            } catch (e) {}
+        }
+
+        // Matter.js 模組
+        const Engine = Matter.Engine,
+              Runner = Matter.Runner,
+              Bodies = Matter.Bodies,
+              Composite = Matter.Composite;
+
+        const TOTAL_LEVELS = 10;
+        let unlockedLevel = 1; // 移除 localStorage，每次重新整理都從第 1 關開始
+        
+        let currentLevelIndex = 1;
+        let engine, runner;
+        
+        let waterParticles = [];
+        let dirtBlocks = [];
+        let stoneBlocks = [];
+        let cupParts = [];
+        let cupBounds = {};
+        
+        let targetWater = 40;
+        let collectedWater = 0;
+        let isGameOver = false;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const DIRT_SIZE = 10; 
+        const BRUSH_RADIUS = 20; 
+
+        // 滑鼠/觸控挖土邏輯
+        let isMouseDown = false;
+        let lastMousePos = null;
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            if(e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        function handlePointerDown(e) { isMouseDown = true; lastMousePos = getMousePos(e); dig(lastMousePos.x, lastMousePos.y); }
+        function handlePointerUp() { isMouseDown = false; lastMousePos = null; }
+        function handlePointerMove(e) {
+            if (!isMouseDown) return;
+            const pos = getMousePos(e);
+            
+            if (lastMousePos) {
+                const dist = Math.hypot(pos.x - lastMousePos.x, pos.y - lastMousePos.y);
+                const steps = Math.max(1, Math.ceil(dist / 5)); 
+                for(let i=1; i<=steps; i++) {
+                    const ix = lastMousePos.x + (pos.x - lastMousePos.x) * (i/steps);
+                    const iy = lastMousePos.y + (pos.y - lastMousePos.y) * (i/steps);
+                    dig(ix, iy);
+                }
+            } else {
+                dig(pos.x, pos.y);
+            }
+            lastMousePos = pos;
+        }
+
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mouseup', handlePointerUp);
+        canvas.addEventListener('mousemove', handlePointerMove);
+        canvas.addEventListener('touchstart', handlePointerDown, {passive: true});
+        window.addEventListener('touchend', handlePointerUp);
+        canvas.addEventListener('touchmove', handlePointerMove, {passive: true});
+
+        function dig(x, y) {
+            if (isGameOver) return;
+            let dug = false;
+            const remainingDirt = [];
+            for (let i = 0; i < dirtBlocks.length; i++) {
+                const b = dirtBlocks[i];
+                if (Math.hypot(b.position.x - x, b.position.y - y) < BRUSH_RADIUS) {
+                    Composite.remove(engine.world, b);
+                    dug = true;
+                } else {
+                    remainingDirt.push(b);
+                }
+            }
+            dirtBlocks = remainingDirt;
+            if (dug) {
+                if(Math.random() > 0.85) playSound('dig');
+            }
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('level-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= TOTAL_LEVELS; i++) {
+                const btn = document.createElement('div');
+                btn.className = `level-btn ${i > unlockedLevel ? 'locked' : ''}`;
+                btn.textContent = i;
+                if (i <= unlockedLevel) {
+                    btn.onclick = () => loadLevel(i);
+                }
+                grid.appendChild(btn);
+            }
+        }
+
+        function returnToMenu() {
+            if(runner) Runner.stop(runner);
+            if(engine) Engine.clear(engine);
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+            renderMenu();
+        }
+
+        function restartLevel() { loadLevel(currentLevelIndex); }
+        function nextLevel() {
+            if (currentLevelIndex < TOTAL_LEVELS) loadLevel(currentLevelIndex + 1);
+            else returnToMenu();
+        }
+
+        // 關卡資料設計
+        const LEVEL_DATA = {
+            1: {
+                waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
+                cup: { x: 400, y: 550 },
+                stones: [],
+                dirtY: 150 
+            },
+            2: {
+                waterSpawn: { x: 150, y: 50, w: 100, h: 80 },
+                cup: { x: 650, y: 550 },
+                stones: [],
+                dirtY: 150
+            },
+            3: {
+                waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
+                cup: { x: 400, y: 550 },
+                stones: [
+                    { x: 400, y: 300, w: 250, h: 30 } 
+                ],
+                dirtY: 150
+            },
+            4: {
+                waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
+                cup: { x: 200, y: 550 },
+                stones: [
+                    { x: 200, y: 250, w: 300, h: 20 },
+                    { x: 600, y: 400, w: 300, h: 20 }
+                ],
+                dirtY: 150
+            },
+            5: {
+                waterSpawn: { x: 100, y: 50, w: 100, h: 80 },
+                cup: { x: 700, y: 550 },
+                stones: [
+                    { x: 200, y: 200, w: 150, h: 20 },
+                    { x: 600, y: 350, w: 200, h: 20 },
+                    { x: 400, y: 450, w: 150, h: 20 },
+                    { x: 400, y: 280, w: 20, h: 100 }
+                ],
+                dirtY: 150
+            },
+            6: {
+                waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
+                cup: { x: 200, y: 550 },
+                stones: [
+                    { x: 400, y: 250, w: 400, h: 20 },
+                    { x: 200, y: 400, w: 200, h: 20 }
+                ],
+                dirtY: 150
+            },
+            7: {
+                waterSpawn: { x: 100, y: 50, w: 100, h: 80 },
+                cup: { x: 700, y: 550 },
+                stones: [
+                    { x: 250, y: 250, w: 300, h: 20 },
+                    { x: 550, y: 400, w: 300, h: 20 }
+                ],
+                dirtY: 150
+            },
+            8: {
+                waterSpawn: { x: 300, y: 50, w: 200, h: 80 },
+                cup: { x: 400, y: 550 },
+                stones: [
+                    { x: 400, y: 200, w: 20, h: 200 }, 
+                    { x: 250, y: 350, w: 150, h: 20 },
+                    { x: 550, y: 350, w: 150, h: 20 }
+                ],
+                dirtY: 150
+            },
+            9: {
+                waterSpawn: { x: 100, y: 50, w: 80, h: 80 },
+                cup: { x: 400, y: 550 },
+                stones: [
+                    { x: 300, y: 200, w: 400, h: 20 },
+                    { x: 500, y: 350, w: 400, h: 20 },
+                    { x: 300, y: 450, w: 400, h: 20 }
+                ],
+                dirtY: 150
+            },
+            10: {
+                waterSpawn: { x: 650, y: 50, w: 100, h: 80 },
+                cup: { x: 150, y: 550 },
+                stones: [
+                    { x: 600, y: 200, w: 200, h: 20 },
+                    { x: 300, y: 300, w: 400, h: 20 },
+                    { x: 500, y: 450, w: 400, h: 20 },
+                    { x: 100, y: 400, w: 100, h: 20 }
+                ],
+                dirtY: 150
+            }
+        };
+
+        function loadLevel(index) {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            
+            currentLevelIndex = index;
+            isGameOver = false;
+            collectedWater = 0;
+            targetWater = 40; 
+
+            document.getElementById('level-display').textContent = `關卡 ${currentLevelIndex}`;
+            updateHUD();
+
+            if (runner) Runner.stop(runner);
+            if (engine) { Engine.clear(engine); Composite.clear(engine.world); }
+
+            engine = Engine.create();
+            engine.gravity.y = 0.8;
+
+            waterParticles = [];
+            dirtBlocks = [];
+            stoneBlocks = [];
+            cupParts = [];
+
+            const data = LEVEL_DATA[index];
+
+            // 1. 建立邊界
+            const bounds = [
+                Bodies.rectangle(400, -50, 800, 100, { isStatic: true }),
+                Bodies.rectangle(400, 650, 800, 100, { isStatic: true }),
+                Bodies.rectangle(-50, 300, 100, 600, { isStatic: true }),
+                Bodies.rectangle(850, 300, 100, 600, { isStatic: true })
+            ];
+            Composite.add(engine.world, bounds);
+
+            // 2. 建立杯子
+            const cw = 70; 
+            const ch = 90; 
+            const cx = data.cup.x;
+            const cy = data.cup.y;
+            const wallThickness = 10;
+            
+            cupParts = [
+                Bodies.rectangle(cx - cw/2, cy - ch/2, wallThickness, ch, { isStatic: true }),
+                Bodies.rectangle(cx + cw/2, cy - ch/2, wallThickness, ch, { isStatic: true }),
+                Bodies.rectangle(cx, cy, cw + wallThickness, wallThickness, { isStatic: true })
+            ];
+            Composite.add(engine.world, cupParts);
+            
+            cupBounds = {
+                minX: cx - cw/2 + wallThickness,
+                maxX: cx + cw/2 - wallThickness,
+                minY: cy - ch,
+                maxY: cy
+            };
+
+            // 3. 建立石頭障礙物
+            data.stones.forEach(s => {
+                const stone = Bodies.rectangle(s.x, s.y, s.w, s.h, { isStatic: true, render: {w: s.w, h: s.h} });
+                stoneBlocks.push(stone);
+            });
+            Composite.add(engine.world, stoneBlocks);
+
+            // 4. 產生泥土網格
+            for (let y = data.dirtY; y < 600; y += DIRT_SIZE) {
+                for (let x = 0; x < 800; x += DIRT_SIZE) {
+                    const px = x + DIRT_SIZE/2;
+                    const py = y + DIRT_SIZE/2;
+                    
+                    if (px > data.waterSpawn.x && px < data.waterSpawn.x + data.waterSpawn.w &&
+                        py > data.waterSpawn.y && py < data.waterSpawn.y + data.waterSpawn.h + 20) {
+                        continue;
+                    }
+
+                    if (px > cx - cw/2 - 15 && px < cx + cw/2 + 15 &&
+                        py > cy - ch - 15 && py < cy + 15) {
+                        continue;
+                    }
+
+                    let inStone = false;
+                    for(let s of data.stones) {
+                        if (px > s.x - s.w/2 - 10 && px < s.x + s.w/2 + 10 &&
+                            py > s.y - s.h/2 - 10 && py < s.y + s.h/2 + 10) {
+                            inStone = true;
+                            break;
+                        }
+                    }
+                    if (inStone) continue;
+
+                    const dirt = Bodies.rectangle(px, py, DIRT_SIZE, DIRT_SIZE, { 
+                        isStatic: true, 
+                        isSensor: false, 
+                        friction: 1 
+                    });
+                    dirtBlocks.push(dirt);
+                }
+            }
+            Composite.add(engine.world, dirtBlocks);
+
+            // 5. 產生水粒子
+            const totalWater = 140; 
+            const wx = data.waterSpawn.x;
+            const wy = data.waterSpawn.y;
+            const ww = data.waterSpawn.w;
+            
+            for (let i = 0; i < totalWater; i++) {
+                const rx = wx + Math.random() * ww;
+                const ry = wy + Math.random() * data.waterSpawn.h;
+                
+                const water = Bodies.circle(rx, ry, 5, {
+                    restitution: 0.2, 
+                    friction: 0.001,
+                    frictionAir: 0.01,
+                    frictionStatic: 0, 
+                    density: 0.001
+                });
+                waterParticles.push(water);
+            }
+            Composite.add(engine.world, waterParticles);
+
+            runner = Runner.create();
+            Runner.run(runner, engine);
+            requestAnimationFrame(customRender);
+        }
+
+        function updateHUD() {
+            document.getElementById('water-display').textContent = `${Math.min(collectedWater, targetWater)} / ${targetWater}`;
+        }
+
+        function checkWin() {
+            if (isGameOver) return;
+
+            let count = 0;
+            for (let i = 0; i < waterParticles.length; i++) {
+                const p = waterParticles[i];
+                if (p.position.x > cupBounds.minX && p.position.x < cupBounds.maxX &&
+                    p.position.y > cupBounds.minY && p.position.y < cupBounds.maxY) {
+                    
+                    if (p.speed < 1) count++; 
+                }
+            }
+
+            if (count > collectedWater && count <= targetWater) {
+                if(count % 5 === 0) playSound('drop');
+            }
+            
+            collectedWater = count;
+            updateHUD();
+
+            if (collectedWater >= targetWater) {
+                isGameOver = true;
+                setTimeout(() => {
+                    playSound('win');
+                    if (currentLevelIndex >= unlockedLevel && unlockedLevel < TOTAL_LEVELS) {
+                        unlockedLevel = currentLevelIndex + 1;
+                        // 更新內部記憶的關卡解鎖進度
+                    }
+                    showModal();
+                }, 500);
+            }
+        }
+
+        function showModal() {
+            const overlay = document.getElementById('modal-overlay');
+            const nextBtn = document.getElementById('next-level-btn');
+
+            if (currentLevelIndex < TOTAL_LEVELS) {
+                nextBtn.style.display = 'inline-block';
+                document.getElementById('modal-desc').textContent = "水杯已經裝滿了！";
+            } else {
+                nextBtn.style.display = 'none';
+                document.getElementById('modal-desc').textContent = "恭喜你通關了所有關卡！";
+            }
+            
+            overlay.style.display = 'flex';
+        }
+
+        // 自訂繪圖循環
+        function customRender() {
+            if (!document.getElementById('game-screen').style.display || document.getElementById('game-screen').style.display === 'none') return;
+
+            checkWin();
+            
+            ctx.fillStyle = '#1e293b'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 畫泥土
+            ctx.fillStyle = '#8b5a2b';
+            ctx.beginPath();
+            for (let i = 0; i < dirtBlocks.length; i++) {
+                const b = dirtBlocks[i];
+                ctx.rect(b.position.x - DIRT_SIZE/2 - 1, b.position.y - DIRT_SIZE/2 - 1, DIRT_SIZE + 2, DIRT_SIZE + 2);
+            }
+            ctx.fill();
+
+            // 畫石頭
+            ctx.fillStyle = '#64748b';
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < stoneBlocks.length; i++) {
+                const s = stoneBlocks[i];
+                ctx.fillRect(s.position.x - s.render.w/2, s.position.y - s.render.h/2, s.render.w, s.render.h);
+                ctx.strokeRect(s.position.x - s.render.w/2, s.position.y - s.render.h/2, s.render.w, s.render.h);
+            }
+
+            // 畫杯子
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 4;
+            
+            if (cupParts.length === 3) {
+                const left = cupParts[0];
+                const right = cupParts[1];
+                const bottom = cupParts[2];
+                const ch = 90; 
+                
+                ctx.beginPath();
+                ctx.moveTo(left.position.x - 5, left.position.y - ch/2);
+                ctx.lineTo(left.position.x - 5, bottom.position.y + 5);
+                ctx.lineTo(right.position.x + 5, bottom.position.y + 5);
+                ctx.lineTo(right.position.x + 5, right.position.y - ch/2);
+                ctx.stroke();
+            }
+
+            // 畫水
+            ctx.globalCompositeOperation = 'screen';
+            ctx.fillStyle = '#0ea5e9';
+            
+            for (let i = 0; i < waterParticles.length; i++) {
+                const p = waterParticles[i];
+                ctx.beginPath();
+                ctx.arc(p.position.x, p.position.y, 8, 0, 2 * Math.PI); 
+                ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over';
+
+            requestAnimationFrame(customRender);
+        }
+
+        renderMenu();
+    </script>
+</body>
+</html>

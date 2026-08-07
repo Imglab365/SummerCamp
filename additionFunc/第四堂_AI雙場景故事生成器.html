@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第四堂｜AI 雙場景故事生成器 V5</title>
+<style>
+:root{--blue:#1554b7;--paper:#fffdf8;--ink:#1f2937;--muted:#6b7280;--line:#e5e0d6;--red:#dc2626;--green:#16a34a}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:linear-gradient(135deg,#fff8ed,#edf6ff);min-height:100vh}
+.wrap{max-width:1160px;margin:auto;padding:22px 16px 46px}header,.panel{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 12px 28px rgba(31,41,55,.09);margin-bottom:16px}
+header{display:flex;justify-content:space-between;gap:16px;align-items:center}h1{margin:0 0 6px;color:var(--blue);font-size:32px}h2{margin:0 0 8px;font-size:26px}.subtitle,.desc,.hint{color:var(--muted);line-height:1.7}.badge{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;border-radius:999px;padding:8px 13px;font-weight:800;white-space:nowrap}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:16px}.step{background:rgba(255,255,255,.75);border:1px solid var(--line);border-radius:16px;padding:11px;text-align:center;color:var(--muted);font-weight:800}.step.active{background:var(--blue);color:#fff}
+.panel{display:none}.panel.active{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card,.field{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:15px}.full{grid-column:1/-1}
+label.title{display:block;font-weight:900;margin:10px 0 7px}.req{color:var(--red);font-size:13px}select,input,textarea{width:100%;border:1px solid #d9d3c7;border-radius:13px;padding:11px 13px;font-size:16px;background:#fff;font-family:inherit}textarea{min-height:82px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#fff;border:1px solid #d9d3c7;border-radius:999px;padding:8px 11px;display:inline-flex;gap:6px;align-items:center}.chip input{accent-color:var(--blue)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}button{border:0;border-radius:14px;padding:12px 16px;font-size:16px;font-weight:900;cursor:pointer}.primary{background:var(--blue);color:#fff}.secondary{background:#e8edf5}.ghost{background:#fff;border:1px solid var(--line)}.success{background:var(--green);color:white}
+.err{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#991b1b;border-radius:16px;padding:13px;margin:12px 0;font-weight:800;line-height:1.7}
+.intro{background:#eef6ff;border:1px solid #bfdbfe;border-radius:16px;padding:13px;margin-top:10px;color:#153f8a;font-weight:700;line-height:1.75;min-height:120px}
+.tagBox{margin-top:10px;background:#fff8db;border:1px solid #f1d98c;border-radius:14px;padding:10px 12px;font-weight:900;color:#8a5a00}
+.two{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px}.summary{background:#fff8db;border:1px solid #f1d98c;border-radius:18px;padding:16px;white-space:pre-wrap;line-height:1.75}.prompt{background:#101827;color:#e5e7eb;border-radius:20px;padding:18px;min-height:390px;white-space:pre-wrap;line-height:1.6;font-size:15px;overflow:auto}.warn{display:none;background:#fee2e2;color:#991b1b;border:2px solid #fecaca;border-radius:16px;padding:12px;margin-top:12px;text-align:center;font-weight:950}
+.wait{background:#f8fafc;border:1px solid #dbe4ef;border-radius:18px;padding:16px;line-height:1.8;margin-top:12px}
+.storyChoice{background:#eef6ff;border:1px solid #bfdbfe;border-radius:18px;padding:15px;margin-top:12px;color:#153f8a;font-weight:800;line-height:1.75}
+.storyboardList{display:grid;gap:11px;margin-top:14px}
+.storyboardRow{display:grid;grid-template-columns:92px 1fr;gap:12px;align-items:start;background:#fff;border:1px solid var(--line);border-radius:17px;padding:13px}
+.storyboardNo{background:var(--blue);color:#fff;border-radius:13px;padding:11px 8px;text-align:center;font-weight:900}
+.storyPrompt{background:#101827;color:#e5e7eb;border-radius:20px;padding:18px;min-height:220px;white-space:pre-wrap;line-height:1.65;font-size:15px;margin-top:14px}
+.storyOutput{display:none;margin-top:16px}
+.autoNote{color:#6b7280;font-size:13px;line-height:1.7;margin-top:8px}
+.radioScene{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.radioScene label{background:#fff;border:1px solid #d9d3c7;border-radius:15px;padding:13px;font-weight:850;display:flex;gap:8px;align-items:center}
+@media(max-width:700px){.storyboardRow,.radioScene{grid-template-columns:1fr}.storyboardNo{text-align:left}}
+@media(max-width:900px){header{display:block}.badge{display:inline-block;margin-top:10px}.steps,.grid,.two{grid-template-columns:1fr}.full{grid-column:auto}h1{font-size:27px}}
+</style></head>
+<body><div class="wrap">
+<header><div><h1>AI 雙場景故事生成器</h1><div class="subtitle">第四堂｜讓角色走進兩個不同世界</div></div><div class="badge">想像力實驗室｜V5</div></header>
+<div class="steps"><div id="s1" class="step active">① 上週角色</div><div id="s2" class="step">② 選兩個場景</div><div id="s3" class="step">③ 場景細節</div><div id="s4" class="step">④ 複製指令</div><div id="s5" class="step">⑤ 影片故事規劃</div></div>
+
+<section id="p1" class="panel active"><h2>① 你有上一堂的角色圖嗎？</h2><p class="desc">這堂課會讓角色走進不同場景。請先填寫自己的真實姓名，方便老師辨認與整理作品；若有上一堂角色圖，也請先下載好。</p><div id="e1" class="err"></div>
+<div class="grid"><div class="field full"><label class="title">上一堂角色圖 <span class="req">＊必填</span></label><div class="chips"><label class="chip"><input type="radio" name="hasPrev" value="yes" onchange="togglePrev()">有，我有上一堂角色圖</label><label class="chip"><input type="radio" name="hasPrev" value="no" onchange="togglePrev()">沒有，我上週沒有產出／沒有來</label></div></div>
+<div class="field"><label class="title">學生姓名 <span class="req">＊必填</span></label><input id="studentName" autocomplete="name" placeholder="請填寫自己的真實姓名"></div>
+<div class="field"><label class="title">角色名字 <span class="req">＊必填</span></label><input id="name" placeholder="例如：阿哲、小米、Jonathan"></div>
+<div id="newRoleBox" class="field" style="display:none"><label class="title">新角色方向 <span class="req">＊必填</span></label><div class="chips"><label class="chip"><input type="radio" name="newRole" value="男生角色">男生角色</label><label class="chip"><input type="radio" name="newRole" value="女生角色">女生角色</label><label class="chip"><input type="radio" name="newRole" value="中性風格角色">中性風格</label></div></div></div>
+<div class="actions"><button class="primary" onclick="next1()">下一步：選兩個場景</button><button class="ghost" onclick="clearAll()">清空重填</button></div></section>
+
+<section id="p2" class="panel"><h2>② 選兩個場景</h2><p class="desc">每一類都增加到 15～20 個選項，降低同班作品重複率。最後會生成一張 16:9 左右雙場景圖。</p><div id="e2" class="err"></div>
+<div class="grid">
+<div class="card"><h3>左邊場景 A</h3><label class="title">類型</label><select id="catA" onchange="updateScenes('A')"></select><label class="title">場景</label><select id="sceneA" onchange="intro('A')"></select><input id="customA" placeholder="請輸入你的奇幻特殊場景" style="display:none;margin-top:10px" oninput="intro('A')"><div id="introA" class="intro">請先選擇場景。</div></div>
+<div class="card"><h3>右邊場景 B</h3><label class="title">類型</label><select id="catB" onchange="updateScenes('B')"></select><label class="title">場景</label><select id="sceneB" onchange="intro('B')"></select><input id="customB" placeholder="請輸入你的奇幻特殊場景" style="display:none;margin-top:10px" oninput="intro('B')"><div id="introB" class="intro">請先選擇場景。</div></div>
+</div><div class="actions"><button class="secondary" onclick="go(1)">上一步</button><button class="primary" onclick="next2()">下一步：設定細節</button></div></section>
+
+<section id="p3" class="panel"><h2>③ 場景細節</h2><p class="desc">每個場景都回答幾個問題，讓圖片更接近你的想像。</p><div id="e3" class="err"></div>
+<div class="grid">
+<div class="card"><h3>左邊場景 A：<span id="titleA">尚未選擇</span></h3><div id="tagA" class="tagBox">圖片左上角標籤：尚未選擇</div><label class="title">角色動作</label><select id="actionA"></select><label class="title">攜帶物品</label><select id="itemA"></select><label class="title">季節／天氣</label><select id="weatherA"></select><label class="title">時間／光影</label><select id="lightA" onchange="refreshTags()"></select><label class="title">情緒</label><select id="moodA"></select><label class="title">補充一句話（選填，可寫其他動作或想法）</label><textarea id="extraA" placeholder="如果想要其他動作、特殊姿勢或更多想法，可以寫在這裡。"></textarea></div>
+<div class="card"><h3>右邊場景 B：<span id="titleB">尚未選擇</span></h3><div id="tagB" class="tagBox">圖片右上角標籤：尚未選擇</div><label class="title">角色動作</label><select id="actionB"></select><label class="title">攜帶物品</label><select id="itemB"></select><label class="title">季節／天氣</label><select id="weatherB"></select><label class="title">時間／光影</label><select id="lightB" onchange="refreshTags()"></select><label class="title">情緒</label><select id="moodB"></select><label class="title">補充一句話（選填，可寫其他動作或想法）</label><textarea id="extraB" placeholder="如果想要其他動作、特殊姿勢或更多想法，可以寫在這裡。"></textarea></div>
+</div><div class="actions"><button class="secondary" onclick="go(2)">上一步</button><button class="primary" onclick="buildPrompt()">整理並產生指令</button></div></section>
+
+<section id="p4" class="panel"><h2>④ AI 幫你整理好了</h2><p class="desc">請先確認學生姓名與角色名字正確，再分享到備忘錄。這堂課先儲存 Prompt，不要直接貼到 ChatGPT 生圖。</p>
+<div class="two"><div><div class="summary" id="summary"></div><div class="actions"><button class="secondary" onclick="go(3)">回去修改</button><button class="success" onclick="copyPrompt()">📋 複製到 ChatGPT</button><button class="secondary" onclick="sharePrompt()">分享到備忘錄</button><button class="secondary" onclick="downloadPrompt()">下載 Prompt 文字檔</button><button class="primary" onclick="go(5)">下一步：影片故事規劃</button><button class="ghost" onclick="clearAll()">建立新設定</button></div><div id="uploadWarn" class="warn">⚠️ 貼上 Prompt 前，請先把上一堂角色圖上傳到 ChatGPT</div><p id="copyMsg" style="color:#15803d;font-weight:900"></p></div><div class="prompt" id="prompt"></div></div></section>
+
+<section id="p5" class="panel">
+<h2>⑤ 第五堂：影片故事規劃</h2>
+<p class="desc">雙場景圖片生成時，先選出一個最想延伸的場景，再規劃五個接續動作。可以先按「自動生成」，再改成自己的版本。</p>
+<div id="e5" class="err"></div>
+
+<div class="field">
+  <label class="title">第五堂主場景（二選一） <span class="req">＊必填</span></label>
+  <div class="radioScene">
+    <label><input type="radio" name="storySceneSide" value="A" onchange="onStorySceneChange()"> <span id="storyOptionA">場景一</span></label>
+    <label><input type="radio" name="storySceneSide" value="B" onchange="onStorySceneChange()"> <span id="storyOptionB">場景二</span></label>
+  </div>
+  <div id="chosenSceneBox" class="storyChoice">請先選擇一個要延伸的場景。</div>
+</div>
+
+<div class="actions">
+  <button class="primary" type="button" onclick="autoStoryboard()">✨ 自動生成五個分鏡</button>
+</div>
+<div class="autoNote">系統會先提供一組連續動作；每個分鏡都可以再自行修改。</div>
+
+<div class="storyboardList">
+  <div class="storyboardRow"><div class="storyboardNo">分鏡 1</div><div><select id="shot1" onchange="toggleShotOther(1)"></select><input id="shotOther1" style="display:none;margin-top:8px" placeholder="請輸入其他動作"></div></div>
+  <div class="storyboardRow"><div class="storyboardNo">分鏡 2</div><div><select id="shot2" onchange="toggleShotOther(2)"></select><input id="shotOther2" style="display:none;margin-top:8px" placeholder="請輸入其他動作"></div></div>
+  <div class="storyboardRow"><div class="storyboardNo">分鏡 3</div><div><select id="shot3" onchange="toggleShotOther(3)"></select><input id="shotOther3" style="display:none;margin-top:8px" placeholder="請輸入其他動作"></div></div>
+  <div class="storyboardRow"><div class="storyboardNo">分鏡 4</div><div><select id="shot4" onchange="toggleShotOther(4)"></select><input id="shotOther4" style="display:none;margin-top:8px" placeholder="請輸入其他動作"></div></div>
+  <div class="storyboardRow"><div class="storyboardNo">分鏡 5</div><div><select id="shot5" onchange="toggleShotOther(5)"></select><input id="shotOther5" style="display:none;margin-top:8px" placeholder="請輸入其他動作"></div></div>
+</div>
+
+<div class="grid" style="margin-top:14px">
+  <div class="field">
+    <label class="title">影片節奏／感覺 <span class="req">＊必填</span></label>
+    <select id="videoRhythm">
+      <option value="">請選擇</option>
+      <option>安靜、慢慢推進</option>
+      <option>熱血、節奏明快</option>
+      <option>療癒、柔和舒服</option>
+      <option>刺激、充滿冒險</option>
+      <option>神秘、逐步揭開線索</option>
+      <option>夢幻、像進入另一個世界</option>
+      <option>幽默、充滿意外驚喜</option>
+      <option>電影感、情緒逐漸加深</option>
+    </select>
+  </div>
+  <div class="field">
+    <label class="title">如果做成海報，最想保留什麼？</label>
+    <textarea id="posterFocus" placeholder="例如：保留角色望向極光的背影，以及天空最亮的光。"></textarea>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="primary" onclick="buildStoryPrompt()">✨ 產生第五堂 Prompt</button>
+  <button class="secondary" onclick="go(4)">回去看雙場景 Prompt</button>
+  <button class="ghost" onclick="clearAll()">建立新設定</button>
+</div>
+
+<div id="storyOutput" class="storyOutput">
+  <div id="storySummary" class="summary"></div>
+  <div id="storyPrompt" class="storyPrompt"></div>
+  <div class="actions">
+    <button class="success" onclick="copyStoryPrompt()">📋 複製第五堂 Prompt</button>
+    <button class="secondary" onclick="shareStoryPrompt()">分享到備忘錄</button>
+    <button class="secondary" onclick="downloadStoryPrompt()">下載第五堂文字檔</button>
+  </div>
+  <p id="storyCopyMsg" style="color:#15803d;font-weight:900"></p>
+</div>
+</section>
+</div>
+<script>
+const sceneData = {"城市類": {"紐約時代廣場": {"intro": "霓虹燈、巨大螢幕、車流與人群，適合呈現熱鬧、夢想與舞台感。", "tag": "霓虹紐約"}, "東京澀谷街頭": {"intro": "大型路口、招牌與快速移動的人群，適合呈現流行、冒險與尋找方向。", "tag": "澀谷街頭"}, "台北夜市": {"intro": "攤位燈光、小吃與熱鬧人潮，適合呈現生活感與在地故事。", "tag": "夜市燈火"}, "巴黎街道": {"intro": "石板路、咖啡館與柔和光線，適合呈現優雅、旅行與藝術。", "tag": "巴黎漫步"}, "倫敦雨天街道": {"intro": "雨傘、紅色巴士與濕潤街道，適合呈現偵探感與城市冒險。", "tag": "雨夜倫敦"}, "首爾街頭": {"intro": "流行商店、街頭音樂與夜晚招牌，適合呈現潮流、音樂與朋友故事。", "tag": "首爾潮街"}, "香港霓虹巷弄": {"intro": "高樓、招牌與霓虹光影，適合呈現神秘、追逐與城市任務。", "tag": "霓虹港巷"}, "威尼斯水都": {"intro": "水道、小船、古老建築與橋樑，適合呈現旅行與尋找線索。", "tag": "水都小徑"}, "未來科技城市": {"intro": "藍色光線、高科技建築與數位看板，適合呈現未來與創新。", "tag": "未來都城"}, "台北捷運站": {"intro": "月台、車廂與通勤感，適合呈現出發、日常冒險與新的旅程。", "tag": "捷運啟程"}, "新加坡濱海灣": {"intro": "現代建築、夜景燈光與水岸線，適合呈現科技、旅行與城市願景。", "tag": "濱海夜景"}, "上海外灘": {"intro": "河岸、摩天樓與復古建築並存，適合呈現時代交會與城市夢想。", "tag": "外灘夜色"}, "洛杉磯街頭": {"intro": "陽光、塗鴉、街道與電影感，適合呈現自由、表演與青春冒險。", "tag": "洛城街影"}, "柏林塗鴉街區": {"intro": "牆面塗鴉、藝術街區與自由氛圍，適合呈現創作、叛逆與探索。", "tag": "柏林塗鴉"}, "曼谷水上市場": {"intro": "小船、攤販、熱帶色彩與河道，適合呈現生活、市集與文化旅行。", "tag": "水上市集"}, "杜拜未來街景": {"intro": "高樓、沙漠城市與未來感建築，適合呈現奢華、挑戰與新世界。", "tag": "未來杜拜"}, "舊金山坡道": {"intro": "斜坡、電車、海灣與城市陽光，適合呈現旅行、追夢與城市探索。", "tag": "坡道旅程"}, "台中歌劇院周邊": {"intro": "流線建築、廣場與城市綠意，適合呈現創意、展演與城市生活。", "tag": "歌劇廣場"}}, "自然景觀": {"冰島極光": {"intro": "寒冷、安靜、遼闊的冰雪世界，夜空有極光，適合呈現震撼與冒險。", "tag": "極光冰島"}, "日本富士山": {"intro": "富士山有清楚季節感，春天可有櫻花，冬天可有積雪，適合呈現旅行與平靜。", "tag": "春日富士"}, "張家界山林": {"intro": "高聳石柱、雲霧與壯闊視野，適合呈現震撼與自然探索。", "tag": "雲霧張界"}, "阿里山森林": {"intro": "神木、森林步道、雲海與日出，適合呈現療癒與成長。", "tag": "阿里晨光"}, "撒哈拉沙漠": {"intro": "金色沙丘、強烈陽光與遼闊天空，適合呈現堅持、挑戰與尋找方向。", "tag": "沙漠遠行"}, "亞馬遜雨林": {"intro": "茂密植物、河流與動物，適合呈現生態任務與探險。", "tag": "雨林探秘"}, "澳洲大堡礁": {"intro": "清澈海水、珊瑚與魚群，適合呈現海洋冒險與自由。", "tag": "珊瑚海域"}, "瑞士雪山": {"intro": "白色雪地、山峰、纜車與清澈空氣，適合呈現挑戰與目標。", "tag": "雪山挑戰"}, "夏威夷海灘": {"intro": "陽光、海浪、椰子樹與輕鬆氣氛，適合呈現放鬆與夏日旅行。", "tag": "夏日海岸"}, "加拿大楓葉森林": {"intro": "秋天楓葉、木屋與湖面，適合呈現回憶與溫柔故事。", "tag": "楓林回憶"}, "挪威峽灣": {"intro": "高聳山壁、深藍海水與冷冽空氣，適合呈現壯闊、孤獨與遠行。", "tag": "峽灣遠望"}, "紐西蘭草原": {"intro": "開闊草地、山脈與清新天空，適合呈現自由、奔跑與冒險出發。", "tag": "草原啟程"}, "肯亞大草原": {"intro": "金色草原、野生動物與夕陽，適合呈現勇氣、觀察與自然生命力。", "tag": "草原夕照"}, "青海湖": {"intro": "湖面、藍天、草原與遠方山脈，適合呈現寧靜、旅行與心願。", "tag": "湖畔遠方"}, "太魯閣峽谷": {"intro": "峽谷、岩壁、溪水與山路，適合呈現冒險、探索與自然力量。", "tag": "峽谷探行"}, "北海道雪原": {"intro": "白色雪地、木屋與安靜天空，適合呈現冬季、溫柔與安靜冒險。", "tag": "雪原旅人"}, "巴里島梯田": {"intro": "綠色梯田、熱帶光線與村落風景，適合呈現療癒、生活與自然節奏。", "tag": "梯田晨光"}, "優勝美地山谷": {"intro": "巨大岩壁、瀑布與森林，適合呈現壯闊、挑戰與自然震撼。", "tag": "山谷巨岩"}}, "歷史建築": {"西班牙聖家堂": {"intro": "高聳教堂、精細雕刻與彩色光線，適合呈現藝術與驚嘆。", "tag": "聖堂光影"}, "埃及金字塔": {"intro": "沙漠、巨大金字塔與古文明氣息，適合呈現考古與神秘任務。", "tag": "金字謎影"}, "羅馬競技場": {"intro": "古老石牆、拱門與競技場空間，適合呈現勇氣、挑戰與歷史穿越。", "tag": "古城競技"}, "中國長城": {"intro": "蜿蜒城牆與山脈視野，適合呈現堅持、守護與遠方旅程。", "tag": "落日長城"}, "京都清水寺": {"intro": "木造寺院、櫻花或楓葉與古都氛圍，適合呈現安靜、祈願與文化探索。", "tag": "古都清水"}, "印度泰姬瑪哈陵": {"intro": "白色建築、倒影水池與對稱構圖，適合呈現美、記憶與深刻情感。", "tag": "白宮倒影"}, "希臘帕德嫩神廟": {"intro": "石柱、藍天、山丘與古希臘氣息，適合呈現智慧、神話與歷史任務。", "tag": "神殿藍天"}, "大英博物館": {"intro": "展廳、文物、古老物件與研究氛圍，適合呈現學習、解謎與收藏故事。", "tag": "博物祕藏"}, "馬丘比丘": {"intro": "高山古城、雲霧與石牆遺跡，適合呈現冒險、發現與文明故事。", "tag": "雲中古城"}, "台南赤崁樓": {"intro": "紅磚、古蹟庭院與台灣歷史感，適合呈現在地文化、記憶與探索。", "tag": "赤崁記憶"}, "吳哥窟": {"intro": "古老石雕、樹根與神廟遺跡，適合呈現神秘、探險與文明線索。", "tag": "神廟迷蹤"}, "布拉格城堡": {"intro": "歐洲城堡、石橋與紅屋頂城市，適合呈現童話、歷史與旅程。", "tag": "城堡晨光"}, "伊斯坦堡聖索菲亞": {"intro": "圓頂、拱門與東西文化交會，適合呈現旅行、歷史與驚嘆。", "tag": "圓頂古城"}, "墨西哥奇琴伊察": {"intro": "金字塔神廟、熱帶天空與古文明遺跡，適合呈現神秘與考古冒險。", "tag": "古塔謎題"}, "奈良東大寺": {"intro": "木造大寺、鹿群與古都氣息，適合呈現溫和、文化與安靜觀察。", "tag": "奈良古寺"}, "凡爾賽宮": {"intro": "華麗宮殿、花園與金色裝飾，適合呈現壯觀、藝術與歷史想像。", "tag": "宮殿金光"}, "布達佩斯漁人堡": {"intro": "白色城牆、塔樓與多瑙河遠景，適合呈現童話、守望與旅人故事。", "tag": "塔樓遠望"}, "紐約中央車站": {"intro": "復古車站大廳、拱形天花與人流，適合呈現啟程、相遇與城市故事。", "tag": "車站啟程"}}, "奇幻特殊": {"太空基地": {"intro": "星空、艙門、儀器與太空窗景，適合呈現未來任務與宇宙探索。", "tag": "星際基地"}, "海底世界": {"intro": "藍色海水、珊瑚、魚群與水下光線，適合呈現奇幻與安靜冒險。", "tag": "海底光廊"}, "雲上城堡": {"intro": "漂浮雲朵、城堡、金色光芒與夢幻天空，適合呈現夢想與希望。", "tag": "雲端城堡"}, "魔法森林": {"intro": "發光植物、神秘小路、霧氣與奇妙生物，適合呈現魔法與秘密任務。", "tag": "魔森微光"}, "巨大食物世界": {"intro": "超大甜點、巨大水果、糖果道路與童話色彩，適合呈現幽默與想像力。", "tag": "甜點王國"}, "機器人城市": {"intro": "機械道路、機器人居民與藍色能源光，適合呈現科技、合作與未來生活。", "tag": "機械都城"}, "恐龍島": {"intro": "叢林、火山、巨大恐龍與探險設備，適合呈現刺激、觀察與勇氣。", "tag": "恐龍秘島"}, "水晶洞穴": {"intro": "發光水晶、地下湖、反射光線與神秘感，適合呈現尋寶與發現。", "tag": "水晶洞窟"}, "夢境圖書館": {"intro": "無限書架、漂浮書本、星光與安靜空間，適合呈現知識與內心世界。", "tag": "夢境書庫"}, "天空列車": {"intro": "飛在雲上的列車、窗外星空或夕陽，適合呈現旅程與期待。", "tag": "天空列車"}, "月球遊樂園": {"intro": "低重力、月球地表、發光遊樂設施，適合呈現奇想、冒險與歡樂。", "tag": "月球樂園"}, "龍的圖書館": {"intro": "古老書架、龍形雕像、魔法燈火，適合呈現知識、守護與奇幻秘密。", "tag": "龍藏書閣"}, "火山機械工廠": {"intro": "熔岩光、齒輪、金屬平台與蒸氣，適合呈現創造、危機與熱血任務。", "tag": "火山工廠"}, "時間鐘塔": {"intro": "巨大時鐘、齒輪與光影隧道，適合呈現時間旅行、選擇與命運感。", "tag": "時鐘之塔"}, "迷你小人國": {"intro": "巨大花草、超大日用品與小人視角，適合呈現驚奇、幽默與探索。", "tag": "小人奇境"}, "星空湖面": {"intro": "倒映星空的湖、漂浮小船與微光，適合呈現夢想、安靜與心願。", "tag": "星湖微光"}, "泡泡城市": {"intro": "透明泡泡建築、彩虹光與漂浮道路，適合呈現輕盈、童趣與想像力。", "tag": "泡泡之城"}, "其他": {"intro": "請自己輸入一個特殊場景。可以是不存在的世界，也可以是混合想像的地點。", "tag": "自訂場景"}}, "生活場景": {"咖啡廳角落": {"intro": "溫暖燈光、木桌、杯子、筆記本與窗邊座位，適合呈現安靜創作與日常故事。", "tag": "咖啡創作"}, "學校教室": {"intro": "黑板、課桌椅、作品牆與同學氛圍，適合呈現學習、合作與發表。", "tag": "教室時光"}, "籃球場": {"intro": "球框、地板線、運動燈光與球隊氣氛，適合呈現努力、比賽與熱血。", "tag": "球場熱血"}, "圖書館": {"intro": "書架、閱讀桌、安靜光線與資料卡，適合呈現研究、思考與知識探索。", "tag": "書海探索"}, "美術教室": {"intro": "畫架、顏料、紙張與作品牆，適合呈現創作、練習與想法成形。", "tag": "畫室靈感"}, "音樂教室": {"intro": "樂器、譜架、音符裝飾與練習空間，適合呈現音樂、表演與自信。", "tag": "樂音練習"}, "小餐館廚房": {"intro": "鍋子、料理台、食材與忙碌但溫暖的氣氛，適合呈現料理、努力與夢想。", "tag": "廚房夢想"}, "房間工作桌": {"intro": "桌燈、平板、草稿、照片與私人收藏，適合呈現準備、整理想法與祕密計畫。", "tag": "桌前計畫"}, "屋頂夜景": {"intro": "城市燈光、晚風、星空與欄杆，適合呈現思考、告別、夢想與新的決定。", "tag": "屋頂星夜"}, "公園午後": {"intro": "草地、樹影、長椅、陽光與散步路線，適合呈現放鬆、友誼與日常冒險。", "tag": "午後公園"}, "便利商店夜晚": {"intro": "明亮招牌、夜晚街道與安靜空氣，適合呈現日常、等待與小小冒險。", "tag": "夜間小店"}, "火車月台": {"intro": "列車、月台燈光與行李，適合呈現出發、離別與新的旅程。", "tag": "月台啟程"}, "家庭客廳": {"intro": "沙發、電視、玩具與家人感，適合呈現溫暖、休息與日常回憶。", "tag": "客廳暖光"}, "寵物店": {"intro": "小動物、籠子、用品與溫柔光線，適合呈現照顧、陪伴與責任感。", "tag": "寵物夥伴"}, "修理工作室": {"intro": "工具、零件、工作檯與燈光，適合呈現發明、修理與解決問題。", "tag": "修理工坊"}, "街角花店": {"intro": "花束、綠葉、玻璃窗與柔和光，適合呈現溫柔、禮物與生活美感。", "tag": "花店晨光"}, "遊戲機台店": {"intro": "復古機台、彩色燈光與遊戲音效感，適合呈現挑戰、童趣與競賽。", "tag": "街機挑戰"}, "露營帳篷": {"intro": "帳篷、營火、星空與戶外裝備，適合呈現休息、冒險與朋友故事。", "tag": "營火夜談"}}};
+const opts = {
+action:["","拍照","畫畫","拿著地圖尋找方向","看向天空","張開雙手感受風景","坐下來思考","奔跑前進","觀察遠方","記錄筆記","準備出發","和機器人夥伴討論","練習技能","尋找線索","安靜站著看風景","回頭看向遠方","拿起相機準備拍攝"],
+item:["","相機","背包","筆記本","地圖","畫板","耳機","望遠鏡","圍巾","手電筒","水壺","球","樂器","料理工具","平板","指南針","小型機器人","雨傘","外套","任務卡"],
+weather:["","春天，晴朗","夏天，陽光明亮","秋天，色彩溫暖","冬天，有雪","陰天，有雲霧","雨天，地面反光","夜晚，空氣安靜","晴天，天空清澈","寒冷，有風","溫暖，有柔光"],
+light:["","清晨，柔和陽光","白天，明亮光線","黃昏，金色夕陽","夜晚，城市燈光","夜晚，星空","極光夜，綠色光芒","雨後反光","室內溫暖燈光","舞台聚光燈","月光照亮"],
+mood:["","安靜","震撼","興奮","孤獨","期待","勇敢","溫暖","神秘","自由","緊張","療癒","熱血","夢幻","有成就感"]
+};
+const shotOptions = [
+  "",
+  "停下腳步觀察四周",
+  "慢慢抬頭看向天空",
+  "望向遠方的地標",
+  "回頭確認身後的景色",
+  "低下頭整理自己的想法",
+  "從背包拿出需要的工具",
+  "拿起相機準備拍攝",
+  "舉起相機尋找構圖",
+  "慢慢走向想拍攝的地方",
+  "沿著道路向前走",
+  "小心靠近重要的線索",
+  "蹲下觀察地面的細節",
+  "翻開地圖確認方向",
+  "在筆記本寫下新的發現",
+  "張開雙手感受眼前景色",
+  "按下快門記錄畫面",
+  "查看剛剛拍下的照片",
+  "露出驚喜或滿意的表情",
+  "放下相機再次望向風景",
+  "轉身繼續下一段旅程",
+  "其他"
+];
+let finalPrompt="";
+let finalStoryPrompt="";
+function el(id){return document.getElementById(id)} function v(id){return el(id)?.value||""} function clean(id){return v(id).trim()} function radio(n){const e=document.querySelector(`input[name="${n}"]:checked`);return e?e.value:""}
+function fill(id,arr,first){el(id).innerHTML=`<option value="">${first}</option>`+arr.filter(Boolean).map(x=>`<option value="${x}">${x}</option>`).join("")}
+function init(){const cats=Object.keys(sceneData);fill("catA",cats,"請選擇類型");fill("catB",cats,"請選擇類型");["A","B"].forEach(s=>{updateScenes(s);fill("action"+s,opts.action,"請選擇動作");fill("item"+s,opts.item,"請選擇物品");fill("weather"+s,opts.weather,"請選擇天氣");fill("light"+s,opts.light,"請選擇光影");fill("mood"+s,opts.mood,"請選擇情緒")});[1,2,3,4,5].forEach(i=>fill("shot"+i,shotOptions,"請選擇分鏡動作"))}
+function go(n){for(let i=1;i<=5;i++){el("p"+i).classList.remove("active");el("s"+i).classList.remove("active")}el("p"+n).classList.add("active");el("s"+n).classList.add("active");scrollTo({top:0,behavior:"smooth"});if(n===3)refreshTags();if(n===5)prepareStoryPanel()}
+function err(id,list){const box=el(id); if(!list.length){box.style.display="none";box.innerHTML="";return} box.style.display="block"; box.innerHTML="請先完成：<br>・"+list.join("<br>・")}
+function togglePrev(){el("newRoleBox").style.display=radio("hasPrev")==="no"?"block":"none"}
+function updateScenes(s){const cat=v("cat"+s); if(!cat) fill("scene"+s,[],"請先選類型"); else fill("scene"+s,Object.keys(sceneData[cat]),"請選擇場景"); el("custom"+s).style.display="none"; el("custom"+s).value=""; intro(s)}
+function sceneName(s){return v("scene"+s)==="其他" ? clean("custom"+s) : v("scene"+s)}
+function baseTag(s){const cat=v("cat"+s), sc=v("scene"+s); if(sc==="其他") return clean("custom"+s) ? clean("custom"+s).slice(0,6) : "自訂場景"; return (cat&&sc&&sceneData[cat]?.[sc]?.tag)?sceneData[cat][sc].tag:"尚未選擇"}
+function smartTag(s){
+  const cat=v("cat"+s), sc=v("scene"+s), name=sceneName(s), light=v("light"+s), weather=v("weather"+s), mood=v("mood"+s);
+  if(!name) return "尚未選擇";
+  if(sc==="其他") return name.slice(0,6);
+
+  // 重要地名優先保留，不硬切地名。再依光影／天氣補 2～3 字。
+  const keepMap = {
+    "張家界山林":"張家界雲海",
+    "中國長城":"落日長城",
+    "日本富士山":"春日富士山",
+    "冰島極光":"冰島極光",
+    "舊金山坡道":"舊金山坡道",
+    "倫敦雨天街道":"雨夜倫敦",
+    "西班牙聖家堂":"聖家堂光影",
+    "埃及金字塔":"金字塔謎影",
+    "京都清水寺":"清水寺秋色",
+    "台南赤崁樓":"赤崁樓記憶",
+    "紐約時代廣場":"霓虹紐約",
+    "台北夜市":"台北夜市",
+    "阿里山森林":"阿里山晨光",
+    "太魯閣峽谷":"太魯閣峽谷",
+    "九鼎山":"九鼎山雲海"
+  };
+  if(keepMap[name]) return keepMap[name].slice(0,7);
+
+  let place = name
+    .replace("街頭","").replace("街道","").replace("山林","").replace("森林","")
+    .replace("世界","").replace("場景","").replace("周邊","").replace("水都","")
+    .replace("基地","").replace("教室","").replace("角落","").replace("夜晚","")
+    .replace("城市","").replace("特殊","").trim();
+
+  if(place.length > 4) place = place.slice(0,4);
+
+  let desc = "";
+  if(light.includes("黃昏")) desc = "落日";
+  else if(light.includes("夜晚") || light.includes("月光")) desc = "夜色";
+  else if(light.includes("清晨")) desc = "晨光";
+  else if(light.includes("極光")) desc = "極光";
+  else if(weather.includes("雨")) desc = "雨夜";
+  else if(weather.includes("雪")) desc = "雪景";
+  else if(weather.includes("雲霧")) desc = "雲霧";
+  else if(mood.includes("神秘")) desc = "秘境";
+  else if(mood.includes("熱血")) desc = "熱血";
+  else desc = "";
+
+  let tag = desc ? desc + place : (baseTag(s) || place);
+  if(tag.length < 4 && place) tag = tag + "之旅";
+  return tag.slice(0,7);
+}
+function intro(s){const cat=v("cat"+s), sc=v("scene"+s), custom=clean("custom"+s); const customBox=el("custom"+s); customBox.style.display=(cat==="奇幻特殊"&&sc==="其他")?"block":"none"; let text="請先選擇場景。"; if(cat&&sc){ if(sc==="其他"){ text = custom ? `自訂場景：${custom}。請想像這個地點的顏色、空間、重要物件與情緒。\n適合呈現：奇幻、冒險、想像力與角色的特殊任務。\n建議標籤：（${baseTag(s)}）` : "請輸入你的奇幻特殊場景，才能繼續。"; } else { const d=sceneData[cat][sc]; text=`場景特色：${d.intro}\n適合呈現：角色在這裡的動作、光影、情緒與故事任務。\n建議標籤：（${d.tag}）`; } } el("intro"+s).textContent=text; el("title"+s).textContent=sceneName(s)||"尚未選擇"; refreshTags()}
+function refreshTags(){["A","B"].forEach(s=>{if(el("tag"+s))el("tag"+s).textContent=`圖片${s==="A"?"左上角":"右上角"}標籤：${smartTag(s)}`})}
+function next1(){let e=[]; if(!radio("hasPrev"))e.push("上一堂角色圖"); if(!clean("studentName"))e.push("學生姓名"); if(!clean("name"))e.push("角色名字"); if(radio("hasPrev")==="no"&&!radio("newRole"))e.push("新角色方向"); err("e1",e); if(!e.length)go(2)}
+function next2(){let e=[]; if(!v("catA"))e.push("左邊場景類型"); if(!v("sceneA"))e.push("左邊場景"); if(v("sceneA")==="其他"&&!clean("customA"))e.push("左邊其他場景名稱"); if(!v("catB"))e.push("右邊場景類型"); if(!v("sceneB"))e.push("右邊場景"); if(v("sceneB")==="其他"&&!clean("customB"))e.push("右邊其他場景名稱"); if(sceneName("A")&&sceneName("A")===sceneName("B"))e.push("左右請選不同場景"); err("e2",e); if(!e.length)go(3)}
+function next3Err(){let e=[]; ["A","B"].forEach(s=>{["action","item","weather","light","mood"].forEach(k=>{if(!v(k+s))e.push((s==="A"?"左":"右")+"邊"+k)})}); err("e3",e); return e}
+function sceneIntroForPrompt(s){const cat=v("cat"+s), sc=v("scene"+s); if(sc==="其他") return `自訂奇幻特殊場景：${sceneName(s)}，請依照學生想像呈現明確空間、顏色與故事感。`; return sceneData[cat][sc].intro}
+function sceneBlock(label,s){return `${label}場景標籤：${smartTag(s)}\n${label}場景：${sceneName(s)}\n場景引導：${sceneIntroForPrompt(s)}\n角色動作：${v("action"+s)}\n攜帶物品：${v("item"+s)}\n季節／天氣：${v("weather"+s)}\n時間／光影：${v("light"+s)}\n情緒：${v("mood"+s)}${clean("extra"+s)?"\n補充："+clean("extra"+s):""}`}
+function buildPrompt(){
+  if(next3Err().length)return;
+  const has=radio("hasPrev"), name=clean("name");
+  const ref=has==="yes"
+    ?"依照我上傳的上一堂角色圖，保持角色的臉、髮型、服裝與氣質一致。"
+    :`建立新的原創${radio("newRole")}。`;
+
+  finalPrompt=`請生成一張 16:9 左右雙場景角色圖。
+
+學生姓名：${clean("studentName")}\n角色：${name}。${ref}
+同一角色分別自然出現在左右場景，外觀一致，兩邊的背景、光影和情緒要明顯不同。
+
+左上角標籤「${smartTag("A")}」；右上角標籤「${smartTag("B")}」。標籤保留主要地名，約 4～6 個中文字，像小型地點牌。
+
+左邊｜${sceneName("A")}
+動作：${v("actionA")}；物品：${v("itemA")}；天氣：${v("weatherA")}；光影：${v("lightA")}；情緒：${v("moodA")}。${clean("extraA")?`補充：${clean("extraA")}。`:""}
+
+右邊｜${sceneName("B")}
+動作：${v("actionB")}；物品：${v("itemB")}；天氣：${v("weatherB")}；光影：${v("lightB")}；情緒：${v("moodB")}。${clean("extraB")?`補充：${clean("extraB")}。`:""}
+
+角色表情自然、有精神並符合情緒。畫面明亮、清楚、有故事感；避免恐怖、暴力、過度成熟及模仿現有角色。除兩個地點標籤外不要放大量文字。`;
+
+  el("summary").textContent=`學生姓名：${clean("studentName")}\n角色：${name}
+上一堂角色圖：${has==="yes"?"有，貼上 Prompt 前要先上傳":"沒有，建立"+radio("newRole")}
+
+左邊：${sceneName("A")}｜${smartTag("A")}｜${v("actionA")}｜${v("moodA")}
+右邊：${sceneName("B")}｜${smartTag("B")}｜${v("actionB")}｜${v("moodB")}`;
+
+  el("prompt").textContent=finalPrompt;
+  el("uploadWarn").style.display=has==="yes"?"block":"none";
+  el("copyMsg").textContent="";
+  go(4);
+}
+async function copyPrompt(){try{await navigator.clipboard.writeText(finalPrompt);el("copyMsg").textContent="已複製，可以貼到 ChatGPT。"}catch(e){el("copyMsg").textContent="無法自動複製，請手動複製右側文字。"}}
+function downloadPrompt(){const student=(clean("studentName")||"未填姓名").replace(/[\\/:*?"<>|]/g,"_");const role=(clean("name")||"角色").replace(/[\\/:*?"<>|]/g,"_"); const blob=new Blob([finalPrompt],{type:"text/plain;charset=utf-8"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`${student}_${role}_第四堂雙場景Prompt.txt`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href)}
+async function sharePrompt(){if(navigator.share){try{await navigator.share({title:`${clean("studentName")}｜第四堂雙場景 Prompt`,text:finalPrompt});el("copyMsg").textContent="已開啟分享選單，請選擇備忘錄。"}catch(e){el("copyMsg").textContent="分享已取消或不支援。"}}else{await copyPrompt();el("copyMsg").textContent="此裝置不支援分享選單，已先複製 Prompt。"}}
+
+function prepareStoryPanel(){
+  if(!el("storyOptionA"))return;
+  el("storyOptionA").textContent=`場景一｜${sceneName("A")||"尚未選擇"}（${smartTag("A")}）`;
+  el("storyOptionB").textContent=`場景二｜${sceneName("B")||"尚未選擇"}（${smartTag("B")}）`;
+  onStorySceneChange();
+}
+function storySide(){return radio("storySceneSide")}
+function storySceneName(){
+  const side=storySide();
+  return side?sceneName(side):"";
+}
+function onStorySceneChange(){
+  const side=storySide();
+  if(!side){
+    el("chosenSceneBox").textContent="請先選擇一個要延伸的場景。";
+    return;
+  }
+  el("chosenSceneBox").textContent=`你選擇了「${sceneName(side)}」，圖片標籤是「${smartTag(side)}」。接下來的五個分鏡都會圍繞這個場景。`;
+}
+function toggleShotOther(i){
+  const show=v("shot"+i)==="其他";
+  el("shotOther"+i).style.display=show?"block":"none";
+  if(!show)el("shotOther"+i).value="";
+}
+function shotValue(i){
+  return v("shot"+i)==="其他"?clean("shotOther"+i):v("shot"+i);
+}
+function setShot(i,value){
+  const select=el("shot"+i);
+  const exists=Array.from(select.options).some(o=>o.value===value);
+  select.value=exists?value:"其他";
+  el("shotOther"+i).style.display=exists?"none":"block";
+  el("shotOther"+i).value=exists?"":value;
+}
+function autoStoryboard(){
+  const side=storySide();
+  const errors=[];
+  if(!side)errors.push("第五堂主場景");
+  err("e5",errors);
+  if(errors.length)return;
+
+  const action=v("action"+side);
+  const item=v("item"+side);
+  const mood=v("mood"+side);
+  let sequence=[
+    "停下腳步觀察四周",
+    mood==="震撼"?"慢慢抬頭看向天空":"望向遠方的地標",
+    item==="相機"?"拿起相機準備拍攝":"從背包拿出需要的工具",
+    item==="相機"?"按下快門記錄畫面":"在筆記本寫下新的發現",
+    "放下相機再次望向風景"
+  ];
+  if(action==="奔跑前進"){
+    sequence=["沿著道路向前走","停下腳步觀察四周","望向遠方的地標","拿起相機準備拍攝","轉身繼續下一段旅程"];
+  }else if(action==="坐下來思考"){
+    sequence=["停下腳步觀察四周","坐下來思考","在筆記本寫下新的發現","慢慢抬頭看向天空","轉身繼續下一段旅程"];
+  }else if(action==="尋找線索"){
+    sequence=["小心靠近重要的線索","蹲下觀察地面的細節","翻開地圖確認方向","在筆記本寫下新的發現","回頭確認身後的景色"];
+  }
+  sequence.forEach((x,idx)=>setShot(idx+1,x));
+}
+function buildStoryPrompt(){
+  const errors=[];
+  const side=storySide();
+  if(!side)errors.push("第五堂主場景");
+  for(let i=1;i<=5;i++){
+    if(!shotValue(i))errors.push(`分鏡 ${i}`);
+  }
+  if(!v("videoRhythm"))errors.push("影片節奏／感覺");
+  err("e5",errors);
+  if(errors.length)return;
+
+  const name=clean("name")||"這位角色";
+  const scene=sceneName(side);
+  const tag=smartTag(side);
+  const sceneMood=v("mood"+side);
+  const sceneLight=v("light"+side);
+  const shots=[1,2,3,4,5].map(i=>shotValue(i));
+
+  finalStoryPrompt=`請依照我上傳的角色圖與場景作品，規劃一段約 8～10 秒、共五個鏡頭的短影片分鏡。
+
+學生姓名：${clean("studentName")}
+角色：${name}
+場景：${scene}（${tag}）
+場景光影：${sceneLight}
+場景情緒：${sceneMood}
+影片節奏：${v("videoRhythm")}
+
+分鏡 1：${shots[0]}
+分鏡 2：${shots[1]}
+分鏡 3：${shots[2]}
+分鏡 4：${shots[3]}
+分鏡 5：${shots[4]}
+
+請讓五個動作前後連貫，角色外觀保持一致，鏡頭由環境、動作到情緒逐步推進。${clean("posterFocus")?`
+海報／主視覺希望保留：${clean("posterFocus")}`:""}`;
+
+  el("storySummary").textContent=`學生姓名：${clean("studentName")}\n第五堂主場景：${scene}
+影片節奏：${v("videoRhythm")}
+五個分鏡：
+1. ${shots[0]}
+2. ${shots[1]}
+3. ${shots[2]}
+4. ${shots[3]}
+5. ${shots[4]}`;
+  el("storyPrompt").textContent=finalStoryPrompt;
+  el("storyOutput").style.display="block";
+  el("storyCopyMsg").textContent="";
+  el("storyOutput").scrollIntoView({behavior:"smooth",block:"start"});
+}
+async function copyStoryPrompt(){
+  if(!finalStoryPrompt){el("storyCopyMsg").textContent="請先產生第五堂 Prompt。";return}
+  try{
+    await navigator.clipboard.writeText(finalStoryPrompt);
+    el("storyCopyMsg").textContent="已複製第五堂 Prompt。";
+  }catch(e){
+    el("storyCopyMsg").textContent="無法自動複製，請手動複製文字。";
+  }
+}
+async function shareStoryPrompt(){
+  if(!finalStoryPrompt){el("storyCopyMsg").textContent="請先產生第五堂 Prompt。";return}
+  if(navigator.share){
+    try{
+      await navigator.share({title:`${clean("studentName")}｜第五堂影片故事 Prompt`,text:finalStoryPrompt});
+      el("storyCopyMsg").textContent="已開啟分享選單，請選擇備忘錄。";
+    }catch(e){
+      el("storyCopyMsg").textContent="分享已取消或此裝置不支援。";
+    }
+  }else{
+    await copyStoryPrompt();
+    el("storyCopyMsg").textContent="此裝置不支援分享選單，已先複製 Prompt。";
+  }
+}
+function downloadStoryPrompt(){
+  if(!finalStoryPrompt){el("storyCopyMsg").textContent="請先產生第五堂 Prompt。";return}
+  const student=(clean("studentName")||"未填姓名").replace(/[\\/:*?"<>|]/g,"_");
+  const role=(clean("name")||"角色").replace(/[\\/:*?"<>|]/g,"_");
+  const blob=new Blob([finalStoryPrompt],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`${student}_${role}_第五堂影片分鏡Prompt.txt`;
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+}
+
+function clearAll(){document.querySelectorAll("input[type=text],textarea").forEach(x=>x.value="");document.querySelectorAll("input[type=radio]").forEach(x=>x.checked=false);document.querySelectorAll("select").forEach(x=>x.selectedIndex=0);document.querySelectorAll(".err").forEach(x=>{x.style.display="none";x.innerHTML=""});el("newRoleBox").style.display="none";el("uploadWarn").style.display="none";[1,2,3,4,5].forEach(i=>{if(el("shotOther"+i))el("shotOther"+i).style.display="none"});if(el("storyOutput"))el("storyOutput").style.display="none";if(el("chosenSceneBox"))el("chosenSceneBox").textContent="請先選擇一個要延伸的場景。";finalPrompt="";finalStoryPrompt="";init();go(1)}
+init();
+</script>
+</body></html>

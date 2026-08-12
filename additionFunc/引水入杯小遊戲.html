@@ -327,7 +327,8 @@
               Composite = Matter.Composite;
 
         const TOTAL_LEVELS = 10;
-        let unlockedLevel = 1; // 移除 localStorage，每次重新整理都從第 1 關開始
+        // 每次重新整理都重置為第一關
+        let unlockedLevel = 1; 
         
         let currentLevelIndex = 1;
         let engine, runner;
@@ -441,29 +442,53 @@
             else returnToMenu();
         }
 
-        // 關卡資料設計
+        // ==========================================
+        // 修正後的難度遞增 10 關卡
+        // ==========================================
         const LEVEL_DATA = {
+            // 第1關：直直落下 (教學關)
             1: {
                 waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
                 cup: { x: 400, y: 550 },
                 stones: [],
                 dirtY: 150 
             },
+            // 第2關：微小斜角 (引導水流轉彎)
             2: {
-                waterSpawn: { x: 150, y: 50, w: 100, h: 80 },
-                cup: { x: 650, y: 550 },
+                waterSpawn: { x: 250, y: 50, w: 100, h: 80 },
+                cup: { x: 500, y: 550 },
                 stones: [],
                 dirtY: 150
             },
+            // 第3關：正中央有一塊小石頭 (教導繞路)
             3: {
                 waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
                 cup: { x: 400, y: 550 },
                 stones: [
-                    { x: 400, y: 300, w: 250, h: 30 } 
+                    { x: 400, y: 300, w: 150, h: 20 } 
                 ],
                 dirtY: 150
             },
+            // 第4關：大對角 + 一個輔助平台
             4: {
+                waterSpawn: { x: 200, y: 50, w: 100, h: 80 },
+                cup: { x: 500, y: 550 },
+                stones: [
+                    { x: 350, y: 350, w: 200, h: 20 }
+                ],
+                dirtY: 150
+            },
+            // 第5關：大石塊阻擋 (強迫拉出大繞路)
+            5: {
+                waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
+                cup: { x: 400, y: 550 },
+                stones: [
+                    { x: 400, y: 300, w: 300, h: 30 }
+                ],
+                dirtY: 150
+            },
+            // 第6關：雙層 Z 字
+            6: {
                 waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
                 cup: { x: 200, y: 550 },
                 stones: [
@@ -472,26 +497,7 @@
                 ],
                 dirtY: 150
             },
-            5: {
-                waterSpawn: { x: 100, y: 50, w: 100, h: 80 },
-                cup: { x: 700, y: 550 },
-                stones: [
-                    { x: 200, y: 200, w: 150, h: 20 },
-                    { x: 600, y: 350, w: 200, h: 20 },
-                    { x: 400, y: 450, w: 150, h: 20 },
-                    { x: 400, y: 280, w: 20, h: 100 }
-                ],
-                dirtY: 150
-            },
-            6: {
-                waterSpawn: { x: 350, y: 50, w: 100, h: 80 },
-                cup: { x: 200, y: 550 },
-                stones: [
-                    { x: 400, y: 250, w: 400, h: 20 },
-                    { x: 200, y: 400, w: 200, h: 20 }
-                ],
-                dirtY: 150
-            },
+            // 第7關：超寬雙層 (需要長斜坡)
             7: {
                 waterSpawn: { x: 100, y: 50, w: 100, h: 80 },
                 cup: { x: 700, y: 550 },
@@ -501,6 +507,7 @@
                 ],
                 dirtY: 150
             },
+            // 第8關：分流設計 (中間柱子)
             8: {
                 waterSpawn: { x: 300, y: 50, w: 200, h: 80 },
                 cup: { x: 400, y: 550 },
@@ -511,6 +518,7 @@
                 ],
                 dirtY: 150
             },
+            // 第9關：三層階梯迷宮
             9: {
                 waterSpawn: { x: 100, y: 50, w: 80, h: 80 },
                 cup: { x: 400, y: 550 },
@@ -521,6 +529,7 @@
                 ],
                 dirtY: 150
             },
+            // 第10關：終極迷宮 (跨越全圖)
             10: {
                 waterSpawn: { x: 650, y: 50, w: 100, h: 80 },
                 cup: { x: 150, y: 550 },
@@ -689,7 +698,6 @@
                     playSound('win');
                     if (currentLevelIndex >= unlockedLevel && unlockedLevel < TOTAL_LEVELS) {
                         unlockedLevel = currentLevelIndex + 1;
-                        // 更新內部記憶的關卡解鎖進度
                     }
                     showModal();
                 }, 500);

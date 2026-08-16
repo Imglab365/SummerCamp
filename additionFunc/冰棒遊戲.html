@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>冰棒消消樂 (完美平衡版) - 想像力實驗室</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --panel-color: #ffffff;
+            --text-color: #0f172a;
+            --accent-blue: #3b82f6;
+            --border-color: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; touch-action: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        /* Logo */
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--panel-color);
+            padding: 10px 25px;
+            border-radius: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--accent-blue);
+            border: 2px solid var(--accent-blue);
+            margin-bottom: 15px;
+        }
+
+        .game-wrapper {
+            background: var(--panel-color);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 4px solid var(--border-color);
+            position: relative;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 15px;
+            flex: 1;
+            border: 2px solid #e2e8f0;
+        }
+
+        .score-label { font-size: 0.9rem; color: #64748b; font-weight: bold; }
+        .score-value { font-size: 1.8rem; font-weight: 900; color: var(--accent-blue); }
+        .high-score { color: #f59e0b; }
+
+        canvas {
+            display: block;
+            background: #e2e8f0;
+            border-radius: 15px;
+            border: 4px solid #cbd5e1;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        /* 遊戲結束視窗 */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; display: none; border-radius: 20px;
+        }
+
+        .modal-box {
+            background: white; padding: 30px; border-radius: 20px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 4px solid var(--accent-blue);
+            transform: scale(0.9); animation: popIn 0.3s forwards; width: 85%;
+        }
+
+        @keyframes popIn { to { transform: scale(1); } }
+
+        .modal-title { font-size: 2rem; font-weight: 900; margin-bottom: 10px; color: #ef4444; }
+        .modal-desc { font-size: 1.1rem; color: #475569; margin-bottom: 20px; }
+        .play-btn {
+            background: var(--accent-blue); color: white; border: none; padding: 12px 30px;
+            font-size: 1.3rem; font-weight: bold; border-radius: 30px; cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .play-btn:hover { transform: scale(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <span style="font-size: 1.5rem;">🧊</span>
+        <span>想像力實驗室</span>
+    </div>
+
+    <div class="game-wrapper">
+        <div class="scoreboard">
+            <div class="score-box">
+                <span class="score-label">分數</span>
+                <span class="score-value" id="score-val">0</span>
+            </div>
+            <div class="score-box">
+                <span class="score-label">最高紀錄</span>
+                <span class="score-value high-score" id="high-score-val">0</span>
+            </div>
+        </div>
+
+        <!-- 畫布包含 6x6 網格以及下方的候選區 -->
+        <canvas id="gameCanvas" width="360" height="520"></canvas>
+
+        <div class="modal-overlay" id="game-over-overlay">
+            <div class="modal-box">
+                <h2 class="modal-title">沒有空間了！</h2>
+                <p class="modal-desc">冰棒填滿了所有格子</p>
+                <button class="play-btn" onclick="initGame()">再玩一次</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 音效系統
+        function playSound(type) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                if (type === 'drop') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                } else if (type === 'clear') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                } else if (type === 'over') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                }
+                
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+            } catch (e) {}
+        }
+
+        // 遊戲設定
+        const COLS = 6;
+        const ROWS = 6;
+        const CELL_SIZE = 50;
+        const GRID_OFFSET_X = (canvas.width - COLS * CELL_SIZE) / 2;
+        const GRID_OFFSET_Y = 20;
+
+        const DOCK_Y = 350; // 候選區 Y 座標
+
+        const COLORS = [
+            '#ef4444', // 紅
+            '#f97316', // 橙
+            '#eab308', // 黃
+            '#22c55e', // 綠
+            '#3b82f6', // 藍
+            '#6366f1', // 靛
+            '#a855f7'  // 紫
+        ];
+
+        let grid = [];
+        let dockPieces = [];
+        let draggingPiece = null;
+        let dragOffset = { x: 0, y: 0 };
+        
+        let score = 0;
+        let highScore = parseInt(localStorage.getItem('popsicleHighScore')) || 0;
+        document.getElementById('high-score-val').textContent = highScore;
+        let isGameOver = false;
+
+        let animatingCells = []; // 存放正在消除的動畫特效
+
+        function initGame() {
+            document.getElementById('game-over-overlay').style.display = 'none';
+            score = 0;
+            document.getElementById('score-val').textContent = score;
+            isGameOver = false;
+            animatingCells = [];
+            
+            // 初始化 6x6 空網格
+            grid = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+            
+            // 初始生成兩隻冰棒
+            dockPieces = [createPiece(0), createPiece(1)];
+            
+            requestAnimationFrame(draw);
+        }
+
+        function createPiece(slot) {
+            // 改為 1/15 的機率出現彩虹冰棒
+            const isRainbow = Math.random() < (1 / 15);
+            let c1, c2;
+            
+            if (isRainbow) {
+                // 如果是彩虹，上下兩格都是彩虹色
+                c1 = 'rainbow';
+                c2 = 'rainbow';
+            } else {
+                // 一般冰棒，上下兩格隨機分配顏色，但必須不同！
+                c1 = COLORS[Math.floor(Math.random() * COLORS.length)];
+                do {
+                    c2 = COLORS[Math.floor(Math.random() * COLORS.length)];
+                } while (c1 === c2);
+            }
+
+            // 固定為直立的冰棒
+            return {
+                id: Date.now() + Math.random(),
+                slot: slot,
+                blocks: [
+                    { r: 0, c: 0, color: c1 },
+                    { r: 1, c: 0, color: c2 }
+                ],
+                // 預設位置: 左右兩個候選位
+                x: slot === 0 ? 100 : 210,
+                y: DOCK_Y,
+                originX: slot === 0 ? 100 : 210,
+                originY: DOCK_Y,
+                w: CELL_SIZE,
+                h: CELL_SIZE * 2
+            };
+        }
+
+        // --- 繪圖邏輯 ---
+        function drawBlock(x, y, color, scale = 1, alpha = 1) {
+            ctx.save();
+            ctx.translate(x + CELL_SIZE/2, y + CELL_SIZE/2);
+            ctx.scale(scale, scale);
+            ctx.globalAlpha = alpha;
+
+            if (color === 'rainbow') {
+                const gradient = ctx.createLinearGradient(-CELL_SIZE/2, -CELL_SIZE/2, CELL_SIZE/2, CELL_SIZE/2);
+                gradient.addColorStop(0, '#ef4444');
+                gradient.addColorStop(0.2, '#f97316');
+                gradient.addColorStop(0.4, '#eab308');
+                gradient.addColorStop(0.6, '#22c55e');
+                gradient.addColorStop(0.8, '#3b82f6');
+                gradient.addColorStop(1, '#a855f7');
+                ctx.fillStyle = gradient;
+            } else {
+                ctx.fillStyle = color;
+            }
+
+            // 畫出冰棒圓角方塊
+            ctx.beginPath();
+            ctx.roundRect(-CELL_SIZE/2 + 2, -CELL_SIZE/2 + 2, CELL_SIZE - 4, CELL_SIZE - 4, 8);
+            ctx.fill();
+            
+            // 冰棒的高光立體感
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.roundRect(-CELL_SIZE/2 + 6, -CELL_SIZE/2 + 6, CELL_SIZE - 12, 10, 4);
+            ctx.fill();
+
+            // 如果是彩虹，加上星星標記
+            if (color === 'rainbow') {
+                ctx.fillStyle = 'white';
+                ctx.font = '20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('⭐', 0, 0);
+            }
+
+            ctx.restore();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 畫 6x6 網格底框
+            ctx.fillStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.roundRect(GRID_OFFSET_X - 5, GRID_OFFSET_Y - 5, COLS * CELL_SIZE + 10, ROWS * CELL_SIZE + 10, 10);
+            ctx.fill();
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const x = GRID_OFFSET_X + c * CELL_SIZE;
+                    const y = GRID_OFFSET_Y + r * CELL_SIZE;
+                    
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.beginPath();
+                    ctx.roundRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4, 6);
+                    ctx.fill();
+
+                    // 畫網格內已放置的冰棒
+                    if (grid[r][c]) {
+                        drawBlock(x, y, grid[r][c]);
+                    }
+                }
+            }
+
+            // 畫消除動畫
+            for (let i = animatingCells.length - 1; i >= 0; i--) {
+                let anim = animatingCells[i];
+                anim.scale += 0.1;
+                anim.alpha -= 0.1;
+                drawBlock(GRID_OFFSET_X + anim.c * CELL_SIZE, GRID_OFFSET_Y + anim.r * CELL_SIZE, anim.color, anim.scale, Math.max(0, anim.alpha));
+                if (anim.alpha <= 0) animatingCells.splice(i, 1);
+            }
+
+            // 畫候選區背景
+            ctx.fillStyle = 'rgba(0,0,0,0.05)';
+            ctx.beginPath();
+            ctx.roundRect(20, DOCK_Y - 20, canvas.width - 40, 160, 15);
+            ctx.fill();
+
+            // 畫候選冰棒 (未被拖曳的)
+            dockPieces.forEach(piece => {
+                if (draggingPiece && draggingPiece.id === piece.id) return;
+                
+                // 先畫冰棒棍 (固定在正下方)
+                ctx.fillStyle = '#dcb083'; // 木頭色
+                ctx.fillRect(piece.x + 15, piece.y + piece.h - 5, 20, 25);
+                
+                // 再畫冰體
+                piece.blocks.forEach(b => {
+                    drawBlock(piece.x + b.c * CELL_SIZE, piece.y + b.r * CELL_SIZE, b.color);
+                });
+            });
+
+            // 畫正在拖曳的冰棒
+            if (draggingPiece) {
+                // 檢查拖曳時是否有對齊空位 (顯示陰影預覽)
+                const gridPos = getGridPosition(draggingPiece.x, draggingPiece.y);
+                if (canPlace(draggingPiece, gridPos.r, gridPos.c)) {
+                    draggingPiece.blocks.forEach(b => {
+                        const px = GRID_OFFSET_X + (gridPos.c + b.c) * CELL_SIZE;
+                        const py = GRID_OFFSET_Y + (gridPos.r + b.r) * CELL_SIZE;
+                        drawBlock(px, py, b.color, 1, 0.4); // 半透明預覽
+                    });
+                }
+
+                // 畫拖曳中的冰棒棍
+                ctx.fillStyle = '#dcb083'; 
+                ctx.fillRect(draggingPiece.x + 15, draggingPiece.y + draggingPiece.h - 5, 20, 25);
+                
+                // 畫拖曳中的冰體
+                draggingPiece.blocks.forEach(b => {
+                    drawBlock(draggingPiece.x + b.c * CELL_SIZE, draggingPiece.y + b.r * CELL_SIZE, b.color, 1.1); // 稍微放大
+                });
+            }
+
+            if (!isGameOver || animatingCells.length > 0) {
+                requestAnimationFrame(draw);
+            }
+        }
+
+        // --- 互動與邏輯 ---
+        function getPointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            if (isGameOver) return;
+            const pos = getPointerPos(e);
+            
+            // 檢查是否點擊候選冰棒 (包含冰棒棍的點擊範圍)
+            for (let piece of dockPieces) {
+                if (pos.x >= piece.x && pos.x <= piece.x + piece.w &&
+                    pos.y >= piece.y && pos.y <= piece.y + piece.h + 20) {
+                    draggingPiece = piece;
+                    dragOffset.x = pos.x - piece.x;
+                    dragOffset.y = pos.y - piece.y;
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!draggingPiece) return;
+            const pos = getPointerPos(e);
+            draggingPiece.x = pos.x - dragOffset.x;
+            draggingPiece.y = pos.y - dragOffset.y;
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            if (!draggingPiece) return;
+
+            const gridPos = getGridPosition(draggingPiece.x, draggingPiece.y);
+            
+            if (canPlace(draggingPiece, gridPos.r, gridPos.c)) {
+                // 成功放置
+                playSound('drop');
+                placePiece(draggingPiece, gridPos.r, gridPos.c);
+                
+                // 記錄目前使用的是哪個槽位 (0 或 1)
+                const usedSlot = draggingPiece.slot;
+
+                // 從候選區移除已放置的冰棒
+                dockPieces = dockPieces.filter(p => p.id !== draggingPiece.id);
+                
+                // 檢查消除
+                checkEliminations();
+                
+                // 立刻補上一支新的冰棒在原槽位
+                dockPieces.push(createPiece(usedSlot));
+
+                // 檢查新局面是否遊戲結束
+                if (checkGameOver()) {
+                    isGameOver = true;
+                    playSound('over');
+                    document.getElementById('game-over-overlay').style.display = 'flex';
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('popsicleHighScore', highScore);
+                        document.getElementById('high-score-val').textContent = highScore;
+                    }
+                }
+
+            } else {
+                // 放錯位置，退回原位
+                draggingPiece.x = draggingPiece.originX;
+                draggingPiece.y = draggingPiece.originY;
+            }
+            
+            draggingPiece = null;
+        });
+
+        function getGridPosition(x, y) {
+            // 加上 CELL_SIZE/2 讓中心點對齊判定更直覺
+            const c = Math.floor((x + CELL_SIZE/2 - GRID_OFFSET_X) / CELL_SIZE);
+            const r = Math.floor((y + CELL_SIZE/2 - GRID_OFFSET_Y) / CELL_SIZE);
+            return { r, c };
+        }
+
+        function canPlace(piece, r, c) {
+            for (let b of piece.blocks) {
+                const nr = r + b.r;
+                const nc = c + b.c;
+                // 檢查邊界與是否為空
+                if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS || grid[nr][nc] !== null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function placePiece(piece, r, c) {
+            for (let b of piece.blocks) {
+                grid[r + b.r][c + b.c] = b.color;
+            }
+        }
+
+        // --- 核心：消除演算法 (廣度優先搜尋 BFS) ---
+        function isMatch(color1, color2) {
+            if (!color1 || !color2) return false;
+            // 相同顏色，或其中一個是彩虹
+            return color1 === color2 || color1 === 'rainbow' || color2 === 'rainbow';
+        }
+
+        function checkEliminations() {
+            let toEliminate = new Set();
+            let visited = new Set();
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (grid[r][c] && !visited.has(`${r},${c}`)) {
+                        let comp = [];
+                        let q = [{r, c}];
+                        visited.add(`${r},${c}`);
+
+                        while (q.length > 0) {
+                            let curr = q.shift();
+                            comp.push(curr);
+                            let dirs = [[1,0], [-1,0], [0,1], [0,-1]]; // 上下左右
+                            
+                            for (let d of dirs) {
+                                let nr = curr.r + d[0];
+                                let nc = curr.c + d[1];
+                                
+                                if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && grid[nr][nc]) {
+                                    // 如果相鄰格子符合配對條件
+                                    if (!visited.has(`${nr},${nc}`) && isMatch(grid[curr.r][curr.c], grid[nr][nc])) {
+                                        visited.add(`${nr},${nc}`);
+                                        q.push({r: nr, c: nc});
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // 只要連線數量 >= 2 就可以消除！
+                        if (comp.length >= 2) {
+                            comp.forEach(p => toEliminate.add(`${p.r},${p.c}`));
+                        }
+                    }
+                }
+            }
+
+            if (toEliminate.size > 0) {
+                playSound('clear');
+                let points = toEliminate.size * 10;
+                score += points;
+                document.getElementById('score-val').textContent = score;
+
+                toEliminate.forEach(key => {
+                    let [r, c] = key.split(',').map(Number);
+                    // 加入消除動畫
+                    animatingCells.push({ r, c, color: grid[r][c], scale: 1, alpha: 1 });
+                    grid[r][c] = null; // 清除格子
+                });
+            }
+        }
+
+        function checkGameOver() {
+            if (dockPieces.length === 0) return false;
+            
+            // 只要候選區的任何一個冰棒，還能在盤面上找到一個合法空位，遊戲就繼續
+            for (let piece of dockPieces) {
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (canPlace(piece, r, c)) {
+                            return false; 
+                        }
+                    }
+                }
+            }
+            return true; // 所有冰棒都放不下了
+        }
+
+        // 啟動遊戲
+        initGame();
+    </script>
+</body>
+</html>

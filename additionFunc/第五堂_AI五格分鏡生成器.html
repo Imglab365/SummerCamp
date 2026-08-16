@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>第五堂｜AI 五格分鏡生成器 V3</title>
+<style>
+:root{
+  --blue:#1554b7;--blue2:#0f3f8f;--paper:#fffdf8;--ink:#1f2937;--muted:#6b7280;
+  --line:#e5e0d6;--red:#dc2626;--green:#16a34a;--yellow:#fff8db;--yellowLine:#f1d98c;
+  --purple:#6d4aff;--softBlue:#eef6ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:linear-gradient(135deg,#fff8ed,#edf6ff);min-height:100vh}
+.wrap{max-width:1160px;margin:auto;padding:22px 16px 54px}
+header,.panel{background:rgba(255,255,255,.95);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 12px 28px rgba(31,41,55,.09);margin-bottom:16px}
+header{display:flex;justify-content:space-between;gap:16px;align-items:center}
+h1{margin:0 0 6px;color:var(--blue);font-size:32px}
+h2{margin:0 0 8px;font-size:26px}.subtitle,.desc,.hint{color:var(--muted);line-height:1.75}
+.badge{background:#eff6ff;color:var(--blue);border:1px solid #bfdbfe;border-radius:999px;padding:8px 13px;font-weight:850;white-space:nowrap}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
+.step{background:rgba(255,255,255,.78);border:1px solid var(--line);border-radius:16px;padding:11px;text-align:center;color:var(--muted);font-weight:850}
+.step.active{background:var(--blue);color:#fff}
+.panel{display:none}.panel.active{display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+.card,.field{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:15px}
+label.title{display:block;font-weight:900;margin:7px 0 7px}.req{color:var(--red);font-size:13px}
+select,input,textarea{width:100%;border:1px solid #d9d3c7;border-radius:13px;padding:11px 13px;font-size:16px;background:#fff;font-family:inherit;color:var(--ink)}
+textarea{min-height:86px;resize:vertical;line-height:1.55}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
+button,.buttonLink{border:0;border-radius:14px;padding:12px 16px;font-size:16px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:inherit}
+.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue2)}
+.secondary{background:#e8edf5;color:#25324a}.ghost{background:#fff;border:1px solid var(--line);color:#374151}.success{background:var(--green);color:white}
+.driveBtn{background:linear-gradient(135deg,#2d6cdf,#1554b7);color:#fff;min-height:62px;font-size:19px;padding:15px 22px;box-shadow:0 8px 18px rgba(21,84,183,.18)}
+.err{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#991b1b;border-radius:16px;padding:13px;margin:12px 0;font-weight:800;line-height:1.7}
+.info{background:var(--softBlue);border:1px solid #bfdbfe;border-radius:17px;padding:14px 16px;color:#153f8a;line-height:1.75;font-weight:700}
+.storyCore{background:#f4f0ff;border:1px solid #d7ccff;border-radius:17px;padding:14px 16px;color:#4c2ba8;line-height:1.75;font-weight:800;margin-top:12px}.storyCore b{color:#32177d}
+.beatRule{background:#fff7ed;border:1px solid #fed7aa;border-radius:17px;padding:14px 16px;color:#9a3412;line-height:1.75;font-weight:850;margin-top:12px}
+.beatRule strong{color:#7c2d12}
+.storyboardRow.beat34{border-width:2px}
+.storyboardRow.beat34 .storyboardNo{background:linear-gradient(135deg,#7c3aed,#5b21b6)}
+
+.tip{background:var(--yellow);border:1px solid var(--yellowLine);border-radius:17px;padding:14px 16px;color:#775400;line-height:1.75;font-weight:750}
+.mode{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:7px 10px;border-radius:999px;font-size:13px;font-weight:900;background:#f3f4f6;color:#4b5563}
+.scenePick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:9px}
+.sceneOption{position:relative;background:#fff;border:2px solid #ddd7cb;border-radius:18px;padding:17px;cursor:pointer;transition:.15s;text-align:center;font-weight:900;font-size:18px}
+.sceneOption:hover{transform:translateY(-1px);border-color:#8cb5ff}.sceneOption.selected{border-color:var(--blue);background:#eef6ff;color:var(--blue)}
+.sceneOption input{position:absolute;opacity:0;pointer-events:none}
+.storyGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.storyCard{background:#fff;border:2px solid #e3ded4;border-radius:18px;padding:15px;cursor:pointer;transition:.15s;min-height:114px}
+.storyCard:hover{transform:translateY(-1px);border-color:#a9c8ff}.storyCard.selected{border-color:var(--blue);background:#eef6ff}
+.storyTitle{font-weight:950;font-size:18px;margin-bottom:5px}.storyDesc{color:var(--muted);font-size:14px;line-height:1.55}
+.storyCard input{display:none}
+.storyboardList{display:grid;gap:12px;margin-top:15px}
+.storyboardRow{display:grid;grid-template-columns:125px 1fr;gap:12px;align-items:stretch;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;transition:.15s}
+.storyboardRow.changed{border-color:#86c99b;background:#f5fff7;box-shadow:0 0 0 1px rgba(22,163,74,.08)}
+.storyboardNo{background:var(--blue);color:#fff;border-radius:14px;padding:12px 9px;text-align:center;font-weight:950;display:flex;flex-direction:column;justify-content:center;line-height:1.45}
+.storyboardNo small{font-size:12px;opacity:.9;font-weight:750}.changeTag{display:none;color:#15803d;font-size:12px;font-weight:950;margin-top:5px}.storyboardRow.changed .changeTag{display:block}
+.progressBox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1px solid #dbe4ef;border-radius:17px;padding:13px 15px;margin-top:14px}
+.progressText{font-weight:900}.progressBar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;flex:1;max-width:330px}.progressFill{height:100%;width:0;background:var(--green);transition:.2s}
+.summary{background:var(--yellow);border:1px solid var(--yellowLine);border-radius:18px;padding:16px;white-space:pre-wrap;line-height:1.75}
+.prompt{background:#101827;color:#e5e7eb;border-radius:20px;padding:18px;min-height:410px;white-space:pre-wrap;line-height:1.65;font-size:15px;overflow:auto}
+.two{display:grid;grid-template-columns:.86fr 1.14fr;gap:16px}
+.finalNote{background:#eefbf2;border:1px solid #b7e2c3;border-radius:17px;padding:14px 16px;color:#166534;line-height:1.75;font-weight:800;margin-bottom:14px}
+#copyMsg{color:#15803d;font-weight:900;line-height:1.6}
+.footerNote{text-align:center;color:#8b8b8b;font-size:12px;margin-top:18px}
+@media(max-width:900px){header{display:block}.badge{display:inline-block;margin-top:10px}.steps,.grid,.storyGrid,.two{grid-template-columns:1fr}.full{grid-column:auto}h1{font-size:27px}.storyboardRow{grid-template-columns:1fr}.storyboardNo{text-align:left}.progressBox{align-items:flex-start;flex-direction:column}.progressBar{width:100%;max-width:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>AI 五格分鏡生成器</h1><div class="subtitle">第五堂｜選一個世界，讓角色的故事繼續發生</div><div id="modeBadge" class="mode"></div></div>
+  <div class="badge">想像力實驗室｜V3</div>
+</header>
+
+<div class="steps">
+  <div id="s1" class="step active">① 回顧與選場景</div>
+  <div id="s2" class="step">② 選故事類型</div>
+  <div id="s3" class="step">③ 修改五格分鏡</div>
+  <div id="s4" class="step">④ 完成 Prompt</div>
+</div>
+
+<section id="p1" class="panel active">
+  <h2>① 先看看自己的第四堂作品</h2>
+  <p class="desc">先到雲端找到自己的作品，看清楚左邊與右邊兩個世界。<b>不用下載，也不要修改圖片。</b>看完後關掉雲端分頁，就會回到這個生成器。</p>
+  <div class="actions" style="margin-top:12px;margin-bottom:18px">
+    <a class="buttonLink driveBtn" href="https://drive.google.com/drive/folders/1fvB0bBv7f7xB9dlgcTRWeXMJwSLxf4Kw?usp=sharing" target="_blank" rel="noopener noreferrer">🔎 查看我的第四堂作品</a>
+  </div>
+  <div class="tip">💡 看完記住兩件事：<b>你想選左邊還是右邊？</b>以及<b>那個世界大概是什麼地方？</b></div>
+  <div id="e1" class="err"></div>
+  <div class="grid" style="margin-top:14px">
+    <div class="field"><label class="title">學生姓名 <span class="req">＊必填</span></label><input id="studentName" autocomplete="name" placeholder="請填自己的真實姓名"></div>
+    <div class="field"><label class="title">角色／職業 <span class="req">＊必填</span></label><select id="role" onchange="toggleRoleOther()"></select><input id="roleOther" style="display:none;margin-top:9px" placeholder="例如：魔法研究員、動物攝影師"></div>
+    <div class="field full"><label class="title">這次想讓哪一個世界繼續發展？ <span class="req">＊必填</span></label>
+      <div class="scenePick">
+        <label class="sceneOption" id="sideA"><input type="radio" name="sceneSide" value="左邊" onchange="refreshSide()">⬅️ 左邊的世界</label>
+        <label class="sceneOption" id="sideB"><input type="radio" name="sceneSide" value="右邊" onchange="refreshSide()">右邊的世界 ➡️</label>
+      </div>
+    </div>
+    <div class="field full"><label class="title">你選的場景／主題叫什麼？ <span class="req">＊必填</span></label><input id="sceneTheme" placeholder="看著作品填簡短關鍵字，例如：挪威極光、紐約街頭、魔法森林、籃球場"><div class="hint">不用寫很長，2～10 個字就可以。這會讓自動分鏡更符合你的作品。</div></div>
+  </div>
+  <div class="actions"><button class="primary" type="button" onclick="next1()">下一步：選故事類型</button><button class="ghost" type="button" onclick="clearAll()">清空重填</button></div>
+</section>
+
+<section id="p2" class="panel">
+  <h2>② 你想讓故事怎麼發展？</h2>
+  <p class="desc">先選一種故事方向。下一頁會依照你的<b>場景＋角色職業＋故事類型</b>，自動安排一套五格分鏡底稿。</p>
+  <div id="e2" class="err"></div>
+  <div id="storyGrid" class="storyGrid"></div>
+  <div id="customStoryBox" class="field" style="display:none;margin-top:14px"><label class="title">自由創意：你希望大概發生什麼？ <span class="req">＊必填</span></label><textarea id="customStory" placeholder="例如：角色發現天空掉下一顆巨大糖果，追過去後找到一座秘密城市。"></textarea></div>
+  <div class="field" style="margin-top:14px"><label class="title">我還有一個特別想法（選填）</label><textarea id="extraIdea" placeholder="有特殊事件、物品、角色動作或結尾想法，可以寫在這裡；沒有就空白。"></textarea></div>
+  <div class="actions"><button class="secondary" type="button" onclick="go(1)">上一步</button><button class="primary" type="button" onclick="next2()">✨ 幫我自動安排五個分鏡</button></div>
+</section>
+
+<section id="p3" class="panel">
+  <h2>③ 系統先幫你完成 70%，換你完成最後 30%</h2>
+  <div id="editRule" class="info"></div>
+  <div class="beatRule">🎬 <strong>第五堂固定鏡頭規則：</strong>第 3 格是「準備動作」，第 4 格是「重頭戲特寫」。兩格可以做同一件事，但第 3 格要先準備，第 4 格才真正完成最重要的瞬間。</div>
+  <div id="storyCoreBox" class="storyCore"></div>
+  <div class="actions" style="margin-top:12px"><button class="secondary" type="button" onclick="autoStoryboard(true)">🔄 換一套故事底稿</button></div>
+  <div id="storyboardList" class="storyboardList"></div>
+  <div id="progressBox" class="progressBox"><div id="progressText" class="progressText"></div><div class="progressBar"><div id="progressFill" class="progressFill"></div></div></div>
+  <div id="e3" class="err"></div>
+  <div class="actions"><button class="secondary" type="button" onclick="go(2)">上一步</button><button class="primary" type="button" onclick="next3()">下一步：完成分鏡 Prompt</button></div>
+</section>
+
+<section id="p4" class="panel">
+  <h2>④ 完成！把這份 Prompt 交給老師</h2>
+  <div class="finalNote">✅ 今天不用自己跑五張圖。老師／助教會使用你的第四堂場景作品，加上這份 Prompt，後臺一次生成一張 <b>16:9 五格分鏡圖</b>。</div>
+  <div class="two">
+    <div>
+      <div id="summary" class="summary"></div>
+      <div class="actions">
+        <button class="secondary" type="button" onclick="go(3)">回去修改</button>
+        <button class="success" type="button" onclick="copyPrompt()">📋 複製 Prompt</button>
+        <button class="secondary" type="button" onclick="sharePrompt()">分享到備忘錄</button>
+        <button class="secondary" type="button" onclick="downloadPrompt()">下載文字檔</button>
+        <button class="ghost" type="button" onclick="clearAll()">建立新作品</button>
+      </div>
+      <p id="copyMsg"></p>
+      <div class="tip" style="margin-top:12px">交給老師後，就可以先去玩老師準備的 Bonus 小遊戲，等待你的分鏡圖完成！</div>
+    </div>
+    <div id="prompt" class="prompt"></div>
+  </div>
+</section>
+
+<div class="footerNote">想像力實驗室｜第五堂 AI 五格分鏡生成器 V3</div>
+</div>
+<script>
+const DRIVE_URL = "https://drive.google.com/drive/folders/1fvB0bBv7f7xB9dlgcTRWeXMJwSLxf4Kw?usp=sharing";
+const params = new URLSearchParams(location.search);
+const LEVEL = (params.get("level")||"standard").toLowerCase();
+const IS_LOW = ["low","lower","junior","1"].includes(LEVEL);
+const REQUIRED_EDITS = IS_LOW ? 0 : 2;
+
+const roles=["學生","攝影師","畫家／插畫家","發明家","工程師","廚師","運動員","探險家","科學家","音樂家","記者","設計師","遊戲創作者","生態觀察員","其他"];
+const roleProfiles={
+  "學生":{primary:"筆記本",record:"筆記本",expertise:"觀察、整理並記下重點"},
+  "攝影師":{primary:"相機",record:"相機",expertise:"觀察光線、尋找構圖並拍攝"},
+  "畫家／插畫家":{primary:"畫本與畫筆",record:"畫本與畫筆",expertise:"用線條與顏色記錄眼前特色"},
+  "發明家":{primary:"自己發明的小工具",record:"設計筆記",expertise:"測試工具、觀察問題並想出新方法"},
+  "工程師":{primary:"工具與平板",record:"平板筆記",expertise:"分析環境、確認問題並規劃解法"},
+  "廚師":{primary:"料理工具",record:"料理筆記",expertise:"觀察食材與環境，設計適合的料理想法"},
+  "運動員":{primary:"運動裝備",record:"訓練紀錄",expertise:"觀察路線、控制動作並完成挑戰"},
+  "探險家":{primary:"地圖與指南針",record:"旅行筆記本",expertise:"辨認方向、觀察地形並規劃路線"},
+  "科學家":{primary:"觀察工具",record:"研究筆記本",expertise:"觀察現象、比較線索並記錄結果"},
+  "音樂家":{primary:"樂器",record:"音樂筆記",expertise:"聆聽環境、感受節奏並創作聲音"},
+  "記者":{primary:"麥克風",record:"筆記本",expertise:"觀察現場、整理重點並記錄事件"},
+  "設計師":{primary:"草稿本或平板",record:"草稿本或平板",expertise:"觀察造型、整理靈感並畫下設計"},
+  "遊戲創作者":{primary:"平板",record:"設計筆記",expertise:"觀察環境、找出有趣規則並記錄靈感"},
+  "生態觀察員":{primary:"望遠鏡",record:"觀察筆記",expertise:"保持距離觀察生物與環境並記錄發現"}
+};
+const storyTypes=[
+  ["探索發現","🔎","在環境裡一步一步發現新的事物。"],
+  ["任務挑戰","🎯","接到一項任務，想辦法完成它。"],
+  ["神秘線索","🧩","發現奇怪線索，慢慢找出答案。"],
+  ["意外事件","⚡","原本很平常，突然發生意想不到的事。"],
+  ["尋找目標","🗺️","尋找一個人、物品、地方或答案。"],
+  ["幫助別人","🤝","發現有人需要幫忙，角色決定出手。"],
+  ["職業任務","🧰","運用角色的職業或專長完成事情。"],
+  ["旅行紀錄","📷","觀察、體驗這個世界，留下自己的紀錄。"],
+  ["奇幻遭遇","✨","遇到不可思議但有趣的奇幻事件。"],
+  ["自由創意","💡","自己決定這五格到底會發生什麼。"]
+];
+const shotMeta=["開場｜遠景","發現｜中景","準備｜中近景","重頭戲｜特寫","結尾｜遠景"];
+let generatedBase=["","","","",""];
+let finalPrompt="";
+let autoSeed=0;
+
+function el(id){return document.getElementById(id)}
+function clean(id){return (el(id)?.value||"").trim()}
+function radio(name){const n=document.querySelector(`input[name="${name}"]:checked`);return n?n.value:""}
+function roleName(){return clean("role")==="其他"?clean("roleOther"):clean("role")}
+function storyType(){return radio("storyType")}
+function profileFor(role){return roleProfiles[role]||{primary:"隨身工具",record:"筆記本",expertise:"運用自己的專長觀察並完成事情"}}
+function storyCore(type,role,scene,p,extra){
+  const s=scene||"這個場景";
+  const e=extra?`，並把「${extra}」自然放進故事裡`:"";
+  const cores={
+    "探索發現":`${role}想在${s}找到一個特別的新發現，透過${p.expertise}確認它到底是什麼${e}。`,
+    "任務挑戰":`${role}要在${s}完成一項小任務，先找到方法，再用自己的專長突破關鍵步驟${e}。`,
+    "神秘線索":`${role}在${s}發現一個不尋常的線索，沿著線索追查，最後理解它背後的答案${e}。`,
+    "意外事件":`${role}原本正常探索${s}，卻遇到一件安全但意想不到的事件，最後用自己的方式處理並收尾${e}。`,
+    "尋找目標":`${role}要在${s}找到一個重要目標，透過觀察、確認方向與行動逐步找到它${e}。`,
+    "幫助別人":`${role}在${s}遇到需要協助的人，先了解問題，再用自己的能力幫忙解決${e}。`,
+    "職業任務":`${role}要在${s}完成一件符合自己職業的任務，從觀察需求到完成成果${e}。`,
+    "旅行紀錄":`${role}想找到${s}最有代表性的一個位置，親自體驗後，用最符合自己職業的方式留下旅行紀錄${e}。`,
+    "奇幻遭遇":`${role}在${s}遇到一個不可思議但安全的奇幻現象，靠近理解並留下難忘結果${e}。`,
+    "自由創意":`${role}要在${s}完成「${clean("customStory")||"自己的故事"}」這個故事想法${e}。`
+  };
+  return cores[type]||cores["探索發現"];
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function err(id,list){const box=el(id);if(!list.length){box.style.display="none";box.innerHTML="";return}box.style.display="block";box.innerHTML="請先完成：<br>・"+list.join("<br>・")}
+function go(n){for(let i=1;i<=4;i++){el("p"+i).classList.remove("active");el("s"+i).classList.remove("active")}el("p"+n).classList.add("active");el("s"+n).classList.add("active");window.scrollTo({top:0,behavior:"smooth"});if(n===3)updateChangeProgress()}
+
+function init(){
+  el("modeBadge").textContent = IS_LOW ? "低年級模式｜可直接使用自動底稿" : "中高年級模式｜至少修改 2 格";
+  el("role").innerHTML='<option value="">請選擇角色／職業</option>'+roles.map(x=>`<option value="${x}">${x}</option>`).join("");
+  el("storyGrid").innerHTML=storyTypes.map(([name,icon,desc])=>`<label class="storyCard" id="story_${name}"><input type="radio" name="storyType" value="${name}" onchange="selectStory('${name}')"><div class="storyTitle">${icon} ${name}</div><div class="storyDesc">${desc}</div></label>`).join("");
+  renderStoryboard();
+  el("editRule").innerHTML = IS_LOW
+    ? "老師已經幫你開啟<strong>低年級模式</strong>：先看看五格故事，如果你有自己的想法就修改；沒有也可以直接完成。"
+    : "今天不用從零開始！系統先依照你的 <strong>角色＋場景＋故事類型</strong> 提供一份 <strong>70% 的連續故事底稿</strong>。請至少修改 <strong>2 個分鏡</strong>，加入自己的動作、物品、表情或故事想法，才可以送出。";
+}
+function toggleRoleOther(){el("roleOther").style.display=clean("role")==="其他"?"block":"none"}
+function refreshSide(){["A","B"].forEach(k=>el("side"+k).classList.remove("selected"));if(radio("sceneSide")==="左邊")el("sideA").classList.add("selected");if(radio("sceneSide")==="右邊")el("sideB").classList.add("selected")}
+function selectStory(name){document.querySelectorAll(".storyCard").forEach(x=>x.classList.remove("selected"));el("story_"+name)?.classList.add("selected");el("customStoryBox").style.display=name==="自由創意"?"block":"none"}
+function next1(){let e=[];if(!clean("studentName"))e.push("學生姓名");if(!clean("role"))e.push("角色／職業");if(clean("role")==="其他"&&!clean("roleOther"))e.push("其他角色／職業內容");if(!radio("sceneSide"))e.push("左邊或右邊的世界");if(!clean("sceneTheme"))e.push("場景／主題關鍵字");err("e1",e);if(!e.length)go(2)}
+function next2(){let e=[];if(!storyType())e.push("故事類型");if(storyType()==="自由創意"&&!clean("customStory"))e.push("自由創意的故事想法");err("e2",e);if(!e.length){autoStoryboard(false);go(3)}}
+
+
+function toolList(p){
+  return [...new Set([p.primary,p.record].filter(Boolean))];
+}
+function toolText(p,sep="、"){
+  return toolList(p).join(sep);
+}
+function beat34For(type,role,scene,p,extra,variant){
+  const name=role||"角色";
+  const s=scene||"這個場景";
+  const primary=p.primary||"隨身工具";
+  const record=p.record||primary;
+  const expertise=p.expertise||"運用自己的專長完成事情";
+  const x=extra?`，並把「${extra}」自然放進這個重點`:"";
+  const v=variant%3;
+
+  const beats={
+    "探索發現":[
+      [
+        `${name}來到剛才發現的目標前，拿出${primary}、調整位置並做好仔細觀察的準備。`,
+        `鏡頭明顯拉近${name}的手部、表情與目標；${name}使用${primary}完成最關鍵的觀察，清楚確認這次的新發現${x}。`
+      ],
+      [
+        `${name}停在目標旁，先用${primary}確認角度與距離，準備做最後一次仔細檢查。`,
+        `以特寫呈現${name}操作${primary}與目標細節的瞬間，讓真正的發現結果在這一格清楚出現${x}。`
+      ],
+      [
+        `${name}把${primary}準備好，靠近剛才注意到的細節，先穩定位置再開始確認。`,
+        `鏡頭拉近到${name}與關鍵細節，呈現完成確認的那一刻，讓「原來如此」的結果成為重頭戲${x}。`
+      ]
+    ],
+    "任務挑戰":[
+      [
+        `${name}在挑戰的關鍵位置停下，拿好${primary}並調整姿勢，準備執行最重要的一步。`,
+        `以特寫呈現${name}使用${primary}完成關鍵步驟的瞬間，清楚看見挑戰被突破${x}。`
+      ],
+      [
+        `${name}重新確認方法，握好${primary}、站到正確位置，準備進行最後一次嘗試。`,
+        `鏡頭拉近${name}的手部、工具與表情，捕捉最後一次嘗試成功的關鍵瞬間${x}。`
+      ],
+      [
+        `${name}先把${primary}準備完成，集中注意力確認最後步驟，不急著直接完成任務。`,
+        `以動作特寫呈現${name}真正完成最後步驟的那一刻，讓成果在第四格明確出現${x}。`
+      ]
+    ],
+    "神秘線索":[
+      [
+        `${name}來到最可疑的線索前，拿出${primary}並調整位置，準備驗證自己的猜想。`,
+        `鏡頭拉近${name}、${primary}與關鍵線索，呈現線索被確認、答案突然連起來的重頭戲${x}。`
+      ],
+      [
+        `${name}把前面找到的線索重新比對，準備用${primary}檢查最後一個關鍵細節。`,
+        `以特寫呈現最後證據與${name}的驚訝表情，讓謎底在這一格清楚揭曉${x}。`
+      ],
+      [
+        `${name}靠近最後的提示，先穩定拿好${primary}，準備做最重要的一次確認。`,
+        `鏡頭聚焦在${primary}、提示細節與${name}的反應，完成「找到答案」的關鍵瞬間${x}。`
+      ]
+    ],
+    "意外事件":[
+      [
+        `${name}確認突發狀況後，拿出${primary}並調整位置，準備用自己的方法處理。`,
+        `以特寫呈現${name}真正採取關鍵行動的瞬間，讓意外事件開始轉向順利結果${x}。`
+      ],
+      [
+        `${name}停下來快速想好方法，準備好${primary}，先對準最需要處理的位置。`,
+        `鏡頭拉近${name}的動作與表情，呈現他用${primary}完成最重要處理的一刻${x}。`
+      ],
+      [
+        `${name}先做好安全準備，拿穩${primary}並確認下一步，不急著直接出手。`,
+        `以動態特寫呈現${name}完成關鍵處理的瞬間，讓事件從意外變成有趣成果${x}。`
+      ]
+    ],
+    "尋找目標":[
+      [
+        `${name}來到最可能找到目標的位置，拿出${primary}再次確認方向，準備做最後搜尋。`,
+        `鏡頭拉近${name}、${primary}與目標出現的位置，呈現終於找到目標的關鍵瞬間${x}。`
+      ],
+      [
+        `${name}依照提示走到最後一個位置，準備用${primary}確認自己沒有找錯。`,
+        `以特寫呈現${name}確認目標與露出驚喜表情的瞬間，讓「找到了！」成為第四格重點${x}。`
+      ],
+      [
+        `${name}停在最後的線索旁，先調整${primary}並做好最後一次確認。`,
+        `鏡頭聚焦在${name}與真正目標上，清楚呈現搜尋成功的那一刻${x}。`
+      ]
+    ],
+    "幫助別人":[
+      [
+        `${name}了解對方的困難後，拿出${primary}、站到適合的位置，準備開始最重要的協助。`,
+        `以特寫呈現${name}使用${primary}完成關鍵幫助的瞬間，讓對方的困難真正被解決${x}。`
+      ],
+      [
+        `${name}先和對方確認方法，準備好${primary}，一起做好完成困難步驟前的準備。`,
+        `鏡頭拉近兩人的手部、工具與表情，呈現合作完成最難部分的重頭戲${x}。`
+      ],
+      [
+        `${name}確認自己能怎麼幫忙後，拿好${primary}並準備示範最有效的方法。`,
+        `以近距離特寫呈現${name}真正完成協助的動作，以及問題被解決的結果${x}。`
+      ]
+    ],
+    "職業任務":[
+      [
+        `角色拿出${primary}，先調整工具、位置與工作姿勢，運用「${expertise}」做好專業行動前的準備。`,
+        `鏡頭明顯拉近角色的手部、${primary}與專注表情，呈現真正完成最重要專業動作的瞬間，讓工作成果清楚出現${x}。`
+      ],
+      [
+        `角色來到工作重點前，準備好${primary}並確認最後一次細節，先完成專業工作的準備階段。`,
+        `以特寫呈現角色使用${primary}完成核心專業動作的瞬間，讓觀眾一眼看懂這就是整段故事的重頭戲${x}。`
+      ],
+      [
+        `角色先拿好${primary}、調整角度與位置，依照「${expertise}」準備開始最重要的工作。`,
+        `鏡頭推近角色與${primary}，捕捉工作真正完成的那一刻，並清楚呈現完成後的成果${x}。`
+      ]
+    ],
+    "旅行紀錄":[
+      [
+        `${name}停在最喜歡的位置，拿出${primary}並調整角度與姿勢，準備留下這趟旅程最重要的紀錄。`,
+        `鏡頭拉近${name}的手部、${primary}與專注表情，呈現真正完成旅行紀錄的那一刻${x}。`
+      ],
+      [
+        `${name}選定代表${s}的最佳位置，準備好${primary}，先確認自己想留下的畫面或內容。`,
+        `以特寫呈現${name}使用${primary}完成紀錄的瞬間，讓這一格成為整趟旅行最重要的畫面${x}。`
+      ],
+      [
+        `${name}在旅行重點前停好位置，拿出${primary}並做好最後準備，不急著立刻離開。`,
+        `鏡頭推近${name}與${primary}，清楚呈現按下、寫下、畫下或完成紀錄的關鍵瞬間${x}。`
+      ]
+    ],
+    "奇幻遭遇":[
+      [
+        `${name}在奇幻現象前停下，拿出${primary}並保持安全距離，準備進行一次小心的互動或觀察。`,
+        `以特寫呈現${name}、${primary}與奇幻現象真正產生互動的瞬間，讓最不可思議的變化在第四格發生${x}。`
+      ],
+      [
+        `${name}確認奇幻現象沒有危險後，先準備好${primary}並調整位置，準備靠近理解它。`,
+        `鏡頭拉近角色與奇幻現象，呈現最精彩的發光、變化或互動瞬間${x}。`
+      ],
+      [
+        `${name}停在奇妙事物旁，拿穩${primary}、觀察規律，準備做第一次真正的互動。`,
+        `以近距離特寫呈現互動成功的那一刻，讓角色的驚喜表情和奇幻變化成為重頭戲${x}。`
+      ]
+    ],
+    "自由創意":[
+      [
+        `${name}來到故事最重要的事件前，拿出${primary}並做好準備，先決定自己要怎麼完成「${clean("customStory")||"這個故事"}」。`,
+        `鏡頭拉近${name}與核心事件，呈現真正做出關鍵選擇或動作的那一刻${x}。`
+      ],
+      [
+        `${name}確認故事接下來最重要的一步後，準備好${primary}、調整位置與姿勢。`,
+        `以特寫呈現${name}完成「${clean("customStory")||"故事核心"}」最精彩動作的瞬間${x}。`
+      ],
+      [
+        `${name}在核心事件前先停一下，拿好${primary}並做好最後準備。`,
+        `鏡頭推近到${name}與事件重點，讓真正的高潮動作或發現完整發生在第四格${x}。`
+      ]
+    ]
+  };
+  const options=beats[type]||beats["探索發現"];
+  return options[v];
+}
+
+function baseStory(type,role,scene,p,extra,variant){
+  const name=role||"角色";
+  const s=scene||"這個場景";
+  const primary=p.primary, record=p.record, expertise=p.expertise;
+  const x=extra?`，同時把「${extra}」自然加入這一段`:"";
+  const v=variant%3;
+  const banks={
+    "探索發現":[
+      [
+        `${name}走進${s}，先用遠景觀察環境，找出最值得探索的方向。`,
+        `${name}注意到一個和平常不太一樣的細節，停下腳步仔細確認。`,
+        `${name}拿出${primary}靠近觀察，運用「${expertise}」一步一步確認這個發現。`,
+        `${name}終於弄清楚這個特別細節的真相，並用${record}留下最重要的發現${x}。`,
+        `${name}收好剛才使用的工具，回頭看一眼發現的位置，帶著新的收穫繼續探索。`
+      ],
+      [
+        `${name}來到${s}，先慢慢前進並觀察四周的地形、建築或自然特色。`,
+        `${name}在遠處發現一個特別醒目的目標，決定走近看看。`,
+        `${name}使用${primary}確認方向與細節，讓自己更接近答案。`,
+        `${name}在目標旁完成最關鍵的觀察，確認一個原本不知道的新發現${x}。`,
+        `${name}用${record}記下結果，滿意地望向${s}的下一個探索方向。`
+      ],
+      [
+        `${name}站在${s}入口，先決定今天要探索哪一個方向。`,
+        `${name}前進後發現環境中藏著一個值得注意的小變化。`,
+        `${name}拿出${primary}，用自己的專長比較前後差異並找出原因。`,
+        `${name}找到造成變化的關鍵，完成這次探索最重要的一刻${x}。`,
+        `${name}把結果記進${record}，收好工具後繼續前往下一個地方。`
+      ]
+    ],
+    "任務挑戰":[
+      [
+        `${name}抵達${s}，先確認今天要完成的任務與周圍環境。`,
+        `${name}很快發現任務前方有一個小阻礙，必須先想出解決方式。`,
+        `${name}拿出${primary}開始行動，運用「${expertise}」逐步處理問題。`,
+        `${name}在關鍵位置完成最困難的一步，成功突破挑戰${x}。`,
+        `${name}確認任務完成，收好工具並露出有成就感的表情。`
+      ],
+      [
+        `${name}站在${s}準備開始挑戰，先觀察最適合的行動路線。`,
+        `${name}途中遇到一個比想像中更麻煩的小問題，只好停下來重新判斷。`,
+        `${name}使用${primary}調整方法，讓自己的專長真正派上用場。`,
+        `${name}找到正確方法後完成挑戰的核心動作${x}。`,
+        `${name}用${record}記下這次成功的方法，帶著成果準備離開。`
+      ],
+      [
+        `${name}來到${s}接受一項限定時間內要完成的小任務。`,
+        `${name}先找到任務需要處理的重點，並確認最可能成功的方式。`,
+        `${name}拿出${primary}開始執行，過程中修正一次自己的方法。`,
+        `${name}靠「${expertise}」完成最後的關鍵步驟${x}。`,
+        `${name}看著完成的成果，開心地把這次挑戰記錄下來。`
+      ]
+    ],
+    "神秘線索":[
+      [
+        `${name}走在${s}時，發現一個和平常環境不太一樣的小線索。`,
+        `${name}停下來仔細看，發現線索似乎指向另一個位置。`,
+        `${name}拿出${primary}沿著提示追查，並用自己的專長比較途中看到的細節。`,
+        `${name}找到第二個關鍵提示，終於把前後線索連起來並理解答案${x}。`,
+        `${name}用${record}記下秘密的答案，收好工具後帶著滿足表情離開。`
+      ],
+      [
+        `${name}來到${s}，原本只是正常觀察環境。`,
+        `${name}突然注意到一個重複出現的奇怪記號，決定追查來源。`,
+        `${name}使用${primary}確認記號出現的位置，逐步縮小範圍。`,
+        `${name}在最關鍵的地方找到真相，原來所有記號都指向同一個答案${x}。`,
+        `${name}把答案記在${record}裡，回頭看著線索出現的地方微微一笑。`
+      ],
+      [
+        `${name}在${s}發現一個小小的神秘物件或痕跡。`,
+        `${name}觀察後發現它和周圍另一個細節有關，開始產生新的猜想。`,
+        `${name}拿出${primary}驗證自己的猜想，並沿著線索繼續前進。`,
+        `${name}找到最後一個證據，成功解開這次不危險的神秘事件${x}。`,
+        `${name}將解謎結果記錄在${record}，帶著「原來如此」的表情收尾。`
+      ]
+    ],
+    "意外事件":[
+      [
+        `${name}原本正在${s}按照自己的計畫前進，一切都很平常。`,
+        `${name}突然遇到一個安全但意想不到的小事件，驚訝地停下來。`,
+        `${name}拿出${primary}確認發生了什麼，並想出最適合自己的應對方式。`,
+        `${name}運用「${expertise}」處理事件最重要的一刻${x}。`,
+        `${name}看著事情順利結束，收好工具並對這段插曲露出笑容。`
+      ],
+      [
+        `${name}在${s}自在地活動，原本只想完成自己的事情。`,
+        `${name}身邊忽然出現一個有趣的變化，讓原本路線必須改變。`,
+        `${name}使用${primary}重新判斷狀況，決定跟著新的方向行動。`,
+        `${name}意外完成一件原本沒有預計會做的事情${x}。`,
+        `${name}用${record}留下這段意外紀錄，帶著驚喜心情繼續旅程。`
+      ],
+      [
+        `${name}來到${s}，正準備開始原本安排好的活動。`,
+        `${name}突然看到附近發生一個無害又好玩的突發狀況。`,
+        `${name}拿出${primary}靠近了解，並用自己的專長加入處理。`,
+        `${name}做出一個讓事件成功轉向的關鍵行動${x}。`,
+        `${name}事情恢復平靜後，回頭看著剛才的地方開心地結束故事。`
+      ]
+    ],
+    "尋找目標":[
+      [
+        `${name}來到${s}，先確認今天要尋找的目標與可能方向。`,
+        `${name}觀察四周後找到第一個位置提示，知道自己應該往哪裡走。`,
+        `${name}拿出${primary}確認路線，沿著提示繼續前進。`,
+        `${name}在關鍵位置終於找到一直尋找的目標${x}。`,
+        `${name}用${record}記下找到的位置與結果，開心地完成這次尋找。`
+      ],
+      [
+        `${name}站在${s}入口，先想清楚要找的東西可能藏在哪裡。`,
+        `${name}發現一個和目標有關的小提示，立刻改變前進方向。`,
+        `${name}使用${primary}逐步確認提示，距離目標越來越近。`,
+        `${name}在意想不到的位置發現真正的目標${x}。`,
+        `${name}確認沒有找錯後，用${record}留下結果並滿意地收尾。`
+      ],
+      [
+        `${name}進入${s}展開尋找，先從最明顯的地方開始觀察。`,
+        `${name}第一次沒有找到，卻注意到一個可以重新判斷方向的細節。`,
+        `${name}拿出${primary}修正路線，重新往新的位置前進。`,
+        `${name}這次成功找到目標，完成故事最重要的一刻${x}。`,
+        `${name}把找到目標的過程記進${record}，準備帶著成果離開。`
+      ]
+    ],
+    "幫助別人":[
+      [
+        `${name}在${s}活動時，注意到有人遇到一個不危險的小困難。`,
+        `${name}先走近了解問題，確認對方真正需要什麼幫助。`,
+        `${name}拿出${primary}，運用「${expertise}」一起想出解決方法。`,
+        `${name}完成最關鍵的幫助動作，讓問題順利解決${x}。`,
+        `${name}看到對方放心或開心的樣子，收好工具並露出溫暖笑容。`
+      ],
+      [
+        `${name}來到${s}，原本正準備做自己的事情。`,
+        `${name}發現旁邊有人不知道該怎麼繼續，便主動停下來詢問。`,
+        `${name}使用${primary}和自己的專長示範一個可行的方法。`,
+        `${name}和對方一起完成最困難的部分${x}。`,
+        `${name}事情完成後，兩人一起看著成果，故事用開心的氣氛收尾。`
+      ],
+      [
+        `${name}走在${s}時，看見有人因為一個小問題停在原地。`,
+        `${name}先觀察狀況，想清楚自己能提供哪一種幫助。`,
+        `${name}拿出${primary}開始協助，讓自己的專長真正派上用場。`,
+        `${name}成功解決問題的關鍵部分${x}。`,
+        `${name}用${record}留下這次合作的成果，和對方互相道別。`
+      ]
+    ],
+    "職業任務":[
+      [
+        `身為${name}，角色來到${s}，先觀察今天最需要處理的工作重點。`,
+        `角色找到一個最適合發揮職業專長的目標，決定從這裡開始。`,
+        `角色拿出${primary}，運用「${expertise}」完成工作的準備與第一步。`,
+        `角色完成整段故事最重要的專業行動，讓工作得到清楚成果${x}。`,
+        `角色用${record}確認或保存成果，整理工具後露出有成就感的表情。`
+      ],
+      [
+        `${name}帶著${primary}抵達${s}，準備完成今天的專業任務。`,
+        `角色先觀察現場，找出最需要自己專長處理的一件事。`,
+        `角色開始工作，依照「${expertise}」一步一步完成處理。`,
+        `角色在關鍵位置做出最專業的一個動作，完成主要任務${x}。`,
+        `角色檢查成果，使用${record}留下紀錄後結束工作。`
+      ],
+      [
+        `${name}來到${s}開始工作，先確認環境和今天要完成的成果。`,
+        `角色發現現場有一個可以做得更好的地方，決定用自己的專長改善。`,
+        `角色拿出${primary}開始處理，過程中仔細確認每個步驟。`,
+        `角色完成改善後，看見清楚的前後差異${x}。`,
+        `角色把成果記進${record}，滿意地收好工具準備離開。`
+      ]
+    ],
+    "旅行紀錄":[
+      [
+        `${name}走進${s}，先用遠景感受這個地方最明顯的特色與氣氛。`,
+        `${name}停下腳步，找到一個最能代表${s}、也最吸引自己的位置。`,
+        `${name}拿出${primary}，用「${expertise}」仔細體驗並確認這個位置的特色。`,
+        `${name}就在同一個位置使用${record}，留下這趟旅程最重要的一筆紀錄${x}。`,
+        `${name}收好剛才使用的工具，再看一眼這個位置，帶著滿足心情前往下一站。`
+      ],
+      [
+        `${name}抵達${s}，帶著期待慢慢前進，先觀察沿途最有特色的景色。`,
+        `${name}發現一個值得停留的地方，決定把它當成今天的旅行重點。`,
+        `${name}使用${primary}深入觀察或體驗，讓自己真正了解這個地點。`,
+        `${name}用${record}把剛才看到與感受到的重點留下來${x}。`,
+        `${name}最後回頭望向這個旅行重點，收好工具並繼續下一段旅程。`
+      ],
+      [
+        `${name}來到${s}開始今天的旅行紀錄，先找出最想探索的一條路線。`,
+        `${name}沿路前進後看到一個最有代表性的場景，停下來仔細欣賞。`,
+        `${name}拿出${primary}確認環境細節，並用自己的專長找出最值得留下的部分。`,
+        `${name}使用${record}完成代表這趟旅程的核心紀錄${x}。`,
+        `${name}確認紀錄完成後收好工具，帶著「下一站」的期待離開畫面。`
+      ]
+    ],
+    "奇幻遭遇":[
+      [
+        `${name}來到${s}，一開始只是正常地觀察與前進。`,
+        `${name}忽然看到一個發光、漂浮或不符合平常規則的奇妙現象。`,
+        `${name}拿出${primary}小心靠近，用自己的專長確認這個現象沒有危險。`,
+        `${name}和奇幻現象產生一次有趣而安全的互動，理解它最特別的地方${x}。`,
+        `${name}用${record}留下這次奇遇，望著現象慢慢遠去並露出驚喜表情。`
+      ],
+      [
+        `${name}走進${s}，周圍原本和第四堂作品一樣熟悉。`,
+        `${name}場景中突然出現一個夢幻但不危險的新變化，讓角色停下腳步。`,
+        `${name}使用${primary}觀察這個變化，找出它出現的規律。`,
+        `${name}在最精彩的一刻和奇幻變化產生互動${x}。`,
+        `${name}用${record}記下結果，當場景恢復平靜時仍覺得像做了一場夢。`
+      ],
+      [
+        `${name}在${s}探索時，發現遠處有一個從沒見過的奇妙事物。`,
+        `${name}靠近後發現它會隨著環境產生有趣變化，角色感到又驚訝又好奇。`,
+        `${name}拿出${primary}確認細節，並保持安全距離觀察。`,
+        `${name}成功找到和奇妙事物互動的方法，完成最難忘的畫面${x}。`,
+        `${name}把這次奇遇記進${record}，回頭看著${s}慢慢結束故事。`
+      ]
+    ],
+    "自由創意":[
+      [
+        `${name}來到${s}，故事從「${clean("customStory")}」這個想法正式開始。`,
+        `${name}發現這個想法中最重要的事件或目標，決定進一步行動。`,
+        `${name}拿出${primary}，用自己的專長推動事件往前發展。`,
+        `${name}來到故事最重要的高潮，完成關鍵選擇或行動${x}。`,
+        `${name}面對最後的結果，用${record}留下成果，讓故事有清楚的結尾。`
+      ],
+      [
+        `${name}站在${s}，準備展開「${clean("customStory")}」的故事。`,
+        `${name}很快遇到第一個轉折，開始思考下一步該怎麼做。`,
+        `${name}使用${primary}採取行動，讓故事朝自己的想法繼續發展。`,
+        `${name}在最關鍵的位置完成故事核心事件${x}。`,
+        `${name}用${record}保留結果，帶著符合故事的情緒完成最後一格。`
+      ],
+      [
+        `${name}進入${s}，先讓「${clean("customStory")}」中的第一件事發生。`,
+        `${name}因此發現一個新的問題、目標或機會，故事開始改變。`,
+        `${name}拿出${primary}做出自己的選擇，讓事件繼續往前。`,
+        `${name}完成最精彩的一個動作或發現${x}。`,
+        `${name}看到最後結果後用${record}留下紀錄，完整結束這段小故事。`
+      ]
+    ]
+  };
+  const options=banks[type]||banks["探索發現"];
+  const result=[...options[v]];
+  const beat34=beat34For(type,role,scene,p,extra,variant);
+  result[2]=beat34[0];
+  result[3]=beat34[1];
+  return result;
+}
+function autoStoryboard(changeSet){
+  const role=roleName(),scene=clean("sceneTheme"),type=storyType(),p=profileFor(role),extra=clean("extraIdea");
+  if(changeSet) autoSeed++;
+  const core=storyCore(type,role,scene,p,extra);
+  const arr=baseStory(type,role,scene,p,extra,autoSeed);
+  generatedBase=[...arr];
+  el("storyCoreBox").innerHTML=`<b>🎬 這次故事主軸：</b>${esc(core)}<br><span style="font-weight:700;color:#6b55b4">固定重要工具：${esc(toolText(p,"／"))}。五格會圍繞同一個故事目標；其中第 3 格一定是準備，第 4 格一定是同一件事的重頭戲特寫。</span>`;
+  [1,2,3,4,5].forEach((i,idx)=>{el("shot"+i).value=arr[idx];el("shot"+i).dataset.base=arr[idx]});
+  updateChangeProgress();
+}
+function renderStoryboard(){
+  el("storyboardList").innerHTML=[1,2,3,4,5].map(i=>{
+    const isBeat34=i===3||i===4;
+    const hint=i===3
+      ?"第 3 格固定是準備：可以改工具、姿勢、位置或準備方式，但先不要把重頭戲做完。"
+      :i===4
+        ?"第 4 格固定是重頭戲特寫：要延續第 3 格同一件事，把真正完成的關鍵瞬間拉近呈現。"
+        :"可以改動作、物品、表情、發現的東西或故事結果。";
+    return `<div class="storyboardRow ${isBeat34?"beat34":""}" id="shotRow${i}"><div class="storyboardNo">分鏡 ${i}<small>${shotMeta[i-1]}</small><div class="changeTag">✓ 已加入你的想法</div></div><div><textarea id="shot${i}" placeholder="自動分鏡會出現在這裡" oninput="updateChangeProgress()"></textarea><div class="hint">${hint}</div></div></div>`;
+  }).join("");
+}
+function modifiedCount(){
+  let n=0;
+  [1,2,3,4,5].forEach(i=>{const now=clean("shot"+i);const base=(el("shot"+i)?.dataset.base||"").trim();const changed=!!base && now!==base;el("shotRow"+i)?.classList.toggle("changed",changed);if(changed)n++});
+  return n;
+}
+function updateChangeProgress(){
+  const n=modifiedCount();
+  if(IS_LOW){el("progressText").textContent=n?`你已經修改 ${n} 格，很棒！（低年級不強制）`:`低年級模式：想改就改，也可以直接使用自動底稿。`;el("progressFill").style.width=n?Math.min(100,n*20)+"%":"0%";}
+  else{const done=Math.min(REQUIRED_EDITS,n);el("progressText").textContent=`已修改 ${n} 格｜至少需要 ${REQUIRED_EDITS} 格`;el("progressFill").style.width=(done/REQUIRED_EDITS*100)+"%";}
+}
+function next3(){
+  let e=[];[1,2,3,4,5].forEach(i=>{if(!clean("shot"+i))e.push(`分鏡 ${i} 的文字`)});
+  if(!IS_LOW && modifiedCount()<REQUIRED_EDITS)e.push(`至少修改 ${REQUIRED_EDITS} 個分鏡（目前 ${modifiedCount()} 個）`);
+  err("e3",e);if(!e.length){buildPrompt();go(4)}
+}
+function buildPrompt(){
+  const student=clean("studentName"),role=roleName(),side=radio("sceneSide"),scene=clean("sceneTheme"),type=storyType(),p=profileFor(role);
+  const shots=[1,2,3,4,5].map(i=>clean("shot"+i));
+  const core=storyCore(type,role,scene,p,clean("extraIdea"));
+  finalPrompt=`請使用我上傳的「第四堂場景作品」作為角色與場景的主要視覺參考，生成一張 16:9 橫向五格連續故事分鏡圖。
+
+【後臺辨識資料｜不要顯示在圖片中】
+學生姓名：${student}
+學生選擇：${side}的場景
+角色／職業：${role}
+場景主題：${scene}
+故事類型：${type}
+故事核心：${core}
+固定重要工具：${toolText(p)}
+
+【五格分鏡】
+1｜開場／遠景：${shots[0]}
+2｜發現／中景：${shots[1]}
+3｜準備動作／中近景：${shots[2]}
+4｜重頭戲／特寫：${shots[3]}
+5｜結尾／遠景：${shots[4]}
+
+【生成規格】
+- 生成一張 16:9 橫向 Storyboard，不要分成五張獨立圖片。
+- 版面使用五格清楚分鏡：上排 3 格、下排 2 格，閱讀順序 1→2→3→4→5。
+- 五格都必須是同一位角色，臉部、髮型、服裝、配件與整體氣質保持一致，不要重新設計角色。
+- 只延伸學生選擇的「${side}」場景作為五格故事舞台；另一側場景不要混入分鏡。
+- 場景延續我上傳的第四堂作品，重要地標、環境、時間感與美術風格保持一致。
+- 五格要像同一段故事的連續瞬間，前一格發生的事情要能自然造成下一格的行動；鏡頭由建立環境、發現事件、準備行動、重頭戲特寫到收尾逐步推進。
+- 第 3 格與第 4 格必須形成固定的「準備 → 重頭戲」關係：第 3 格先呈現工具、姿勢、位置或動作準備；第 4 格延續同一件核心行動，把鏡頭明顯拉近，以特寫呈現真正完成、發現、按下、啟動、解決或成功的關鍵瞬間。
+- 第 4 格不要突然改做另一件無關的事情，也不要只是把第 3 格完全重複一次；要像同一個動作從準備推進到最精彩的一刻。
+- 嚴格遵守分鏡文字中的主要道具與行動，不要自行加入相機、魔法道具、武器或其他未提及的重要工具。若某一格沒有使用工具，可讓工具收在身上或包內，不要憑空換成新的道具。
+- 五格中的空間位置、角色前進方向與時間感盡量連續，不要每一格都像重新開始一個新場景。
+- 第 5 格必須呈現這段小故事的結果、完成感或下一站感，不要只是重複前面相同動作。
+- 每格只放小型 1～5 編號即可，不要加入對白、標題或大量文字。
+- 畫面清楚、有故事感、適合國小學生；避免恐怖、暴力、血腥或過度成熟內容。`;
+  el("summary").textContent=`學生姓名：${student}
+選擇場景：${side}｜${scene}
+角色／職業：${role}
+故事類型：${type}
+故事主軸：${core}
+固定重要工具：${toolText(p,"／")}
+
+五格故事：
+1. ${shots[0]}
+2. ${shots[1]}
+3. ${shots[2]}
+4. ${shots[3]}
+5. ${shots[4]}`;
+  el("prompt").textContent=finalPrompt;el("copyMsg").textContent="";
+}
+async function copyPrompt(){if(!finalPrompt){return}try{await navigator.clipboard.writeText(finalPrompt);el("copyMsg").textContent="已複製 Prompt，請交給老師／助教。"}catch(e){el("copyMsg").textContent="無法自動複製，請長按右側 Prompt 手動複製。"}}
+async function sharePrompt(){if(!finalPrompt)return;if(navigator.share){try{await navigator.share({title:`${clean("studentName")}｜第五堂五格分鏡 Prompt`,text:finalPrompt});el("copyMsg").textContent="已開啟分享選單，可選擇備忘錄保存。"}catch(e){el("copyMsg").textContent="分享已取消或此裝置不支援。"}}else{await copyPrompt();el("copyMsg").textContent="此裝置不支援分享選單，已先複製 Prompt。"}}
+function downloadPrompt(){if(!finalPrompt)return;const blob=new Blob([finalPrompt],{type:"text/plain;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${clean("studentName")||"學生"}_第五堂_五格分鏡Prompt.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function clearAll(){if(!confirm("確定要清空目前內容，重新開始嗎？"))return;document.querySelectorAll("input,textarea,select").forEach(x=>{if(x.type==="radio"||x.type==="checkbox")x.checked=false;else x.value=""});el("roleOther").style.display="none";el("customStoryBox").style.display="none";document.querySelectorAll(".selected,.changed").forEach(x=>x.classList.remove("selected","changed"));generatedBase=["","","","",""];finalPrompt="";autoSeed=0;renderStoryboard();err("e1",[]);err("e2",[]);err("e3",[]);go(1)}
+init();
+</script>
+</body>
+</html>

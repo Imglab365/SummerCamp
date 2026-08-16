@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>想像力水管工 (20關擴充版) - 接水管遊戲</title>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --panel-color: #ffffff;
+            --text-color: #0f172a;
+            --accent-blue: #0ea5e9;
+            --accent-dark: #0369a1;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --pipe-empty: #94a3b8;
+            --pipe-border: #475569;
+            --water-color: #06b6d4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; touch-action: manipulation; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--panel-color);
+            padding: 10px 25px;
+            border-radius: 40px;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.15);
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: var(--accent-dark);
+            border: 2px solid var(--accent-blue);
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            z-index: 10;
+        }
+
+        /* 遊戲主容器放大 */
+        .game-wrapper {
+            background: var(--panel-color);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px; /* 加大版面 */
+            border: 4px solid #cbd5e1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 選單畫面 */
+        .menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 20px;
+            width: 100%;
+            min-height: 500px;
+            background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .menu-title { 
+            font-size: 3rem; font-weight: 900; margin-bottom: 15px; 
+            color: var(--accent-blue); text-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+            text-align: center;
+        }
+        
+        .rules-box {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid var(--accent-blue);
+            border-radius: 20px;
+            padding: 25px 35px;
+            margin-bottom: 40px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+        .rules-title { font-weight: bold; font-size: 1.5rem; color: var(--accent-dark); margin-bottom: 10px; }
+        .rules-desc { font-size: 1.1rem; color: #475569; line-height: 1.6; }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .level-btn {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 3px solid var(--accent-blue);
+            background: white;
+            color: var(--accent-blue);
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.1);
+        }
+
+        .level-btn:hover:not(.locked) {
+            transform: translateY(-5px);
+            background: var(--accent-blue);
+            color: white;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+        }
+
+        .level-btn.locked {
+            border-color: #94a3b8;
+            color: #94a3b8;
+            background: #f1f5f9;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 遊戲畫面 */
+        .game-screen { display: none; flex-direction: column; width: 100%; align-items: center; padding: 20px; }
+
+        .game-hud {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; max-width: 700px; margin-bottom: 20px;
+        }
+
+        .hud-btn {
+            background: white; border: 3px solid var(--accent-blue);
+            padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            color: var(--accent-blue); transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .hud-btn:hover { background: var(--accent-blue); color: white; }
+
+        .level-display {
+            background: var(--accent-blue); padding: 10px 30px; border-radius: 20px;
+            font-weight: 900; font-size: 1.5rem; color: white;
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .canvas-container {
+            background: #e2e8f0;
+            border-radius: 16px;
+            border: 4px solid #94a3b8;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        canvas { display: block; cursor: pointer; }
+
+        /* 彈出視窗 */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 50; display: none; border-radius: 20px;
+        }
+
+        .modal-box {
+            background: white; padding: 40px; border-radius: 20px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 4px solid var(--accent-blue);
+            transform: scale(0.9); animation: popIn 0.3s forwards; width: 85%; max-width: 350px;
+        }
+
+        @keyframes popIn { to { transform: scale(1); } }
+
+        .modal-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 10px; color: var(--accent-blue); }
+        .modal-desc { font-size: 1.2rem; color: #475569; margin-bottom: 25px; font-weight: bold; }
+        
+        .modal-btns { display: flex; gap: 15px; justify-content: center; }
+
+        .m-btn {
+            padding: 12px 25px; font-size: 1.2rem; font-weight: bold; border-radius: 30px;
+            cursor: pointer; border: none; color: white; transition: transform 0.2s;
+        }
+        .m-btn:hover { transform: scale(1.05); }
+        .btn-secondary { background: #94a3b8; }
+        .btn-primary { background: var(--accent-green); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4); }
+
+        /* 漏水提示 Toast */
+        .toast {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--accent-red); color: white; padding: 15px 30px;
+            font-size: 1.5rem; font-weight: bold; border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .toast.show { opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <a href="#" class="logo-container" onclick="event.preventDefault(); returnToMenu();">
+        <span>🚰</span>
+        <span>想像力實驗室</span>
+    </a>
+
+    <div class="game-wrapper">
+        
+        <!-- 主選單 -->
+        <div class="menu-screen" id="menu-screen">
+            <h1 class="menu-title">想像力水管工</h1>
+            
+            <div class="rules-box">
+                <div class="rules-title">📜 遊戲規則</div>
+                <div class="rules-desc">
+                    點擊畫面上的 <strong>水管</strong> 來旋轉它。<br>
+                    將水管從起點接通到終點的 <strong>水杯</strong>。<br>
+                    準備好後，點擊左上角的 <strong>紅色出水閥</strong> 放水測試！<br>
+                    (注意：如果不小心接到死胡同會漏水喔！)
+                </div>
+            </div>
+            
+            <div class="level-grid" id="level-grid"></div>
+        </div>
+
+        <!-- 遊戲畫面 -->
+        <div class="game-screen" id="game-screen">
+            <div class="game-hud">
+                <button class="hud-btn" onclick="returnToMenu()">❮ 返回選單</button>
+                <div class="level-display" id="level-display">關卡 1</div>
+                <button class="hud-btn" onclick="resetLevel()">↻ 重設</button>
+            </div>
+
+            <div class="canvas-container" id="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+                
+                <div class="toast" id="toast-msg">漏水了！請調整水管</div>
+
+                <div class="modal-overlay" id="modal-overlay">
+                    <div class="modal-box">
+                        <h2 class="modal-title" id="modal-title">通水成功！</h2>
+                        <p class="modal-desc" id="modal-desc">水管完美接通啦！</p>
+                        <div class="modal-btns">
+                            <button class="m-btn btn-secondary" onclick="returnToMenu()">選單</button>
+                            <button class="m-btn btn-primary" id="next-btn" onclick="nextLevel()">下一關 ❯</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 音效系統 ---
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                if (type === 'rotate') { 
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                } else if (type === 'flow') { 
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(300, ctx.currentTime + 1.0);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 1.0);
+                } else if (type === 'leak') { 
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                } else if (type === 'win') { 
+                    osc.type = 'square'; osc.frequency.setValueAtTime(440, ctx.currentTime); 
+                    osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1); 
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime); gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                }
+                
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 1.0);
+            } catch (e) {}
+        }
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const TOTAL_LEVELS = 20;
+        let unlockedLevel = 1;
+        let currentLevel = 1;
+        
+        let ROWS = 6;
+        let COLS = 6;
+        let CELL_SIZE = 60; 
+
+        // 水管定義: openings 對應 0:上, 1:右, 2:下, 3:左
+        const PIPES = {
+            'I': { openings: [0, 2] },
+            'L': { openings: [0, 1] },
+            'T': { openings: [3, 0, 1] },
+            'S': { openings: [1] }, // Start 固定朝右 (1)
+            'E': { openings: [3] }  // End 固定朝左 (3)
+        };
+
+        const DIR_R = [-1, 0, 1, 0];
+        const DIR_C = [0, 1, 0, -1];
+
+        let grid = [];
+        let isAnimating = false;
+        let waterProgress = 0;
+        let flowResult = null; // { maxDist, reachedEnd }
+        let animFrameId = null;
+
+        // --- 選單邏輯 ---
+        function renderMenu() {
+            const grid = document.getElementById('level-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= TOTAL_LEVELS; i++) {
+                const btn = document.createElement('div');
+                btn.className = `level-btn ${i > unlockedLevel ? 'locked' : ''}`;
+                btn.textContent = i;
+                if (i <= unlockedLevel) {
+                    btn.onclick = () => loadLevel(i);
+                }
+                grid.appendChild(btn);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', renderMenu);
+
+        function returnToMenu() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'flex';
+            isAnimating = false;
+            if (animFrameId) cancelAnimationFrame(animFrameId);
+            renderMenu();
+        }
+
+        // --- 核心：保證有解的地圖生成器 ---
+        function generateLevel(level) {
+            // 難度設定: 1~5(6x6), 6~10(7x7), 11~20(8x8)
+            if (level <= 5) ROWS = 6;
+            else if (level <= 10) ROWS = 7;
+            else ROWS = 8;
+            COLS = ROWS;
+            
+            // 畫面放大邏輯
+            const maxW = Math.min(window.innerWidth - 60, 650);
+            CELL_SIZE = Math.floor((maxW - 10) / COLS);
+            canvas.width = COLS * CELL_SIZE;
+            canvas.height = ROWS * CELL_SIZE;
+
+            grid = Array(ROWS).fill().map(() => Array(COLS).fill(null));
+
+            // 設定起終點
+            const startPos = { r: 0, c: 0, dir: 1 };
+            const endPos = { r: ROWS - 1, c: COLS - 1, dir: 3 };
+
+            // 1. 利用 DFS 尋找一條隨機路徑 (強制路徑前兩格與後兩格，確保起終點方向合理)
+            let path = [];
+            let tempGrid = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+            tempGrid[0][0] = 1;
+            tempGrid[ROWS-1][COLS-1] = 1;
+
+            function dfs(r, c) {
+                if (r === ROWS - 1 && c === COLS - 2) {
+                    path.push({r, c});
+                    return true;
+                }
+                tempGrid[r][c] = 1;
+                path.push({r, c});
+
+                let dirs = [[-1,0], [1,0], [0,-1], [0,1]];
+                dirs.sort(() => Math.random() - 0.5); // 隨機方向
+
+                for (let d of dirs) {
+                    let nr = r + d[0], nc = c + d[1];
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && tempGrid[nr][nc] === 0) {
+                        if (dfs(nr, nc)) return true;
+                    }
+                }
+                path.pop();
+                tempGrid[r][c] = 0;
+                return false;
+            }
+
+            dfs(0, 1);
+            let fullPath = [startPos, ...path, endPos];
+
+            function getDir(from, to) {
+                if (to.r < from.r) return 0;
+                if (to.c > from.c) return 1;
+                if (to.r > from.r) return 2;
+                if (to.c < from.c) return 3;
+            }
+
+            function findRotation(baseOps, reqOps) {
+                for (let rot = 0; rot < 4; rot++) {
+                    let rotated = baseOps.map(op => (op + rot) % 4).sort();
+                    let reqSorted = [...reqOps].sort();
+                    if (rotated.join() === reqSorted.join()) return rot;
+                }
+                return 0;
+            }
+
+            // 2. 依照路徑分配正確的水管種類
+            grid[startPos.r][startPos.c] = { type: 'S', rotation: 0, fillOrder: -1 };
+            grid[endPos.r][endPos.c] = { type: 'E', rotation: 0, fillOrder: -1 };
+
+            // 隨關卡推進增加 T 型水管出現的機率
+            let tChance = (level - 1) * 0.04; 
+
+            for (let i = 1; i < fullPath.length - 1; i++) {
+                let curr = fullPath[i];
+                let prev = fullPath[i-1];
+                let next = fullPath[i+1];
+
+                let dirFromPrev = getDir(curr, prev);
+                let dirToNext = getDir(curr, next);
+                let required = [dirFromPrev, dirToNext];
+
+                let type = Math.abs(dirFromPrev - dirToNext) === 2 ? 'I' : 'L';
+
+                // 有機率升級成 T 型水管 (增加迷惑性)
+                if (Math.random() < tChance) {
+                    type = 'T';
+                    let available = [0,1,2,3].filter(x => !required.includes(x));
+                    required.push(available[Math.floor(Math.random() * available.length)]);
+                }
+
+                let rot = findRotation(PIPES[type].openings, required);
+                // 隨機打亂初始旋轉角度
+                grid[curr.r][curr.c] = { type: type, solutionRot: rot, rotation: Math.floor(Math.random() * 4), fillOrder: -1 };
+            }
+
+            // 3. 填滿剩下的空格為隨機干擾水管
+            const pipeTypes = ['I', 'L', 'T'];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (!grid[r][c]) {
+                        let randType = pipeTypes[Math.floor(Math.random() * pipeTypes.length)];
+                        grid[r][c] = { type: randType, rotation: Math.floor(Math.random() * 4), fillOrder: -1 };
+                    }
+                }
+            }
+        }
+
+        function getOpenings(cell) {
+            if (!cell || !PIPES[cell.type]) return [];
+            return PIPES[cell.type].openings.map(op => (op + cell.rotation) % 4);
+        }
+
+        // --- 核心：水流檢測演算法 ---
+        function checkFlow() {
+            for(let r=0; r<ROWS; r++) {
+                for(let c=0; c<COLS; c++) {
+                    grid[r][c].fillOrder = -1;
+                }
+            }
+
+            let q = [{r: 0, c: 0, dist: 0}];
+            grid[0][0].fillOrder = 0;
+            let maxDist = 0;
+            let reachedEnd = false;
+
+            while(q.length > 0) {
+                let curr = q.shift();
+                maxDist = Math.max(maxDist, curr.dist);
+
+                if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
+                    reachedEnd = true;
+                }
+
+                let cell = grid[curr.r][curr.c];
+                let openings = getOpenings(cell);
+
+                for (let op of openings) {
+                    let nr = curr.r + DIR_R[op];
+                    let nc = curr.c + DIR_C[op];
+
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                        let nCell = grid[nr][nc];
+                        if (nCell.fillOrder === -1) { 
+                            let nOpenings = getOpenings(nCell);
+                            let targetOp = (op + 2) % 4; // 對接方向
+                            if (nOpenings.includes(targetOp)) {
+                                nCell.fillOrder = curr.dist + 1;
+                                q.push({r: nr, c: nc, dist: curr.dist + 1});
+                            }
+                        }
+                    }
+                }
+            }
+            return { maxDist, reachedEnd };
+        }
+
+        // --- 互動控制 ---
+        canvas.addEventListener('pointerdown', (e) => {
+            if (isAnimating) return; // 正在放水動畫時鎖定操作
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            const c = Math.floor(x / CELL_SIZE);
+            const r = Math.floor(y / CELL_SIZE);
+
+            if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+                const cell = grid[r][c];
+                if (cell.type === 'S') {
+                    // 點擊起點 -> 放水測試
+                    startFlowAnimation();
+                } else if (cell.type !== 'E') {
+                    // 點擊水管 -> 旋轉
+                    cell.rotation = (cell.rotation + 1) % 4;
+                    playSound('rotate');
+                }
+            }
+        });
+
+        function startFlowAnimation() {
+            flowResult = checkFlow();
+            isAnimating = true;
+            waterProgress = 0;
+            playSound('flow');
+        }
+
+        // --- 繪圖引擎 ---
+        function drawPipe(r, c, cell) {
+            const cx = c * CELL_SIZE + CELL_SIZE / 2;
+            const cy = r * CELL_SIZE + CELL_SIZE / 2;
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(cell.rotation * Math.PI / 2);
+
+            const isFilled = cell.fillOrder !== -1 && cell.fillOrder <= Math.floor(waterProgress);
+            const pipeColor = isFilled ? varColor('--water-color') : varColor('--pipe-empty');
+            
+            const w = CELL_SIZE * 0.35; 
+            const half = CELL_SIZE / 2;
+
+            ctx.fillStyle = pipeColor;
+            ctx.strokeStyle = varColor('--pipe-border');
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.arc(0, 0, w/2, 0, Math.PI*2);
+            ctx.fill();
+
+            ctx.beginPath();
+            if (cell.type === 'I') {
+                ctx.rect(-w/2, -half, w, CELL_SIZE);
+            } else if (cell.type === 'L') {
+                ctx.rect(-w/2, -half, w, half + w/2);
+                ctx.rect(-w/2, -w/2, half + w/2, w);
+            } else if (cell.type === 'T') {
+                ctx.rect(-w/2, -half, w, half + w/2); 
+                ctx.rect(0, -w/2, half, w); 
+                ctx.rect(-half, -w/2, half, w); 
+            } else if (cell.type === 'S') {
+                ctx.fillStyle = isFilled ? varColor('--accent-blue') : '#475569';
+                ctx.roundRect(-CELL_SIZE*0.4, -CELL_SIZE*0.4, CELL_SIZE*0.6, CELL_SIZE*0.8, 8);
+                ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = pipeColor;
+                ctx.fillRect(CELL_SIZE*0.2, -w/2, CELL_SIZE*0.3, w);
+                ctx.strokeRect(CELL_SIZE*0.2, -w/2, CELL_SIZE*0.3, w);
+                
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath(); ctx.arc(-CELL_SIZE*0.1, 0, CELL_SIZE*0.15, 0, Math.PI*2); ctx.fill();
+            } else if (cell.type === 'E') {
+                ctx.fillStyle = isFilled ? varColor('--water-color') : '#cbd5e1';
+                ctx.beginPath();
+                ctx.moveTo(CELL_SIZE*0.1, -CELL_SIZE*0.3);
+                ctx.lineTo(CELL_SIZE*0.4, -CELL_SIZE*0.4);
+                ctx.lineTo(CELL_SIZE*0.4, CELL_SIZE*0.4);
+                ctx.lineTo(CELL_SIZE*0.1, CELL_SIZE*0.3);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+                
+                ctx.fillStyle = pipeColor;
+                ctx.fillRect(-CELL_SIZE*0.5, -w/2, CELL_SIZE*0.6, w);
+                ctx.strokeRect(-CELL_SIZE*0.5, -w/2, CELL_SIZE*0.6, w);
+            }
+
+            if (cell.type === 'I' || cell.type === 'L' || cell.type === 'T') {
+                ctx.fill(); ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function varColor(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            for(let r=0; r<=ROWS; r++) {
+                ctx.beginPath(); ctx.moveTo(0, r*CELL_SIZE); ctx.lineTo(canvas.width, r*CELL_SIZE); ctx.stroke();
+            }
+            for(let c=0; c<=COLS; c++) {
+                ctx.beginPath(); ctx.moveTo(c*CELL_SIZE, 0); ctx.lineTo(c*CELL_SIZE, canvas.height); ctx.stroke();
+            }
+
+            if (isAnimating) {
+                waterProgress += 0.15; 
+                
+                if (waterProgress > flowResult.maxDist + 1) {
+                    isAnimating = false;
+                    if (flowResult.reachedEnd) {
+                        playSound('win');
+                        if (currentLevel >= unlockedLevel && unlockedLevel < TOTAL_LEVELS) {
+                            unlockedLevel = currentLevel + 1;
+                        }
+                        
+                        document.getElementById('modal-overlay').style.display = 'flex';
+                        if(currentLevel === TOTAL_LEVELS) {
+                            document.getElementById('next-btn').style.display = 'none';
+                            document.getElementById('modal-title').textContent = '恭喜通關！';
+                            document.getElementById('modal-desc').innerHTML = '你已完成所有 20 個挑戰！<br>真正的想像力水管工大師！';
+                        } else {
+                            document.getElementById('next-btn').style.display = 'inline-block';
+                            document.getElementById('modal-title').textContent = '通水成功！';
+                            document.getElementById('modal-desc').textContent = '水管完美接通啦！';
+                        }
+                    } else {
+                        playSound('leak');
+                        const toast = document.getElementById('toast-msg');
+                        toast.classList.add('show');
+                        setTimeout(() => { 
+                            toast.classList.remove('show');
+                            for(let r=0; r<ROWS; r++) for(let c=0; c<COLS; c++) grid[r][c].fillOrder = -1;
+                        }, 1500);
+                    }
+                }
+            }
+
+            for(let r=0; r<ROWS; r++) {
+                for(let c=0; c<COLS; c++) {
+                    drawPipe(r, c, grid[r][c]);
+                }
+            }
+
+            animFrameId = requestAnimationFrame(render);
+        }
+
+        function loadLevel(lv) {
+            currentLevel = Number(lv);
+            
+            // UI 切換
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            document.getElementById('modal-overlay').style.display = 'none';
+            
+            document.getElementById('level-display').textContent = `關卡 ${currentLevel}`;
+            
+            isAnimating = false;
+            waterProgress = 0;
+            if(animFrameId) cancelAnimationFrame(animFrameId);
+            
+            generateLevel(currentLevel);
+            render();
+        }
+
+        function nextLevel() {
+            if (currentLevel < TOTAL_LEVELS) {
+                loadLevel(currentLevel + 1);
+            } else {
+                returnToMenu();
+            }
+        }
+        
+        function resetLevel() {
+            if (!isAnimating) {
+                loadLevel(currentLevel);
+            }
+        }
+
+    </script>
+</body>
+</html>
